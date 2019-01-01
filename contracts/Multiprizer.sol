@@ -5,14 +5,16 @@
 pragma solidity ^0.5.0;
 
 /**
- * @title Ownable (OpenZeppelin)
+ * @title Ownable (OpenZeppelin) (with addition of timekeeper)
  * @dev The Ownable contract has an owner address, and provides basic authorization control
  * functions, this simplifies the implementation of "user permissions".
  */
 contract Ownable {
-    address private _owner;
+    address payable private _owner;
+    address payable private _timekeeper;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address payable indexed previousOwner, address payable indexed newOwner);
+    event TimekeepingTransferred(address payable indexed previousOwner, address payable indexed newOwner);
 
     /**
      * @dev The Ownable constructor sets the original `owner` of the contract to the sender
@@ -26,8 +28,15 @@ contract Ownable {
     /**
      * @return the address of the owner.
      */
-    function owner() public view returns (address) {
+    function owner() public view returns (address payable) {
         return _owner;
+    }
+
+    /**
+     * @return the address of the timekeeper.
+     */
+    function timekeeper() public view returns (address payable) {
+        return _timekeeper;
     }
 
     /**
@@ -39,29 +48,47 @@ contract Ownable {
     }
 
     /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwners() {
+        require(isOwner() || isTimekeeper());
+        _;
+    }
+
+    /**
      * @return true if `msg.sender` is the owner of the contract.
      */
     function isOwner() public view returns (bool) {
         return msg.sender == _owner;
+    }
+
+    /**
+     * @return true if `msg.sender` is the timekeeper of the contract.
+     */
+    function isTimekeeper() public view returns (bool) {
+        return msg.sender == _timekeeper;
     }
     
     /**
      * @dev Allows the current owner to transfer control of the contract to a newOwner.
      * @param newOwner The address to transfer ownership to.
      */
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
+    function transferOwnership(address payable newOwner) public onlyOwner {
+        require(newOwner != address(0));
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;    
     }
 
     /**
-     * @dev Transfers control of the contract to a newOwner.
+     * @dev Allows the current owners to transfer control of timekeeping to a newOwner.
      * @param newOwner The address to transfer ownership to.
      */
-    function _transferOwnership(address newOwner) internal {
+    function transferTimekeeping(address payable newOwner) public onlyOwners {
         require(newOwner != address(0));
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
+        emit TimekeepingTransferred(_timekeeper, newOwner);
+        _timekeeper = newOwner;    
     }
+    
 }
 
 
@@ -192,6 +219,7 @@ contract Multiprizer is Ownable {
 
 using SafeMath for uint256;
 
+//gameID and roundNumber cannot start from zero value since they are used to compute roundID
 struct Game{
     uint256 gameID;
     uint256 maxTokens;
@@ -203,52 +231,46 @@ struct Game{
     uint256 maxTokensPerPlayer;
     uint256 houseEdge;
     uint256 megaPrizeEdge;
-    uint256 totalRoundsDone;
+    uint256 currentRound;
     uint256 totalValuePlaced;
     uint256 totalWinnings;
     uint256 directPlayTokenValue;
+    bool isGameLocked;
 }
 
 struct Round{
     uint256 gameID;
     uint256 roundNumber;
+    uint256 totalTokensPurchased;
     uint256 iterationStartTimeMS;
     uint256 iterationStartTimeBlock;
     mapping (address => uint256) playerTokens;
     address payable[] playerlist;
     address payable winner;
+    bool isRoundOpen;
 }
 
 /**  
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
 *  without the need of going to the website to play. It doesn't even require metamask or  
 *  other web3 injectors. All you need is an ethereum wallet from which you can directly send
-*  certain valued ethers to enable automatic participation in specific games. You could even
+*  specific valued ethers to enable automatic participation in specific games. You could even
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
 
-uint256 directPlayWithdrawValue;
-uint256 prizeOnLoss;
+uint256 public directPlayWithdrawValue;
+uint256 public prizeOnLoss;
 
-mapping (address => uint256) playerWithdrawals;
+mapping (address => uint256) private playerWithdrawals;
 mapping (uint256 => Game) public gameStrategies;
-uint256[] gameStrategiesKeys;
-mapping (uint256 => Round) rounds;
+uint256[] public gameStrategiesKeys;
 
-constructor (
-    uint256[14] memory _gameProperties,
-    uint256 _directPlayWithdrawValue,
-    uint256 _prizeOnLoss
-    ) public {
-        for(uint256 index=0; index < _gameProperties[0]; index++) {
-            addGameByAdmin(_gameProperties);
-            updateDirectPlayByAdmin(
-                _directPlayWithdrawValue,
-                _prizeOnLoss
-            );
+// Key value for rounds is 'roundID' generated uniquely from gameID and roundNumber 
+// using a Pairing Function (like Cantor Pairing Function)
+mapping (uint256 => Round) private rounds;
 
-        }
-
+constructor () public {
+            //# EMIT EVENT LOG - to be done
 
 }
 
@@ -265,13 +287,13 @@ constructor (
         _gameProperties[7] : uint256 maxTokensPerPlayer,
         _gameProperties[8] : uint256 houseEdge,
         _gameProperties[9] : uint256 megaPrizeEdge,
-        _gameProperties[10] : uint256 totalRoundsDone,
+        _gameProperties[10] : uint256 currentRound,
         _gameProperties[11] : uint256 totalValuePlaced,
         _gameProperties[12] : uint256 totalWinnings,
         _gameProperties[13] : uint256 directPlayTokenValue
 */
 
-function addGameByAdmin(uint256[14] memory _gameProperties) public 
+function addGameByAdmin(uint256[14] calldata _gameProperties) external 
     onlyOwner returns(uint256 _newGameIndex) {
 
         require(gameStrategies[_gameProperties[0]].gameID == 0, " GameID already exists ");
@@ -287,14 +309,16 @@ function addGameByAdmin(uint256[14] memory _gameProperties) public
         gameObj.maxTokensPerPlayer = _gameProperties[7];
         gameObj.houseEdge = _gameProperties[8];
         gameObj.megaPrizeEdge = _gameProperties[9];
-        gameObj.totalRoundsDone = _gameProperties[10];
+        gameObj.currentRound = _gameProperties[10];
         gameObj.totalValuePlaced = _gameProperties[11];
         gameObj.totalWinnings = _gameProperties[12];
         gameObj.directPlayTokenValue = _gameProperties[13];
+        gameObj.isGameLocked = true;
         
         gameStrategies[gameObj.gameID] = gameObj;
-        gameStrategiesKeys[gameStrategiesKeys.length++] = gameObj.gameID;
-        _newGameIndex = gameStrategiesKeys.length;
+        gameStrategiesKeys.push(gameObj.gameID);
+        _newGameIndex = gameStrategiesKeys.length.sub(1);
+        //# EMIT EVENT LOG - to be done
 
 }
 
@@ -314,12 +338,14 @@ function updateGameByAdmin(uint256[14] calldata _gameProperties, uint256 _gameID
         gameObj.maxTokensPerPlayer = _gameProperties[7];
         gameObj.houseEdge = _gameProperties[8];
         gameObj.megaPrizeEdge = _gameProperties[9];
-        gameObj.totalRoundsDone = _gameProperties[10];
+        gameObj.currentRound = _gameProperties[10];
         gameObj.totalValuePlaced = _gameProperties[11];
         gameObj.totalWinnings = _gameProperties[12];
         gameObj.directPlayTokenValue = _gameProperties[13];
+        gameObj.isGameLocked = true;
         
         gameStrategies[_gameID] = gameObj;
+        //# EMIT EVENT LOG - to be done
         return true;
 }
 
@@ -339,15 +365,19 @@ function deleteGameByAdmin(uint256 _gameID) external
             if(_success == true){
                 gameStrategiesKeys[i] = gameStrategiesKeys[i+1];
             }
-
         }
+
         if(_success != true) {
             if(gameStrategiesKeys[i] == _gameID)
                 delete gameStrategiesKeys[i];
+                gameStrategiesKeys.length--;
         }
         else {
             delete gameStrategiesKeys[i];
+            gameStrategiesKeys.length--;
         }
+
+        //# EMIT EVENT LOG - to be done
         return _success;
 }
 
@@ -355,13 +385,112 @@ function deleteGameByAdmin(uint256 _gameID) external
 function updateDirectPlayByAdmin(
     uint256 _directPlayWithdrawValue,
     uint256 _prizeOnLoss
-    ) public 
+    ) external 
     onlyOwner returns(bool _success) {
         directPlayWithdrawValue = _directPlayWithdrawValue;
         prizeOnLoss = _prizeOnLoss;
+
+        //# EMIT EVENT LOG - to be done
         return true;
+}
+
+
+function lockGameByAdmin(uint256 _gameID) internal 
+    onlyOwners returns (bool _success) {
+
+        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+        gameStrategies[_gameID].isGameLocked = true;
+
+        //# EMIT EVENT LOG - to be done
+        return true;
+}
+
+
+function unlockGameByAdmin(uint256 _gameID) internal 
+    onlyOwners returns (bool _success) {
+
+        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+        gameStrategies[_gameID].isGameLocked = false;
+
+        //# EMIT EVENT LOG - to be done
+        return true;
+}
+
+
+function playGame(uint256 _gameID, uint256 _roundNumber, uint256 _numberOfTokens ) public  
+    payable {
+        // game should not be in locked mode
+        require(!gameStrategies[_gameID].isGameLocked, " Game is in locked state ");
+        // _gameID should be valid
+        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+        // zero check for _roundNumber and numberOfTokens
+        require(_roundNumber != 0 && _numberOfTokens != 0, " Invalid values given in game parameters ");
+        // get the unique roundID value from the _gameID & _roundNumber pair (pairing function)
+        uint256 roundID = cantorPairing(_gameID, _roundNumber);
+        // game round (_roundNumber) should be active
+        require(rounds[roundID].isRoundOpen == true, " Round chosen is not a valid and active round ");
+        // _numberOfTokens should be a valid value as per game strategy
+        require(_numberOfTokens + rounds[roundID].playerTokens[msg.sender] <= gameStrategies[_gameID].maxTokensPerPlayer,
+            " Total tokens purchased exceeds max value ");
+        // ethers sent should be equal to token value
+        require(msg.value >= (gameStrategies[_gameID].tokenValue).mul(_numberOfTokens),  
+            " Amount sent is less than required ");
+        
+        rounds[roundID].playerTokens[msg.sender] += _numberOfTokens;
+        
+        //# EMIT EVENT LOG - to be done
 
 }
+
+
+function revertGame(uint256 _gameID, uint256 _roundNumber ) public  {
+    
+    // game should not be in locked mode
+    require(!gameStrategies[_gameID].isGameLocked, " Game is in locked state ");
+    // _gameID should be valid
+    require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+    // zero check for _roundNumber and numberOfTokens
+    require(_roundNumber != 0, " Invalid round number given in game parameters ");
+    // get the unique roundID value from the _gameID & _roundNumber pair (pairing function)
+    uint256 roundID = cantorPairing(_gameID, _roundNumber);
+    // game round (_roundNumber) should be active
+    require(rounds[roundID].isRoundOpen == true, " Round chosen is not an active round ");
+    // _numberOfTokens should be a valid value as per game strategy
+    require(rounds[roundID].playerTokens[msg.sender] > 0,
+        " There are no tokens placed in the active round to revert ");
+    
+    // refund the amount placed 
+    uint256 refundAmount = (rounds[roundID].playerTokens[msg.sender]).mul((gameStrategies[_gameID].tokenValue));
+    rounds[roundID].playerTokens[msg.sender] = 0;
+    if(!msg.sender.send(refundAmount)) {
+        //# EMIT EVENT LOG - to be done
+
+        playerWithdrawals[msg.sender] = (playerWithdrawals[msg.sender]).add(refundAmount);
+    }
+
+    //# EMIT EVENT LOG - to be done
+}
+
+
+
+
+
+/**
+    * @dev outputs the Cantor Pairing Function result of two input natural numbers 
+    * Function: π(a,b)=1/2(a+b)(a+b+1)+b  
+*/
+function cantorPairing(uint256 _a, uint256 _b) internal 
+    pure returns (uint256 _result) {
+
+        require(_a > 0 && _b > 0, 
+            " Exception raised in internal mathematical operation ");
+        _result = (((_a.add(_b)).mul((_a.add(_b)).add(1)))/2).add(_b);
+
+        //# EMIT EVENT LOG - to be done
+        return _result;
+}
+
+
 
 // fallback function
     function () external payable {
@@ -371,7 +500,9 @@ function updateDirectPlayByAdmin(
 
 
 
-}
+}// End of Multiprizer Contract
+
+
 
 
 
