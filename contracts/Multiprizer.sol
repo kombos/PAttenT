@@ -5,7 +5,7 @@
 pragma solidity ^0.5.0;
 
 /**
- * @title Ownable (OpenZeppelin) (with addition of timekeeper)
+ * @title Ownable (OpenZeppelin with additions)
  * @dev The Ownable contract has an owner address, and provides basic authorization control
  * functions, this simplifies the implementation of "user permissions".
  */
@@ -48,7 +48,7 @@ contract Ownable {
     }
 
     /**
-     * @dev Throws if called by any account other than the owner.
+     * @dev Throws if called by any account other than the owners (owner and timekeeper).
      */
     modifier onlyOwners() {
         require(isOwner() || isTimekeeper());
@@ -245,8 +245,10 @@ struct Round{
     uint256 iterationStartTimeMS;
     uint256 iterationStartTimeBlock;
     mapping (address => uint256) playerTokens;
-    address payable[] playerlist;
+    address payable[] playerList;
     address payable winner;
+    bytes32 oraclizeID;
+    bytes32 oraclizeProof;
     bool isRoundOpen;
 }
 
@@ -261,13 +263,27 @@ struct Round{
 uint256 public directPlayWithdrawValue;
 uint256 public prizeOnLoss;
 
-mapping (address => uint256) private playerWithdrawals;
-mapping (uint256 => Game) public gameStrategies;
-uint256[] public gameStrategiesKeys;
+
 
 // Key value for rounds is 'roundID' generated uniquely from gameID and roundNumber 
 // using a Pairing Function (like Cantor Pairing Function)
 mapping (uint256 => Round) private rounds;
+mapping (bytes32 => uint256[]) private roundsOfOraclizeID;
+mapping (uint256 => Game) public gameStrategies;
+uint256[] public gameStrategiesKeys;
+mapping (address => uint256) private playerWithdrawals;
+address payable[] private playerWithdrawalsKeys;
+
+
+event lockEvent(string messageSender);
+
+ /**
+     * @dev Throws if called by any account other than the oraclize cbAddress.
+     */
+    modifier onlyOraclize() {
+        require(msg.sender == oraclize_cbAddress());
+        _;
+    }
 
 constructor () public {
             //# EMIT EVENT LOG - to be done
@@ -294,7 +310,7 @@ constructor () public {
 */
 
 function addGameByAdmin(uint256[14] calldata _gameProperties) external 
-    onlyOwner returns(uint256 _newGameIndex) {
+    onlyOwner {
 
         require(gameStrategies[_gameProperties[0]].gameID == 0, " GameID already exists ");
 
@@ -317,13 +333,13 @@ function addGameByAdmin(uint256[14] calldata _gameProperties) external
         
         gameStrategies[gameObj.gameID] = gameObj;
         gameStrategiesKeys.push(gameObj.gameID);
-        _newGameIndex = gameStrategiesKeys.length.sub(1);
+
         //# EMIT EVENT LOG - to be done
 
 }
 
 function updateGameByAdmin(uint256[14] calldata _gameProperties, uint256 _gameID) external 
-    onlyOwner returns (bool _success) {
+    onlyOwner {
 
         require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
 
@@ -346,17 +362,16 @@ function updateGameByAdmin(uint256[14] calldata _gameProperties, uint256 _gameID
         
         gameStrategies[_gameID] = gameObj;
         //# EMIT EVENT LOG - to be done
-        return true;
 }
 
 
 function deleteGameByAdmin(uint256 _gameID) external 
-    onlyOwner returns (bool _success) {
+    onlyOwner {
 
-        uint256 i=0;
-        _success=false;
-        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
         
+        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+        uint256 i;
+        bool _success=false;
         delete gameStrategies[_gameID];
         for (i=0; i < gameStrategiesKeys.length-1; i++) {
             if(gameStrategiesKeys[i] == _gameID) {
@@ -368,9 +383,12 @@ function deleteGameByAdmin(uint256 _gameID) external
         }
 
         if(_success != true) {
-            if(gameStrategiesKeys[i] == _gameID)
+            if(gameStrategiesKeys[i] == _gameID) {
                 delete gameStrategiesKeys[i];
                 gameStrategiesKeys.length--;
+            }
+            else
+                revert(" Error during game deletion. Couldn't find the required game. ");
         }
         else {
             delete gameStrategiesKeys[i];
@@ -378,101 +396,238 @@ function deleteGameByAdmin(uint256 _gameID) external
         }
 
         //# EMIT EVENT LOG - to be done
-        return _success;
 }
 
 
-function updateDirectPlayByAdmin(
-    uint256 _directPlayWithdrawValue,
-    uint256 _prizeOnLoss
-    ) external 
-    onlyOwner returns(bool _success) {
+function updateDirectPlayByAdmin( uint256 _directPlayWithdrawValue, uint256 _prizeOnLoss ) external 
+    onlyOwner {
         directPlayWithdrawValue = _directPlayWithdrawValue;
         prizeOnLoss = _prizeOnLoss;
 
         //# EMIT EVENT LOG - to be done
-        return true;
 }
 
 
-function lockGameByAdmin(uint256 _gameID) internal 
-    onlyOwners returns (bool _success) {
 
-        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
-        gameStrategies[_gameID].isGameLocked = true;
+function lockGamesByAdmin(uint256[] calldata _gameIDs) external 
+    onlyOwners {
 
-        //# EMIT EVENT LOG - to be done
-        return true;
+        for(uint256 i=0; i<_gameIDs.length; i++) {
+            require(gameStrategies[_gameIDs[i]].gameID != 0, " GameID doesn't exist ");
+            gameStrategies[_gameIDs[i]].isGameLocked = true;
+
+        }
+
+        //# EMIT EVENT LOG1
+        //emit lockEvent("admin", _gameIDs);
 }
 
 
-function unlockGameByAdmin(uint256 _gameID) internal 
-    onlyOwners returns (bool _success) {
+function unlockGamesByAdmin(uint256[] calldata _gameIDs) external 
+    onlyOwners {
 
-        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
-        gameStrategies[_gameID].isGameLocked = false;
+        for(uint256 i=0; i<_gameIDs.length; i++) {
+            require(gameStrategies[_gameIDs[i]].gameID != 0, " GameID doesn't exist ");
+            gameStrategies[_gameIDs[i]].isGameLocked = false;
 
-        //# EMIT EVENT LOG - to be done
-        return true;
+        }
+
+        //# EMIT EVENT LOG1
+        //emit unlockEvent("admin", _gameIDs);
+
 }
 
 
 function playGame(uint256 _gameID, uint256 _roundNumber, uint256 _numberOfTokens ) public  
     payable {
-        // game should not be in locked mode
-        require(!gameStrategies[_gameID].isGameLocked, " Game is in locked state ");
+        
         // _gameID should be valid
-        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist. ");
+        // game should not be in locked mode
+        require(!gameStrategies[_gameID].isGameLocked, 
+            " Game round is set in locked state by admin. Wait till the game resumes. ");
         // zero check for _roundNumber and numberOfTokens
-        require(_roundNumber != 0 && _numberOfTokens != 0, " Invalid values given in game parameters ");
+        require(_roundNumber != 0 && _numberOfTokens != 0, " Invalid values given in game parameters. ");
         // get the unique roundID value from the _gameID & _roundNumber pair (pairing function)
         uint256 roundID = cantorPairing(_gameID, _roundNumber);
         // game round (_roundNumber) should be active
-        require(rounds[roundID].isRoundOpen == true, " Round chosen is not a valid and active round ");
+        require(rounds[roundID].isRoundOpen == true, " Round chosen is not a valid and active round. ");
+        // check if the totalTokensPurchased for the round doesn't cross maxTokens for the game 
+        require(_numberOfTokens + rounds[roundID].totalTokensPurchased <= gameStrategies[_gameID].maxTokens,
+            " Max tokens that can be purchased for this round has been exceeded. Wait for open slots. ");
         // _numberOfTokens should be a valid value as per game strategy
         require(_numberOfTokens + rounds[roundID].playerTokens[msg.sender] <= gameStrategies[_gameID].maxTokensPerPlayer,
-            " Total tokens purchased exceeds max value ");
+            " Total tokens purchased by player exceeds maximum allowed for this game. Try another game. ");
         // ethers sent should be equal to token value
-        require(msg.value >= (gameStrategies[_gameID].tokenValue).mul(_numberOfTokens),  
+        require(msg.value >= _numberOfTokens.mul(gameStrategies[_gameID].tokenValue),  
             " Amount sent is less than required ");
         
-        rounds[roundID].playerTokens[msg.sender] += _numberOfTokens;
+        rounds[roundID].playerTokens[msg.sender] = (rounds[roundID].playerTokens[msg.sender]).add(_numberOfTokens);
+        rounds[roundID].playerList.push(msg.sender);
+        rounds[roundID].totalTokensPurchased = (rounds[roundID].totalTokensPurchased).add(rounds[roundID].playerTokens[msg.sender]);
         
         //# EMIT EVENT LOG - to be done
 
 }
 
 
-function revertGame(uint256 _gameID, uint256 _roundNumber ) public  {
+function revertGame(uint256 _gameID, uint256 _roundNumber, address payable _playerAddress ) public  {
     
-    // game should not be in locked mode
-    require(!gameStrategies[_gameID].isGameLocked, " Game is in locked state ");
     // _gameID should be valid
-    require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist ");
+    require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist. ");
+    // check the validity of sender address / player address
+    require(msg.sender == owner() || msg.sender == _playerAddress, " Message sender address invalid. ");
+    if(msg.sender == _playerAddress) {
+        // game should not be in locked mode
+        require(!gameStrategies[_gameID].isGameLocked, 
+            " Revert not possible as game is locked by admin. Wait till the game resumes. ");
+    }
     // zero check for _roundNumber and numberOfTokens
-    require(_roundNumber != 0, " Invalid round number given in game parameters ");
+    require(_roundNumber != 0, " Invalid round number given in game parameters. ");
     // get the unique roundID value from the _gameID & _roundNumber pair (pairing function)
     uint256 roundID = cantorPairing(_gameID, _roundNumber);
     // game round (_roundNumber) should be active
-    require(rounds[roundID].isRoundOpen == true, " Round chosen is not an active round ");
+    require(rounds[roundID].isRoundOpen == true, " Round chosen is not a valid and active round. ");
     // _numberOfTokens should be a valid value as per game strategy
-    require(rounds[roundID].playerTokens[msg.sender] > 0,
-        " There are no tokens placed in the active round to revert ");
+    require(rounds[roundID].playerTokens[_playerAddress] > 0,
+        " There are no existing tokens in the active round to revert. ");
     
     // refund the amount placed 
-    uint256 refundAmount = (rounds[roundID].playerTokens[msg.sender]).mul((gameStrategies[_gameID].tokenValue));
-    rounds[roundID].playerTokens[msg.sender] = 0;
-    if(!msg.sender.send(refundAmount)) {
+    uint256 refundAmount = (rounds[roundID].playerTokens[_playerAddress]).mul((gameStrategies[_gameID].tokenValue));
+    rounds[roundID].totalTokensPurchased = (rounds[roundID].totalTokensPurchased).sub(rounds[roundID].playerTokens[_playerAddress]);
+
+    // remove the entry of _playerAddress from playerList array of the round
+    uint256 i;
+    bool _success=false;
+    for (i=0; i < rounds[roundID].playerList.length-1; i++) {
+        if(rounds[roundID].playerList[i] == _playerAddress) {
+            _success=true;
+        }
+        if(_success == true){
+            rounds[roundID].playerList[i] = rounds[roundID].playerList[i+1];
+        }
+    }
+
+    if(_success != true) {
+        if(rounds[roundID].playerList[i] == _playerAddress) {
+            delete rounds[roundID].playerList[i];
+            rounds[roundID].playerList.length--;
+        }
+        else
+            revert(" Error during revert token function. Couldn't find the required token(s). ");
+    }
+    else {
+        delete rounds[roundID].playerList[i];
+        rounds[roundID].playerList.length--;
+    }
+    // remove the _playerAddress entry from the playerTokens mapping value of the round
+    rounds[roundID].playerTokens[_playerAddress] = 0;
+    if(!_playerAddress.send(refundAmount)) {
         //# EMIT EVENT LOG - to be done
 
-        playerWithdrawals[msg.sender] = (playerWithdrawals[msg.sender]).add(refundAmount);
+        playerWithdrawals[_playerAddress] = (playerWithdrawals[_playerAddress]).add(refundAmount);
     }
 
     //# EMIT EVENT LOG - to be done
 }
 
 
+function completeRounds(uint256[] memory _gameIDs) public 
+    onlyOwners {
+        // _gameIDs should be valid
+        for(uint256 i=0; i<_gameIDs.length; i++) {
+            require(gameStrategies[_gameIDs[i]].gameID != 0, " GameID doesn't exist ");
 
+        }
+
+        bytes32 _oraclizeID;
+        
+        _oraclizeID = oraclize_query(); //# finish this oraclize function
+
+        uint256 _roundNumber;
+        uint256 _nextRoundNumber;
+        uint256 roundID;
+        uint256 nextRoundID;
+
+        for(uint256 i=0; i<_gameIDs.length; i++) {
+            if(!gameStrategies[_gameIDs[i]].isGameLocked) {
+                // close the current round
+                _roundNumber = gameStrategies[_gameIDs[i]].currentRound;
+                roundID = cantorPairing(_gameIDs[i], _roundNumber);
+                rounds[roundID].isRoundOpen = false;
+                rounds[roundID].oraclizeID = _oraclizeID;
+                roundsOfOraclizeID[_oraclizeID].push(_gameIDs[i]);
+                // increment the round number and start a new round
+                _nextRoundNumber = _roundNumber.add(1);
+                gameStrategies[_gameIDs[i]].currentRound = _nextRoundNumber;
+                nextRoundID = cantorPairing(_gameIDs[i], _nextRoundNumber);
+                rounds[roundID].gameID = gameStrategies[_gameIDs[i]].gameID;
+                rounds[roundID].roundNumber = _nextRoundNumber;
+                rounds[roundID].totalTokensPurchased = 0;
+                rounds[roundID].iterationStartTimeMS = now;
+                rounds[roundID].iterationStartTimeBlock = block.number;
+                rounds[roundID].isRoundOpen = true;
+
+            }
+
+        }
+
+        gameStrategies[_gameID].isGameLocked = true;
+
+        if(msg.sender == timekeeper())
+        //# EMIT EVENT LOG1
+        emit lockEvent("timekeeper");
+        else
+        //# EMIT EVENT LOG1
+        emit lockEvent("admin");
+
+        //# playerTokensValue in round needs to be updated
+        //lets do it at the playGame and revert end itself
+        //oops there is no var called playerTokensValue
+}
+
+
+function __callback(bytes32 oraclizeID, string memory result, bytes memory proof) public   
+    onlyOraclize {
+
+        //# transpose the values of player tokens to make sure a common random number for 
+        //several games does not make the game predictable
+
+}
+
+
+function getRoundInfo(uint256 _gameID, uint256 _roundNumber ) public view  
+    returns(
+        uint256 _totalTokensPurchased,
+        uint256 _iterationStartTimeMS,
+        uint256 _iterationStartTimeBlock,
+        address payable _winner,
+        bytes32 _oraclizeProof
+    ){
+        // _gameID should be valid
+        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist. ");
+        // check _roundNumber is valid and not the current round number
+        require(_roundNumber != 0 && _roundNumber < gameStrategies[_gameID].currentRound, 
+            " Round number can't be current round or an invalid round number. ");
+        // get the unique roundID value from the _gameID & _roundNumber pair (pairing function)
+        uint256 roundID = cantorPairing(_gameID, _roundNumber);
+        // game round (_roundNumber) should not be active or open
+        require(rounds[roundID].isRoundOpen != true, " Round number chosen is stil open. ");
+
+        _totalTokensPurchased = rounds[roundID].totalTokensPurchased;
+        _iterationStartTimeMS = rounds[roundID].iterationStartTimeMS;
+        _iterationStartTimeBlock = rounds[roundID].iterationStartTimeBlock;
+        _winner = rounds[roundID].winner;
+        _oraclizeProof = rounds[roundID].oraclizeProof;
+
+        return( 
+            _totalTokensPurchased,
+            _iterationStartTimeMS,
+            _iterationStartTimeBlock,
+            _winner,
+            _oraclizeProof );
+
+}
 
 
 /**
