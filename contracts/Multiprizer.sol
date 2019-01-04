@@ -1966,14 +1966,16 @@ function revertGame(uint256 _gameID, uint256 _roundNumber, address payable _play
     for (i=0; i < _playerListLength; i++) {
         if(rounds[_roundID].playerList[i] == _playerAddress) {
             rounds[_roundID].playerList[i] = rounds[_roundID].playerList[_playerListLength.sub(1)];
-            delete rounds[_roundID].playerList[_playerListLength.sub(1)];
-            rounds[_roundID].playerList.length = (rounds[_roundID].playerList.length).sub(1);
             break;
         }
     }
 
     if(i == _playerListLength) {
         revert(" Error during revert token function. Couldn't find the required token(s). ");
+    }
+    else {
+        delete rounds[_roundID].playerList[_playerListLength.sub(1)];
+        rounds[_roundID].playerList.length = (rounds[_roundID].playerList.length).sub(1);
     }
 
     if( safeSend(_playerAddress, _refundAmount) )
@@ -2176,9 +2178,17 @@ function compensateWinner(address payable _winnerAddress, uint256 _roundID) priv
 
 }
 
+function viewWithdrawalsByAdmin(address payable _playerAddress) external view  
+    onlyOwners returns(uint256 _amount) {
+        
+        _amount = playerWithdrawals[_playerAddress];
+        return(_amount);
 
+        //SOME ERROR IN PLAYERWITHDRAWAL KEYS, THEY WAY THEY DEDUCT WHEN WITHDRAWN. FIX IT.
 
-function getRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view  
+}
+
+function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view  
     returns(
         uint256 _totalTokensPurchased,
         uint256 _iterationStartTimeMS,
@@ -2230,8 +2240,10 @@ function safeSend(address payable _toAddress, uint256 _amount) private
     returns (bool _success) {
 
         if(!_toAddress.send(_amount)) {
+            if(playerWithdrawals[_toAddress] == 0) {
+                playerWithdrawalsKeys.push(_toAddress);
+            }
             playerWithdrawals[_toAddress] = (playerWithdrawals[_toAddress]).add(_amount);
-            playerWithdrawalsKeys.push(_toAddress);
             _success = false;
         }
         else {
@@ -2254,31 +2266,45 @@ function withdraw() public {
             " Insufficient funds available in contract to invoke withdraw. Contact admin in case of legit irregularity. ");
 
         playerWithdrawals[msg.sender] = 0;
+        // implement code to remove the address entry from the withdrawplayerlist
         msg.sender.transfer(_amount);
 }
 
+
 /**
     * @dev function for transferring funds to a given To address
-    * Only owner address can transfer ether 
+    * Only owner address can transfer ether, in case contract based transfers revert. 
 */
-    function transferByAdmin(address payable _toAddress, uint _amount) public 
-		onlyOwner {
+function transferByAdmin(address payable _toAddress, uint _amount) public 
+    onlyOwner {
 
-            require(_amount > 0, " There is no amount left to withdraw ");
-            require(address(this).balance >= _amount, 
-            " Insufficient funds available in contract to invoke withdraw. Contact admin in case of legit irregularity. ");
+        require(_amount > 0, " There is no amount left to withdraw ");
+        require(address(this).balance >= _amount, 
+        " Insufficient funds available in contract to invoke withdraw. Contact admin in case of legit irregularity. ");
 
-            playerWithdrawals[_toAddress] = 0;
-            // send the amount to the destination address
-            
-            if(_toAddress.send(_amount)) 
-                //# EMIT EVENT LOG - Successful transfer of funds
-                true;
-            else
-                //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
-                true; 
+        playerWithdrawals[_toAddress] = 0;
+        // remove the entry of _toAddress from playerWithdrawalsKeys array
+        uint256 i;
+        uint256 _withdrawKeysLength = playerWithdrawalsKeys.length;
+        for (i=0; i < _withdrawKeysLength; i++) {
+            if(playerWithdrawalsKeys[i] == _toAddress) {
+                playerWithdrawalsKeys[i] = playerWithdrawalsKeys[_withdrawKeysLength.sub(1)];
+                break;
+            }
+        }
 
-    }
+        delete playerWithdrawalsKeys[_withdrawKeysLength.sub(1)];
+        playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
+
+        // send the amount to the destination address
+        if(_toAddress.send(_amount)) 
+            //# EMIT EVENT LOG - Successful transfer of funds
+            true;
+        else
+            //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
+            true; 
+
+}
 
 /**
     * @dev outputs the Cantor Pairing Function result of two input natural numbers 
@@ -2295,17 +2321,15 @@ function cantorPairing(uint256 _a, uint256 _b) private pure
 }
 
 
-
 // fallback function
 function () external payable {
     //# this needs to be filled
 }
 
+
 // self destruct contract
     function ownerKill() onlyOwner external {
 }
-
-
 
 
 }// End of Multiprizer Contract
