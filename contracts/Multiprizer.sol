@@ -1900,7 +1900,7 @@ function resumeAllGamesByAdmin() public
 
         }
 
-        // VERY IMPORTANT TO EMIT EVENT TO PAUSE TIMER AT TIMEKEEPER END!!!
+        // VERY IMPORTANT TO EMIT EVENT TO RESUME TIMER AT TIMEKEEPER END!!!
         //# EMIT EVENT LOG1  
         //emit unlockEvent("admin", _gameIDs);
 
@@ -2190,7 +2190,7 @@ function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _or
     for(uint256 i=0; i < _roundsOfOraclizeID.length; i++) {
         _roundID = _roundsOfOraclizeID[i];
         // if a round has been already decided by Oraclize callback, then continue with next round. 
-        // This will also help to prevent any possible malicious execution from oraclize_cbAddress()
+        // This will also help to prevent any possible malicious execution by Oraclize
         if(rounds[_roundID].oraclizeProof.length != 0) continue;
         _gameID = rounds[_roundID].gameID;
         address payable[] storage _playerList = rounds[_roundID].playerList;
@@ -2310,8 +2310,9 @@ function compensateWinner(address payable _winnerAddress, uint256 _roundID, stri
 
 }
 
-function viewWithdrawalsByAdmin(address payable _playerAddress) external view  
-    onlyOwners returns(uint256 _amount) {
+
+function viewWithdrawalInfo(address payable _playerAddress) external view  
+    returns(uint256 _amount) {
         
         _amount = playerWithdrawals[_playerAddress];
         return(_amount);
@@ -2364,6 +2365,32 @@ function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view
 }
 
 
+function getWithdrawalsByAdmin() external view 
+    onlyOwners returns(uint256[] memory _playerWithdrawalsAmounts, address payable[] memory _playerWithdrawalsKeys) {
+
+        _playerWithdrawalsKeys = playerWithdrawalsKeys;
+        uint256 withdrawalListLength = playerWithdrawalsKeys.length;
+        uint256[] memory _playerWithdrawals = new uint256[](withdrawalListLength);
+        // copy the pending withdraw amounts of players to an array
+        for(uint256 i=0;i < withdrawalListLength; i++) {
+            _playerWithdrawals[i] = playerWithdrawals[playerWithdrawalsKeys[i]];
+
+        }
+        // encode playerWithdrawalsKeys and _playerWithdrawalsAmounts arrays to bytes array for more effecient dispatch
+        return(_playerWithdrawalsAmounts, _playerWithdrawalsKeys);
+
+}
+
+
+function getPendingOraclizeByAdmin() external view 
+    onlyOwners returns(uint256[] memory _pendingRoundsOraclize) {
+
+        _pendingRoundsOraclize = pendingRoundsOraclize;
+        return(_pendingRoundsOraclize);
+
+}
+
+
 /**
     * @dev sends the amount of ethers to the required _toAddress
     * Make sure all the state changes are already committed prior to invocation. 
@@ -2395,10 +2422,20 @@ function withdraw() public {
         
         require(_amount > 0, " There is no _amount left to withdraw ");
         require(address(this).balance >= _amount, 
-            " Insufficient funds available in contract to invoke withdraw. Contact admin in case of legit irregularity. ");
+            " Insufficient funds available in contract to invoke withdraw. Contact admin in case of a legitimate irregularity. ");
 
         playerWithdrawals[msg.sender] = 0;
         // implement code to remove the address entry from the withdrawplayerlist
+
+        uint256 i;
+        uint256 _withdrawKeysLength = playerWithdrawalsKeys.length;
+        for (i=0; i < _withdrawKeysLength; i++) {
+            if(playerWithdrawalsKeys[i] == msg.sender) {
+                playerWithdrawalsKeys[i] = playerWithdrawalsKeys[_withdrawKeysLength.sub(1)];
+                break;
+            }
+        }
+        playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
         msg.sender.transfer(_amount);
 }
 
