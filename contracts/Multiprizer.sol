@@ -1544,7 +1544,6 @@ END ORACLIZE_API
 */
 
 
-
 /**
  * @title Multiprizer
  * @dev The Multiprizer contract is the core game.
@@ -1623,7 +1622,6 @@ string dataSourceOraclize;
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
 mapping (uint256 => Round) private rounds;
-uint256[] private roundsKeys;
 mapping (uint256 => Game) public gameStrategies;
 uint256[] public gameStrategiesKeys;
 mapping (address => uint256) private playerWithdrawals;
@@ -1640,12 +1638,13 @@ uint256 megaPrizeID;
 uint256 megaPrizeAmount;
 mapping (address => uint256) private megaPrizePlayers;
 address payable[] private megaPrizePlayersKeys;
-address payable[] private megaPrizeWinners;
+mapping (uint256 => address) public megaPrizeWinners;
 bool private isMegaPrizeEnabled;
+bool private isMegaPrizeLateLocked;
 bool private isMegaPrizeMatured;
+uint256 megaPrizeNumber;
 uint256 megaPrizeDurationInEpoch;
 uint256 megaPrizeDurationInBlocks;
-
 
 /** 
 *  Event Logs 
@@ -1670,7 +1669,13 @@ constructor () public {
     numBytesOraclize = 8;
     delayOraclize = 0;
     dataSourceOraclize = "random";
-
+    // set MegaPrize parameters
+    megaPrizeAmount = 0;
+    isMegaPrizeEnabled = false;
+    isMegaPrizeMatured = false;
+    isMegaPrizeLateLocked = false;
+    megaPrizeNumber = 1;
+    
 }
 
 /**
@@ -1825,18 +1830,37 @@ function updateOraclizeByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOracl
 
 
 function updateMegaPrizeByAdmin(uint256 _megaPrizeID, uint256 _megaPrizeAmount, bool _isMegaPrizeEnabled, 
-    bool _isMegaPrizeMatured, uint256 _megaPrizeDurationInEpoch, uint256 _megaPrizeDurationInBlocks) external payable
+    bool _isMegaPrizeLateLocked, bool _isMegaPrizeMatured, uint256 _megaPrizeDurationInEpoch, uint256 _megaPrizeDurationInBlocks) external payable
     onlyOwners {
 
-    megaPrizeID = _megaPrizeID;
-    megaPrizeAmount = _megaPrizeAmount;
-    isMegaPrizeEnabled = _isMegaPrizeEnabled;
-    isMegaPrizeMatured = _isMegaPrizeMatured;
-    megaPrizeAmount = megaPrizeAmount.add(msg.value);
-    megaPrizeDurationInEpoch = _megaPrizeDurationInEpoch;
-    megaPrizeDurationInBlocks = _megaPrizeDurationInBlocks;
+        require(_megaPrizeAmount == msg.value, " _megaPrizeAmount parameter value does not match the funds injected ");
+
+        megaPrizeID = _megaPrizeID;
+        megaPrizeAmount = megaPrizeAmount.add(_megaPrizeAmount);
+        isMegaPrizeEnabled = _isMegaPrizeEnabled;
+        isMegaPrizeLateLocked = _isMegaPrizeLateLocked;
+        isMegaPrizeMatured = _isMegaPrizeMatured;
+        megaPrizeDurationInEpoch = _megaPrizeDurationInEpoch;
+        megaPrizeDurationInBlocks = _megaPrizeDurationInBlocks;
         
     //# EMIT EVENT LOG - to be done
+}
+
+
+function lockMegaPrizeByAdmin() external 
+    onlyOwners {
+
+        isMegaPrizeLateLocked = true;
+        //# EMIT EVENT LOG1
+}
+
+
+function unlockMegaPrizeByAdmin() external 
+    onlyOwners {
+
+        isMegaPrizeLateLocked = false;
+        isMegaPrizeEnabled = true;
+        //# EMIT EVENT LOG1
 }
 
 
@@ -2042,7 +2066,7 @@ function completeRoundsByAdmin(uint256[] memory _gameIDs) public
     onlyOwners {
         // gameIDs should be valid
         for(uint256 k=0; k<_gameIDs.length; k++) {
-            // if gameID corresponds to megaPrize game, set the matured flag and continue.
+            // if gameID corresponds to megaPrize game, set the mega prize matured flag and continue.
             if(_gameIDs[k] == megaPrizeID) {
                 isMegaPrizeMatured = true;
                 continue;
@@ -2135,8 +2159,6 @@ function completeRoundsByAdmin(uint256[] memory _gameIDs) public
                 rounds[_nextRoundID].iterationStartTimeMS = now;
                 rounds[_nextRoundID].iterationStartTimeBlock = block.number;
                 rounds[_nextRoundID].isRoundOpen = true;
-                // set _nextRoundID value in the roundsKeys array
-                roundsKeys.push(_nextRoundID);
 
             }
             else {
@@ -2261,17 +2283,17 @@ function compensateWinner(address payable _winnerAddress, uint256 _roundID, stri
     gameStrategies[_gameID].totalValueForGame = (gameStrategies[_gameID].totalValueForGame).add(_totalValuePurchased);
     
     // transfer the prize amount to winner, after deducting house edge and megaprize edge
-    _megaPrizeEdgeAmount = (_totalValuePurchased.mul(gameStrategies[_gameID].megaPrizeEdge)).div(DIVISOR_POWER_5);
+    _megaPrizeEdgeAmount = isMegaPrizeEnabled ? (_totalValuePurchased.mul(gameStrategies[_gameID].megaPrizeEdge)).div(DIVISOR_POWER_5) : 0;
     _houseEdgeAmount = ((_totalValuePurchased.mul(gameStrategies[_gameID].houseEdge)).div(DIVISOR_POWER_5)).sub(_megaPrizeEdgeAmount);
     _winnerAmount = _totalValuePurchased.sub((_houseEdgeAmount.add(_megaPrizeEdgeAmount)));
     gameStrategies[_gameID].totalWinnings = (gameStrategies[_gameID].totalWinnings).add(_winnerAmount);
-    
+    // deduct the house edge and transfer it to the house account
     if(playerWithdrawals[owner()] == 0) {
                 playerWithdrawalsKeys.push(owner());
     }
     playerWithdrawals[owner()] = playerWithdrawals[owner()].add(_houseEdgeAmount);
     megaPrizeAmount = megaPrizeAmount.add(_megaPrizeEdgeAmount);
-
+    // send the winning amount to the winner using safeSend
     if(safeSend(_winnerAddress, _winnerAmount)) {
         //# EMIT EVENT LOG - Successful transfer of funds
     }
@@ -2287,16 +2309,21 @@ function compensateWinner(address payable _winnerAddress, uint256 _roundID, stri
 
         // find the mega prize winner address using Provable Random Number from Oraclize 
         _megaPrizeWinner = megaPrizePlayersKeys[_megaPrizeRandomNumber];
-        megaPrizeWinners.push(_megaPrizeWinner);
+        megaPrizeWinners[megaPrizeNumber] = _megaPrizeWinner;
         _megaPrizeAmount = megaPrizeAmount;
         
         // delete all megaPrize storage variable values pertaining to players
         isMegaPrizeMatured = false;
         megaPrizeAmount = 0;
+        megaPrizeNumber = megaPrizeNumber.add(1);
         for(uint256 i=0; i < megaPrizePlayersKeys.length; i++) {
             megaPrizePlayers[megaPrizePlayersKeys[i]] = 0;
         }
         delete megaPrizePlayersKeys;
+        // lock the next mega prize round if isMegaPrizeLateLocked flag is set
+        if(isMegaPrizeLateLocked) {
+            isMegaPrizeEnabled = false;
+        }
         
         // safeSend the relevant mega prize amount to the mega prize winner
         if(safeSend(_megaPrizeWinner, _megaPrizeAmount)) {
@@ -2311,6 +2338,22 @@ function compensateWinner(address payable _winnerAddress, uint256 _roundID, stri
 }
 
 
+function viewDirectPlayInfo() external view  
+    returns(
+        uint256 _directPlayWithdrawValue,
+        uint256 _prizeOnLoss,
+        bool _isDirectPlayEnabled
+        ) {
+        
+        return (
+            directPlayWithdrawValue,
+            prizeOnLoss,
+            isDirectPlayEnabled
+        );
+
+}
+
+
 function viewWithdrawalInfo(address payable _playerAddress) external view  
     returns(uint256 _amount) {
         
@@ -2320,6 +2363,28 @@ function viewWithdrawalInfo(address payable _playerAddress) external view
         //SOME ERROR IN PLAYERWITHDRAWAL KEYS, THEY WAY THEY DEDUCT WHEN WITHDRAWN. FIX IT.
 
 }
+
+
+function viewMegaPrizeInfo() external view  
+    returns(
+        uint256 _megaPrizeAmount,
+        uint256 _megaPrizeDurationInEpoch,
+        uint256 _megaPrizeDurationInBlocks,
+        bool _isMegaPrizeEnabled,
+        bool _isMegaPrizeMatured
+    ){
+        
+
+        return (
+            megaPrizeAmount,
+            megaPrizeDurationInEpoch,
+            megaPrizeDurationInBlocks,
+            isMegaPrizeEnabled,
+            isMegaPrizeMatured
+        );
+
+}
+
 
 function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view  
     returns(
@@ -2360,7 +2425,46 @@ function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view
             _playerList,
             _playerTokensList,
             _winner,
-            _oraclizeProof );
+            _oraclizeProof 
+        );
+
+}
+
+
+function getMegaPrizeByAdmin() external view  
+    onlyOwners returns(
+        uint256 _megaPrizeID,
+        uint256 _megaPrizeAmount,
+        uint256 _megaPrizeNumber,
+        uint256 _megaPrizeDurationInEpoch,
+        uint256 _megaPrizeDurationInBlocks,
+        address payable[] memory _megaPrizePlayersKeys,
+        bool _isMegaPrizeEnabled,
+        bool _isMegaPrizeLateLocked,
+        bool _isMegaPrizeMatured
+    ){
+        
+        _megaPrizeID = megaPrizeID;
+        _megaPrizeAmount = megaPrizeAmount;
+        _megaPrizeNumber = megaPrizeNumber;
+        _megaPrizeDurationInEpoch = megaPrizeDurationInEpoch;
+        _megaPrizeDurationInBlocks = megaPrizeDurationInBlocks;
+        _megaPrizePlayersKeys = megaPrizePlayersKeys;
+        _isMegaPrizeEnabled = isMegaPrizeEnabled;
+        _isMegaPrizeLateLocked = isMegaPrizeLateLocked;
+        _isMegaPrizeMatured = isMegaPrizeMatured;
+
+        return (
+            _megaPrizeID,
+            _megaPrizeAmount,
+            _megaPrizeNumber,
+            _megaPrizeDurationInEpoch,
+            _megaPrizeDurationInBlocks,
+            _megaPrizePlayersKeys,
+            _isMegaPrizeEnabled,
+            _isMegaPrizeLateLocked,
+            _isMegaPrizeMatured
+        );
 
 }
 
@@ -2376,19 +2480,40 @@ function getWithdrawalsByAdmin() external view
             _playerWithdrawals[i] = playerWithdrawals[playerWithdrawalsKeys[i]];
 
         }
-        // encode playerWithdrawalsKeys and _playerWithdrawalsAmounts arrays to bytes array for more effecient dispatch
+
         return(_playerWithdrawalsAmounts, _playerWithdrawalsKeys);
 
 }
 
 
-function getPendingOraclizeByAdmin() external view 
-    onlyOwners returns(uint256[] memory _pendingRoundsOraclize) {
+function getOraclizeByAdmin() external view 
+    onlyOwners returns(
+        uint256 _gasLimitOraclize,
+        uint256 _gasPriceOraclize,
+        uint256 _numBytesOraclize,
+        uint256 _delayOraclize,
+        string memory _dataSourceOraclize,
+        uint256[] memory _pendingRoundsOraclize
+    ) {
 
+        _gasLimitOraclize = gasLimitOraclize;
+        _gasPriceOraclize = gasPriceOraclize;
+        _numBytesOraclize = numBytesOraclize;
+        _delayOraclize = delayOraclize;
+        _dataSourceOraclize = dataSourceOraclize;
         _pendingRoundsOraclize = pendingRoundsOraclize;
-        return(_pendingRoundsOraclize);
+
+        return(
+            _gasLimitOraclize,
+            _gasPriceOraclize,
+            _numBytesOraclize,
+            _delayOraclize,
+            _dataSourceOraclize,
+            _pendingRoundsOraclize
+        );
 
 }
+
 
 
 /**
