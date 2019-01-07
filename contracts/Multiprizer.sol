@@ -1604,6 +1604,7 @@ bool public isDirectPlayEnabled;
 bool private isGamesPaused;
 uint256 pauseTime;
 uint256 constant DIVISOR_POWER_5 = 100000;
+uint256 constant DIRECTPLAYTOKEN = 1;
 
 /** 
 *  Oraclize Variables 
@@ -1930,7 +1931,7 @@ function resumeAllGamesByAdmin() public
 
 }
 
-function revertFundsToPlayers() external 
+function revertFundsToPlayers() public 
     onlyOwner {
         // Pause all games if not already done. 
         pauseAllGamesByAdmin();
@@ -1981,7 +1982,6 @@ function revertFundsToPlayers() external
 
 function playGame(uint256 _gameID, uint256 _roundNumber, uint256 _numberOfTokens ) public  
     payable {
-        
         // _gameID should be valid
         require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist. ");
         // game should not be in locked mode
@@ -2015,7 +2015,6 @@ function playGame(uint256 _gameID, uint256 _roundNumber, uint256 _numberOfTokens
 
 //revert active tokens at play back to the players
 function revertGame(uint256 _gameID, uint256 _roundNumber, address payable _playerAddress ) public  {
-    
     // _gameID should be valid
     require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist. ");
     // check the validity of sender address / player address
@@ -2034,7 +2033,6 @@ function revertGame(uint256 _gameID, uint256 _roundNumber, address payable _play
     uint256 _refundAmount = (rounds[_roundID].playerTokens[_playerAddress]).mul((gameStrategies[_gameID].tokenValue));
     rounds[_roundID].totalTokensPurchased = (rounds[_roundID].totalTokensPurchased).sub(rounds[_roundID].playerTokens[_playerAddress]);
     rounds[_roundID].playerTokens[_playerAddress] = 0;
-
     // remove the entry of _playerAddress from playerList array of the round
     uint256 i;
     uint256 _playerListLength = rounds[_roundID].playerList.length;
@@ -2431,6 +2429,74 @@ function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view
 }
 
 
+function getGamesByAdmin() external view  
+    onlyOwners returns(
+        uint256[] memory _gameIDs,
+        uint256[] memory _maxTokens,
+        uint256[] memory _tokenValues,
+        uint256[] memory _gameDurationsInEpoch,
+        uint256[] memory _gameDurationsInBlocks,
+        uint256[] memory _maxTokensPerPlayers,
+        uint256[] memory _houseEdges,
+        uint256[] memory _megaPrizeEdges,
+        uint256[] memory _totalValueForGames,
+        uint256[] memory _totalWinnings,
+        uint256[] memory _directPlayTokenValues,
+        uint256[] memory _currentRounds,
+        bool[] memory _isGameLocked,
+        bool[] memory _isGameLateLocked
+    ){
+        _gameIDs = new uint256[](gameStrategiesKeys.length);
+        _maxTokens = new uint256[](gameStrategiesKeys.length);
+        _tokenValues = new uint256[](gameStrategiesKeys.length);
+        _gameDurationsInEpoch = new uint256[](gameStrategiesKeys.length);
+        _gameDurationsInBlocks = new uint256[](gameStrategiesKeys.length);
+        _maxTokensPerPlayers = new uint256[](gameStrategiesKeys.length);
+        _houseEdges = new uint256[](gameStrategiesKeys.length);
+        _megaPrizeEdges = new uint256[](gameStrategiesKeys.length);
+        _totalValueForGames = new uint256[](gameStrategiesKeys.length);
+        _totalWinnings = new uint256[](gameStrategiesKeys.length);
+        _directPlayTokenValues = new uint256[](gameStrategiesKeys.length);
+        _currentRounds = new uint256[](gameStrategiesKeys.length);
+        _isGameLocked = new bool[](gameStrategiesKeys.length);
+        _isGameLateLocked = new bool[](gameStrategiesKeys.length);
+
+        for(uint256 i=0;i < gameStrategiesKeys.length;i++) {
+            _gameIDs[i] = gameStrategies[gameStrategiesKeys[i]].gameID;
+            _maxTokens[i] = gameStrategies[gameStrategiesKeys[i]].maxTokens;
+            _tokenValues[i] = gameStrategies[gameStrategiesKeys[i]].tokenValue;
+            _gameDurationsInEpoch[i] = gameStrategies[gameStrategiesKeys[i]].gameDurationInEpoch;
+            _gameDurationsInBlocks[i] = gameStrategies[gameStrategiesKeys[i]].gameDurationInBlocks;
+            _maxTokensPerPlayers[i] = gameStrategies[gameStrategiesKeys[i]].maxTokensPerPlayer;
+            _houseEdges[i] = gameStrategies[gameStrategiesKeys[i]].houseEdge;
+            _megaPrizeEdges[i] = gameStrategies[gameStrategiesKeys[i]].megaPrizeEdge;
+            _totalValueForGames[i] = gameStrategies[gameStrategiesKeys[i]].totalValueForGame;
+            _totalWinnings[i] = gameStrategies[gameStrategiesKeys[i]].totalWinnings;
+            _directPlayTokenValues[i] = gameStrategies[gameStrategiesKeys[i]].directPlayTokenValue;
+            _currentRounds[i] = gameStrategies[gameStrategiesKeys[i]].currentRound;
+            _isGameLocked[i] = gameStrategies[gameStrategiesKeys[i]].isGameLocked;
+            _isGameLateLocked[i] = gameStrategies[gameStrategiesKeys[i]].isGameLateLocked;
+        }
+
+        return (
+            _gameIDs,
+            _maxTokens,
+            _tokenValues,
+            _gameDurationsInEpoch,
+            _gameDurationsInBlocks,
+            _maxTokensPerPlayers,
+            _houseEdges,
+            _megaPrizeEdges,
+            _totalValueForGames,
+            _totalWinnings,
+            _directPlayTokenValues,
+            _currentRounds,
+            _isGameLocked,
+            _isGameLateLocked
+        );
+}
+
+
 function getMegaPrizeByAdmin() external view  
     onlyOwners returns(
         uint256 _megaPrizeID,
@@ -2513,7 +2579,6 @@ function getOraclizeByAdmin() external view
         );
 
 }
-
 
 
 /**
@@ -2615,14 +2680,49 @@ function cantorPairing(uint256 _a, uint256 _b) private pure
 }
 
 
-// fallback function
+// fallback function which implements DirectPlay
 function () external payable {
-    //# this needs to be filled
+
+    if(msg.sender != owner() && msg.sender != timekeeper()) {
+        // if the token value pertains to DirectPlay Withdraw feature, withdraw player's pending amount alongwith token value
+        if(msg.value == directPlayWithdrawValue) {
+            playerWithdrawals[msg.sender] = (playerWithdrawals[msg.sender]).add(msg.value);
+            withdraw();
+            return;
+        }
+        // else scan through the tokenValue of every game to find which game the player wants to play
+        uint256 _gameID;
+        uint256 _roundNumber;
+        uint256 i;
+        require(!isGamesPaused, " All games are in Pause mode. Wait till admin resumes the game. ");
+        for(i=0;i < gameStrategiesKeys.length; i++) {
+            if(msg.value == gameStrategies[gameStrategiesKeys[i]].tokenValue) {
+                _gameID = gameStrategiesKeys[i];
+                _roundNumber = gameStrategies[gameStrategiesKeys[i]].currentRound;
+                playGame(_gameID, _roundNumber, DIRECTPLAYTOKEN);
+                break;
+
+            }
+        }
+        // if the token value doesn't match any of the features, revert the transaction
+        if(i == gameStrategiesKeys.length) { revert(" token value sent doesn't match any of the Direct Play options. ");}
+    }
+    else {
+        if(msg.value == directPlayWithdrawValue) {
+            withdraw();
+            return;
+        }
+        
+    }
 }
 
 
-// self destruct contract
-    function ownerKill() onlyOwner external {
+// self destruct contract after reverting all pending games of players and sending back funds
+function ownerKill() external 
+    onlyOwner{
+        revertFundsToPlayers();
+        selfdestruct(owner());
+        
 }
 
 
