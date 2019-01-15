@@ -24,16 +24,3 @@ client/src/contracts/OraclizeAddrResolverI.json
 client/src/contracts/OraclizeI.json
 client/src/contracts/Ownable.json
 client/src/contracts/SafeMath.json
-build/contracts/usingOraclize.json
-build/contracts/Buffer.json
-build/contracts/CBOR.json
-build/contracts/Migrations.json
-build/contracts/Multiprizer.json
-build/contracts/MultiprizerAbstract.json
-build/contracts/Multiprizer_core.json
-build/contracts/Multiprizer_oraclize.json
-build/contracts/Multiprizer_oraclizeAbstract.json
-build/contracts/OraclizeAddrResolverI.json
-build/contracts/OraclizeI.json
-build/contracts/Ownable.json
-build/contracts/SafeMath.json
