@@ -1,0 +1,88 @@
+import React, { Component } from 'react'
+import { ContractData } from 'drizzle-react-components'
+import { DrizzleContext } from "drizzle-react";
+
+class GameStrategy extends Component {
+    static contextType = DrizzleContext.Consumer;
+    constructor(props, context) {
+        super(props);
+        this.state = { dataKey: null };
+        console.log("___ instide GameStrategy constructor___");
+        console.log(context);
+        this.context = context;
+    }
+
+    componentDidMount() {
+        const multiprizer = this.context.drizzle.contracts.Multiprizer;
+
+        // get and save the key for the variable we are interested in
+        const dataKey = multiprizer.methods["gameStrategies"].cacheCall(this.props.gameID);
+        console.log("datakey value is:" + dataKey);
+        this.setState({ dataKey });
+    }
+
+    render() {
+
+        console.log("!!!!!!!!! Context inside GameStrategy:  this.context is : ");
+        console.log(this.context);
+
+        const initialized = this.context.initialized;
+        console.log("initialized value: ");
+        console.log(initialized);
+
+        if (!initialized) {
+            return "Loading...";
+        }
+
+        const { Multiprizer } = this.context.drizzleState.contracts;
+        console.log("Multiprizer contract initialized? : ");
+        console.log(Multiprizer.initialized);
+        const _gameObj = Multiprizer.gameStrategies[this.state.dataKey];
+
+        const gameID = _gameObj && _gameObj.value["gameID"];
+        const maxTokens = _gameObj && _gameObj.value["maxTokens"];
+        const tokenValue = _gameObj && _gameObj.value["tokenValue"];
+        const gameDurationInEpoch = _gameObj && _gameObj.value["gameDurationInEpoch"];
+        const gameDurationInBlocks = _gameObj && _gameObj.value["gameDurationInBlocks"];
+        const maxTokensPerPlayer = _gameObj && _gameObj.value["maxTokensPerPlayer"];
+        const houseEdge = _gameObj && _gameObj.value["houseEdge"];
+        const megaPrizeEdge = _gameObj && _gameObj.value["megaPrizeEdge"];
+        const totalValueForGame = _gameObj && _gameObj.value["totalValueForGame"];
+        const totalWinnings = _gameObj && _gameObj.value["totalWinnings"];
+        const directPlayTokenValue = _gameObj && _gameObj.value["directPlayTokenValue"];
+        const currentRound = _gameObj && _gameObj.value["currentRound"];
+        const isGameLocked = _gameObj && (_gameObj.value["isGameLocked"] ? "true" : "false");
+        const isGameLateLocked = _gameObj && (_gameObj.value["isGameLateLocked"] ? "true" : "false");
+
+        /*         console.log("@@@@@@@@ props inside DrizzleApp:  this.props is : ");
+                console.log(this.context);
+                console.log("____ gameObj value ______");
+                console.log(_gameObj);
+         */
+
+        return (
+            <div className="col-sm-3" >
+                <ul>
+                    <li> {gameID} </li>
+                    <li> {maxTokens} </li>
+                    <li> {tokenValue} </li>
+                    <li> {gameDurationInEpoch} </li>
+                    <li> {gameDurationInBlocks} </li>
+                    <li> {maxTokensPerPlayer} </li>
+                    <li> {houseEdge} </li>
+                    <li> {megaPrizeEdge} </li>
+                    <li> {totalValueForGame} </li>
+                    <li> {totalWinnings} </li>
+                    <li> {directPlayTokenValue} </li>
+                    <li> {currentRound} </li>
+                    <li> {isGameLocked} </li>
+                    <li> {isGameLateLocked} </li>
+                </ul>
+            </div>
+            <div className="GameInput"><GameInput gameID={this.props.gameID} /></div>
+        );
+    }
+
+}
+
+export default GameStrategy;

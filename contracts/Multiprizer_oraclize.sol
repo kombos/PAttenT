@@ -1421,9 +1421,13 @@ END ORACLIZE_API
 
 */
 
-contract Multiprizer_core {
+
+ 
+ contract MultiprizerAbstract {
     function callback(bytes32 _oraclizeID, string calldata _result, bytes calldata _oraclizeProof, bool _isProofValid) external;
 }
+
+
 
 /**
  * @title Multiprizer_oraclize
@@ -1444,8 +1448,8 @@ uint256 numBytesOraclize;
 uint256 delayOraclize;
 string constant dataSourceOraclize = "random";
 
-Multiprizer_core private multiprizer_core;
-address payable multiprizerCoreAddress;
+MultiprizerAbstract private multiprizer;
+address payable multiprizerAddress;
 
 /** 
 *  Constructor call 
@@ -1454,8 +1458,8 @@ address payable multiprizerCoreAddress;
   */
 constructor (address payable _contractAddress) public {
     //# EMIT EVENT LOG - to be done
-    multiprizer_core = Multiprizer_core(_contractAddress);
-    multiprizerCoreAddress = _contractAddress;
+    multiprizer = MultiprizerAbstract(_contractAddress);
+    multiprizerAddress = _contractAddress;
         
 }
 
@@ -1476,7 +1480,7 @@ function updateOraclizeByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOracl
 }
 
 function newRandomDSQuery() external returns (bytes32 _queryId) {
-    if (msg.sender != multiprizerCoreAddress) revert();
+    if (msg.sender != multiprizerAddress) revert();
         //check if contract has enough funds to invoke oraclize
         if(oraclize_getPrice(dataSourceOraclize, gasLimitOraclize) > address(this).balance) {
             // pause all games until contract funds have been replenished
@@ -1512,7 +1516,7 @@ function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _or
         _isProofValid = true;
     }
 
-    multiprizer_core.callback(_oraclizeID, _result, _oraclizeProof, _isProofValid);
+    multiprizer.callback(_oraclizeID, _result, _oraclizeProof, _isProofValid);
 
 }
 
@@ -1532,7 +1536,6 @@ function ownerKill() external
 
 }
 
- 
 
 
 
