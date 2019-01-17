@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { ContractData } from 'drizzle-react-components'
 import { DrizzleContext } from "drizzle-react";
+import GameInput from "./GameInput";
 
 class GameStrategy extends Component {
     static contextType = DrizzleContext.Consumer;
@@ -78,8 +78,8 @@ class GameStrategy extends Component {
                     <li> {isGameLocked} </li>
                     <li> {isGameLateLocked} </li>
                 </ul>
+                <div className="GameInput"><GameInput gameID={this.props.gameID} gameStrategy={_gameObj} /></div>
             </div>
-            <div className="GameInput"><GameInput gameID={this.props.gameID} /></div>
         );
     }
 

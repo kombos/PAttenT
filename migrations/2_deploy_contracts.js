@@ -1,4 +1,4 @@
-var MultiprizerCore = artifacts.require("Multiprizer");
+var Multiprizer = artifacts.require("Multiprizer");
 var MultiprizerOraclize = artifacts.require("Multiprizer_oraclize");
 
 module.exports = function(deployer, network, accounts) {
@@ -18,31 +18,39 @@ module.exports = function(deployer, network, accounts) {
         1e14
     ];
 
-    var multiprizerCoreInstance, multiprizerOraclizeInstance;
+    var multiprizerInstance, multiprizerOraclizeInstance;
     
     if(network == "development") {
-        deployer.deploy(MultiprizerCore, {gas:10000000}).then(function() {
+        deployer.deploy(Multiprizer, {gas:10000000}).then(function() {
             
-            return deployer.deploy(MultiprizerOraclize, MultiprizerCore.address, {gas:10000000});
+            return deployer.deploy(MultiprizerOraclize, Multiprizer.address, {gas:10000000});
         });
 
     }
 
     if(network == "ganache") {
-        deployer.deploy(MultiprizerCore, {gas:10000000})
+        deployer.deploy(Multiprizer, {gas:10000000})
             .then(function(instance) {
-                multiprizerCoreInstance = instance;
-                return multiprizerCoreInstance.transferTimekeeping(accounts[1], {from:accounts[0]});
+                multiprizerInstance = instance;
+                return multiprizerInstance.transferTimekeeping(accounts[1], {from:accounts[0]});
             })
+            // deploy Multiprizer_oraclize
             .then(function(receipt) {
-                return multiprizerCoreInstance.addGameByAdmin(_gameProperties, {from:accounts[0]});
+                return deployer.deploy(MultiprizerOraclize, Multiprizer.address, {from:accounts[0], gas:10000000});
             })
+            // set deployed address of  Multiprizer_oraclize in Multiprizer
             .then(function(receipt) {
-                return multiprizerCoreInstance.resumeAllGamesByAdmin({from:accounts[0]});
+                return multiprizerInstance.setOraclizeByAdmin(MultiprizerOraclize.address, {from:accounts[0]});
             })
+            // add a new game
             .then(function(receipt) {
-                return deployer.deploy(MultiprizerOraclize, MultiprizerCore.address, {from:accounts[0], gas:10000000});
+                return multiprizerInstance.addGameByAdmin(_gameProperties, {from:accounts[0]});
             })
+            // resume all games
+            .then(function(receipt) {
+                return multiprizerInstance.resumeAllGamesByAdmin({from:accounts[0]});
+            })
+            
             .catch(function(e){
                 console.log(e);
             });

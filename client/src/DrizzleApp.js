@@ -9,7 +9,7 @@ class DrizzleApp extends React.Component {
     constructor(props, context) {
         super(props);
         this.state = { dataKey: null };
-        console.log("___ instide constiructor___");
+        console.log("___ inside constructor___");
         console.log(context);
         this.context = context;
 
