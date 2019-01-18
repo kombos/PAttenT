@@ -1447,7 +1447,11 @@ uint256 gasPriceOraclize;
 uint256 numBytesOraclize;
 uint256 delayOraclize;
 string constant dataSourceOraclize = "random";
-
+/** 
+*  Control Variables 
+*  @dev DirectPlay enables a player to place a single token for any of the strategy games   
+*  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
+  */
 MultiprizerAbstract private multiprizer;
 address payable multiprizerAddress;
 
@@ -1460,9 +1464,7 @@ constructor (address payable _contractAddress) public {
     //# EMIT EVENT LOG - to be done
     multiprizer = MultiprizerAbstract(_contractAddress);
     multiprizerAddress = _contractAddress;
-        
 }
-
 
 function updateOraclizeByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
     uint256 _numBytesOraclize, uint256 _delayOraclize) external 
@@ -1502,7 +1504,6 @@ function getOraclizeByAdmin() external view
         _numBytesOraclize = numBytesOraclize;
         _delayOraclize = delayOraclize;
         _dataSourceOraclize = dataSourceOraclize;
-
 }
 
 function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _oraclizeProof) public {
@@ -1517,11 +1518,12 @@ function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _or
     }
 
     multiprizer.callback(_oraclizeID, _result, _oraclizeProof, _isProofValid);
-
 }
 
 // fallback function 
 function () external payable {
+    if(msg.sender != owner() && msg.sender != timekeeper() && msg.sender != multiprizerAddress)
+        revert(" only admins can send funds to this contract ");
     
 }
 
