@@ -213,6 +213,12 @@ library SafeMath {
 
 contract Multiprizer_oraclizeAbstract {
     function newRandomDSQuery() external returns (bytes32 _queryId);
+    function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view 
+    returns (
+        bytes memory _result, 
+        bytes memory _oraclizeProof, 
+        bool _isProofValid
+        );
 }
 
 
@@ -236,7 +242,7 @@ struct Game{
     uint256 megaPrizeEdge;
     uint256 totalValueForGame;
     uint256 totalWinnings;
-    uint256 directPlayTokenValue;
+    uint256 directPlayTokenGas;
     uint256 currentRound;
     bool isGameLocked;
     bool isGameLateLocked;
@@ -372,7 +378,7 @@ constructor () public {
         _gameProperties[8] : uint256 currentRound,
         _gameProperties[9] : uint256 totalValueForGame,
         _gameProperties[10] : uint256 totalWinnings,
-        _gameProperties[11] : uint256 directPlayTokenValue
+        _gameProperties[11] : uint256 directPlayTokenGas
 */
 
 function addGameByAdmin(uint256[12] calldata _gameProperties) external 
@@ -397,7 +403,7 @@ function addGameByAdmin(uint256[12] calldata _gameProperties) external
         gameObj.currentRound = _gameProperties[8];
         gameObj.totalValueForGame = _gameProperties[9];
         gameObj.totalWinnings = _gameProperties[10];
-        gameObj.directPlayTokenValue = _gameProperties[11];
+        gameObj.directPlayTokenGas = _gameProperties[11];
         gameObj.isGameLocked = true;
         gameObj.isGameLateLocked = true;
         
@@ -432,7 +438,7 @@ function updateGameByAdmin(uint256[12] calldata _gameProperties) external
         gameStrategies[_gameID].currentRound = _gameProperties[8];
         gameStrategies[_gameID].totalValueForGame = _gameProperties[9];
         gameStrategies[_gameID].totalWinnings = _gameProperties[10];
-        gameStrategies[_gameID].directPlayTokenValue = _gameProperties[11];
+        gameStrategies[_gameID].directPlayTokenGas = _gameProperties[11];
         gameStrategies[_gameID].isGameLocked = true;
         gameStrategies[_gameID].isGameLateLocked = true;
 
@@ -643,17 +649,8 @@ function revertFundsToPlayers() public
                 _playerAmount = _tokenValue.mul(rounds[_roundID].playerTokens[_playerAddress]);
                 rounds[_roundID].playerTokens[_playerAddress] = 0;
                 if(_playerAmount == 0) continue;
-                if(safeSend(_playerAddress, _playerAmount))
-                    //# check if re-entrancy attack is possible ???
-                    //# EMIT EVENT LOG - Successful transfer of funds
-
-                    true;
-                    
-                else
-                    //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
-                    true; 
-                    
-    
+                safeSend(_playerAddress, _playerAmount);
+                //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
             }
 
             rounds[_roundID].totalTokensPurchased = 0;
@@ -673,14 +670,14 @@ function revertFundsToPlayers() public
 function playGame(uint256 _gameID, uint256 _numberOfTokens ) public  
     payable {
         // _gameID should be valid
-        require(gameStrategies[_gameID].gameID != 0, " GameID doesn't exist. ");
+        require(gameStrategies[_gameID].gameID != 0 && _numberOfTokens != 0, " Invalid values given in game parameters. ");
         // game should not be in locked mode
         require(!gameStrategies[_gameID].isGameLocked, 
             " Game round is set in locked state by admin. Wait till the game resumes. ");
         // get the current round number of the specified game.
         uint256 _roundNumber = gameStrategies[_gameID].currentRound;
         // zero check for _roundNumber and _numberOfTokens
-        require(_roundNumber != 0 && _numberOfTokens != 0, " Invalid values given in game parameters. ");
+        require(_roundNumber != 0 , " Game not started yet. ");
         // ethers value sent should be equal to token value
         require(msg.value == _numberOfTokens.mul(gameStrategies[_gameID].tokenValue),  
             " Amount sent is less than required ");
@@ -752,9 +749,7 @@ function revertGame(uint256 _gameID, address payable _playerAddress ) public  {
             else {
                 megaPrizePlayersKeys.length = (megaPrizePlayersKeys.length).sub(1);
             }
-
         }
-
     }
     
     // refund the amount placed 
@@ -777,25 +772,24 @@ function revertGame(uint256 _gameID, address payable _playerAddress ) public  {
         rounds[_roundID].playerList.length = (rounds[_roundID].playerList.length).sub(1);
     }
 
-    if( safeSend(_playerAddress, _refundAmount) )
-        //# EMIT EVENT LOG - Successful transfer of funds
-        true;
-    else
-        //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
-        true; 
+    safeSend(_playerAddress, _refundAmount);
+    //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
 
 }
 
+
+function completeMegaprizeRoundByAdmin() external 
+    onlyOwners {
+        isMegaPrizeMatured = true;
+        isMegaPrizeEnabled = false;  
+
+        
+    }
 
 function completeRoundsByAdmin(uint256[] calldata _gameIDs) external 
     onlyOwners {
         // gameIDs should be valid
         for(uint256 k=0; k<_gameIDs.length; k++) {
-            // if gameID corresponds to megaPrize game, set the mega prize matured flag and continue.
-            if(_gameIDs[k] == megaPrizeID) {
-                isMegaPrizeMatured = true;
-                continue;
-            }
             require(gameStrategies[_gameIDs[k]].gameID != 0, " One or more of the GameIDs doesn't exist ");
         }
         uint256 _roundNumber;
@@ -806,17 +800,17 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
         address payable _playerAddress;
         bool _needsOraclize = false;
 
-        
+        // find out if oraclize is required (only required when number of players is more than 1)
         for(uint256 j=0; j<_gameIDs.length; j++) {
+            _roundNumber = gameStrategies[_gameIDs[j]].currentRound;
+            _roundID = (_roundNumber == 0) ? 0 : cantorPairing(_gameIDs[j], _roundNumber);
 
-            if(_gameIDs[j] == megaPrizeID || gameStrategies[_gameIDs[j]].isGameLocked || gameStrategies[_gameIDs[j]].currentRound==0) {
+            if(gameStrategies[_gameIDs[j]].isGameLocked || gameStrategies[_gameIDs[j]].currentRound==0 || !rounds[_roundID].isRoundOpen) {
                 continue;
             }
             // set the _needsOraclize flag if in at least one of the games, the number of players is more than 1
-            _roundNumber = gameStrategies[_gameIDs[j]].currentRound;
-            _roundID = cantorPairing(_gameIDs[j], _roundNumber);
             _needsOraclize = _needsOraclize || ((rounds[_roundID].playerList.length > 1) || (isMegaPrizeMatured && isMegaPrizeEnabled)) ? true : false ;
-
+            if(_needsOraclize) break;
         }
 
         // create an Oraclize query for RNG
@@ -828,18 +822,17 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
             if(_oraclizeID.length == 0) {
                 revert(" Insuffecient funds in Multiprizer_oraclize contract to execute Oraclize ");
             }
-
         }
-        // save round info and create new round for relevant games
+        // save current round info for each game and create new round for relevant games
         for(uint256 i=0; i < _gameIDs.length; i++) {
 
-            if(_gameIDs[i] == megaPrizeID || gameStrategies[_gameIDs[i]].isGameLocked) {
+            if(gameStrategies[_gameIDs[i]].isGameLocked) {
                 continue;
             }
 
             // close the current round if not already closed
             _roundNumber = gameStrategies[_gameIDs[i]].currentRound;
-            _roundID = _roundNumber == 0 ? 0 : cantorPairing(_gameIDs[i], _roundNumber);
+            _roundID = (_roundNumber == 0) ? 0 : cantorPairing(_gameIDs[i], _roundNumber);
             
             // to close the current round requires it to be not already closed or not 0
             if(_roundNumber != 0 && rounds[_roundID].isRoundOpen) {
@@ -893,96 +886,78 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
 }
 
 
-function callback(bytes32 _oraclizeID, string calldata _result, bytes calldata _oraclizeProof, bool _isProofValid) external {
+function calculateWinnersByAdmin(bytes32 _oraclizeID) external onlyOwners {
+
+    uint256 i;
+    uint256 j;
+    uint256 k;
+    uint256 _slabIndex=0;
+
+    (bytes memory _result, bytes memory _oraclizeProof, bool _isProofValid) = 
+        multiprizer_oraclize.getOraclizeResultByAdmin(_oraclizeID);
     
-    // using require statement instead since using modifiers may use extra call stack
-    require(msg.sender == oraclizeAddress, " __callback cannot be called by any actor apart from Oraclize ");
     if (!_isProofValid) {
 
-        for(uint256 p=0;p < roundsOfOraclizeID[_oraclizeID].length; p++) {
-            pendingRoundsOraclize.push(roundsOfOraclizeID[_oraclizeID][p]);
-        
+        for(i=0;i < roundsOfOraclizeID[_oraclizeID].length; i++) {
+            pendingRoundsOraclize.push(roundsOfOraclizeID[_oraclizeID][i]);
         }
-
+        delete roundsOfOraclizeID[_oraclizeID];
         //# EMIT EVENT LOG
         return;
     }
-
-    uint256 _gameID;
-    uint256 _slabIndex;
     uint256 _oraclizeRandomNumber;
     address payable[] memory _tokenSlab;
     uint256[] memory _numTokensSlab;
     
-    uint256[] memory _roundsOfOraclizeID = new uint256[]((roundsOfOraclizeID[_oraclizeID].length).add(pendingRoundsOraclize.length));
-    _slabIndex = 0;
-    // add the pending rounds first, which were not processed by Oraclize previously due to proof mismatch
-    for(uint256 n=0;n < pendingRoundsOraclize.length; n++) {
-        _roundsOfOraclizeID[_slabIndex] =  pendingRoundsOraclize[n];
-        _slabIndex = _slabIndex.add(1);
-    }
-    // add the new rounds associated with the current oraclizeID
-    for(uint256 m=0;m < roundsOfOraclizeID[_oraclizeID].length; m++) {
-        _roundsOfOraclizeID[_slabIndex] =  roundsOfOraclizeID[_oraclizeID][m];
-        _slabIndex = _slabIndex.add(1);
+    for(i=0;i < pendingRoundsOraclize.length; i++) {
+        roundsOfOraclizeID[_oraclizeID].push(pendingRoundsOraclize[i]);
     }
     // remove the pending oraclize rounds since they have been included in the new array _roundsOfOraclizeID
     delete pendingRoundsOraclize;
-    _slabIndex = 0; 
-
-    for(uint256 i=0; i < _roundsOfOraclizeID.length; i++) {
+    // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased (or _tokenSlab)
+    _oraclizeRandomNumber = uint256(keccak256(_result));
+    
+    uint256[] storage _roundsOfOraclizeID = roundsOfOraclizeID[_oraclizeID];
+    for(i=0; i < _roundsOfOraclizeID.length; i++) {
         //_roundID = _roundsOfOraclizeID[i];
         // if a round has been already decided by Oraclize callback, then continue with next round. 
         // This will also help to prevent any possible malicious execution by Oraclize itself
         if(rounds[_roundsOfOraclizeID[i]].oraclizeProof.length != 0) continue;
-        _gameID = rounds[_roundsOfOraclizeID[i]].gameID;
         address payable[] storage _playerList = rounds[_roundsOfOraclizeID[i]].playerList;
-        // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased (or _tokenSlab)
-        _oraclizeRandomNumber = uint256(keccak256(bytes(_result))).mod(rounds[_roundsOfOraclizeID[i]].totalTokensPurchased);
         // _tokenSlab will be the array in which we choose a random index provided by Oraclize to pick winner.
         // _numTokensSlab is the array containing number of tokens purchased by each player of this round.
         // We will use these two arrays, alongwith playerList to input values in the _tokenSlab in a transposing manner.
         // This enables a very fine mixing of values before picking winner, and also prevents any outcome prediction.
         _numTokensSlab = new uint256[](_playerList.length);
         _tokenSlab = new address payable[](rounds[_roundsOfOraclizeID[i]].totalTokensPurchased);
-
-        for(uint256 j=0; j < _playerList.length; j++) {
+        // get the corresponding tokens of each player in the playerList to the array _numTokensSlab
+        for(j=0; j < _playerList.length; j++) {
             _numTokensSlab[j] = rounds[_roundsOfOraclizeID[i]].playerTokens[_playerList[j]];
-            // consider for Mega Prize
-            /* if(megaPrizePlayers[_playerList[j]] == 0) {
-                megaPrizePlayersKeys.push(_playerList[j]);
-            }
-            megaPrizePlayers[_playerList[j]] = megaPrizePlayers[_playerList[j]].add(rounds[_roundsOfOraclizeID[i]].playerTokens[_playerList[j]]); */
-
         }
-        _slabIndex = 0;
         // input player address values in the _tokensSlab in a transposing manner. A player address value is input in 
         //_tokenSlab multiple times if more than one token is bought, providing weighted probabilities of winning.
-        for(uint256 k=0; _slabIndex < rounds[_roundsOfOraclizeID[i]].totalTokensPurchased; k++) {
+        for(k=0; _slabIndex < rounds[_roundsOfOraclizeID[i]].totalTokensPurchased; k++) {
             
             if(_numTokensSlab[k.mod(_numTokensSlab.length)] == 0) {
                 continue;
             }
-
             else {
                 _tokenSlab[_slabIndex] = _playerList[k.mod(_playerList.length)];
                 _slabIndex = _slabIndex.add(1);
                 _numTokensSlab[k.mod(_numTokensSlab.length)] = (_numTokensSlab[k.mod(_numTokensSlab.length)]).sub(1);
-
             }
-            
         }
         // select the winner address using Oraclize provided Provable Random Number
-        rounds[_roundsOfOraclizeID[i]].winner = _tokenSlab[_oraclizeRandomNumber];
+        rounds[_roundsOfOraclizeID[i]].winner = _tokenSlab[_oraclizeRandomNumber.mod(_tokenSlab.length)];
         // set the oraclizeProof data into the round data
         rounds[_roundsOfOraclizeID[i]].oraclizeProof = _oraclizeProof;
-        // compensate the winner and deduct houseEdge and megaPrizeEdge in a seperate private function
-        compensateWinner(rounds[_roundsOfOraclizeID[i]].winner, _roundsOfOraclizeID[i], _result);
-        
         //# EMIT EVENT LOG
         delete _numTokensSlab; 
         delete _tokenSlab;
     }
+
+    // compensate the winner and deduct houseEdge and megaPrizeEdge in a seperate private function
+    compensateWinner(_oraclizeID, _oraclizeRandomNumber);
 
 }
 
@@ -991,48 +966,48 @@ function callback(bytes32 _oraclizeID, string calldata _result, bytes calldata _
     * @dev sends the winning amount of ethers to the required winner address
     * Make sure all the state changes are already committed prior to invocation. 
 */
-function compensateWinner(address payable _winnerAddress, uint256 _roundID, string memory _result) private {
+function compensateWinner(bytes32 _oraclizeID, uint256 _oraclizeRandomNumber) private {
 
     uint256 _gameID;
+    uint256 _roundID;
     uint256 _totalValuePurchased;
+    address payable _winnerAddress;
     uint256 _winnerAmount;
     uint256 _houseEdgeAmount;
     uint256 _megaPrizeEdgeAmount;
+    uint256[] memory _roundsOfOraclizeID = roundsOfOraclizeID[_oraclizeID];
 
-    _gameID = rounds[_roundID].gameID;
-    _totalValuePurchased = gameStrategies[_gameID].tokenValue.mul(rounds[_roundID].totalTokensPurchased);
-    gameStrategies[_gameID].totalValueForGame = (gameStrategies[_gameID].totalValueForGame).add(_totalValuePurchased);
-    
-    // transfer the prize amount to winner, after deducting house edge and megaprize edge
-    _megaPrizeEdgeAmount = isMegaPrizeEnabled ? (_totalValuePurchased.mul(gameStrategies[_gameID].megaPrizeEdge)).div(DIVISOR_POWER_5) : 0;
-    _houseEdgeAmount = ((_totalValuePurchased.mul(gameStrategies[_gameID].houseEdge)).div(DIVISOR_POWER_5)).sub(_megaPrizeEdgeAmount);
-    _winnerAmount = _totalValuePurchased.sub((_houseEdgeAmount.add(_megaPrizeEdgeAmount)));
-    gameStrategies[_gameID].totalWinnings = (gameStrategies[_gameID].totalWinnings).add(_winnerAmount);
-    // deduct the house edge and transfer it to the house account
-    if(playerWithdrawals[owner()] == 0) {
-                playerWithdrawalsKeys.push(owner());
-    }
-    playerWithdrawals[owner()] = playerWithdrawals[owner()].add(_houseEdgeAmount);
-    megaPrizeAmount = megaPrizeAmount.add(_megaPrizeEdgeAmount);
-    // send the winning amount to the winner using safeSend
-    if(safeSend(_winnerAddress, _winnerAmount)) {
-        //# EMIT EVENT LOG - Successful transfer of funds
-    }
-    else {
+    for(uint256 i=0;i<_roundsOfOraclizeID.length;i++) {
+
+        _roundID = _roundsOfOraclizeID[i];
+        _gameID = rounds[_roundID].gameID;
+        _winnerAddress = rounds[_roundID].winner;
+        _totalValuePurchased = gameStrategies[_gameID].tokenValue.mul(rounds[_roundID].totalTokensPurchased);
+        gameStrategies[_gameID].totalValueForGame = (gameStrategies[_gameID].totalValueForGame).add(_totalValuePurchased);
+        // transfer the prize amount to winner, after deducting house edge and megaprize edge
+        _megaPrizeEdgeAmount = (isMegaPrizeEnabled || isMegaPrizeMatured) ? (_totalValuePurchased.mul(gameStrategies[_gameID].megaPrizeEdge)).div(DIVISOR_POWER_5) : 0;
+        _houseEdgeAmount = ((_totalValuePurchased.mul(gameStrategies[_gameID].houseEdge)).div(DIVISOR_POWER_5)).sub(_megaPrizeEdgeAmount);
+        _winnerAmount = _totalValuePurchased.sub((_houseEdgeAmount.add(_megaPrizeEdgeAmount)));
+        gameStrategies[_gameID].totalWinnings = (gameStrategies[_gameID].totalWinnings).add(_winnerAmount);
+        // transfer the house edge to the house account
+        if(playerWithdrawals[owner()] == 0) {
+                    playerWithdrawalsKeys.push(owner());
+        }
+        playerWithdrawals[owner()] = playerWithdrawals[owner()].add(_houseEdgeAmount);
+        megaPrizeAmount = megaPrizeAmount.add(_megaPrizeEdgeAmount);
+        // send the winning amount to the winner using safeSend
+        safeSend(_winnerAddress, _winnerAmount);
         //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
     }
     
-    if(isMegaPrizeEnabled && isMegaPrizeMatured) {
+    if(isMegaPrizeMatured) {
 
         address payable _megaPrizeWinner;
         uint256 _megaPrizeAmount;
-        uint256 _megaPrizeRandomNumber = uint256(keccak256(bytes(_result))).mod(megaPrizePlayersKeys.length);
-
         // find the mega prize winner address using Provable Random Number from Oraclize 
-        _megaPrizeWinner = megaPrizePlayersKeys[_megaPrizeRandomNumber];
+        _megaPrizeWinner = megaPrizePlayersKeys[_oraclizeRandomNumber.mod(megaPrizePlayersKeys.length)];
         megaPrizeWinners.push(_megaPrizeWinner);
         _megaPrizeAmount = megaPrizeAmount;
-        
         // delete all megaPrize storage variable values pertaining to players
         isMegaPrizeMatured = false;
         megaPrizeAmount = 0;
@@ -1047,13 +1022,8 @@ function compensateWinner(address payable _winnerAddress, uint256 _roundID, stri
         }
         
         // safeSend the relevant mega prize amount to the mega prize winner
-        if(safeSend(_megaPrizeWinner, _megaPrizeAmount)) {
-            //# EMIT EVENT LOG - Successful transfer of funds
-        }
-        else {
-            //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
-        }
-
+        safeSend(_megaPrizeWinner, _megaPrizeAmount);
+        //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
     }
 
 }
@@ -1069,7 +1039,6 @@ function viewDirectPlayInfo() external view
             directPlayWithdrawValue,
             isDirectPlayEnabled
         );
-
 }
 
 
@@ -1080,7 +1049,6 @@ function viewWithdrawalInfo(address payable _playerAddress) external view
         return(_amount);
 
         //SOME ERROR IN PLAYERWITHDRAWAL KEYS, THEY WAY THEY DEDUCT WHEN WITHDRAWN. FIX IT.
-
 }
 
 
@@ -1099,7 +1067,6 @@ function viewMegaPrizeInfo() external view
             isMegaPrizeEnabled,
             isMegaPrizeMatured
         );
-
 }
 
 
@@ -1150,7 +1117,6 @@ function viewGameIDs() external view
         for(uint256 i=0;i < _gameIDsLength;i++) {
             _gameIDs[i] = gameStrategies[gameStrategiesKeys[i]].gameID;
         }
-
 }
 
 
@@ -1177,7 +1143,6 @@ function getMegaPrizeByAdmin() external view
         _isMegaPrizeEnabled = isMegaPrizeEnabled;
         _isMegaPrizeLateLocked = isMegaPrizeLateLocked;
         _isMegaPrizeMatured = isMegaPrizeMatured;
-
 }
 
 
@@ -1194,7 +1159,6 @@ function getWithdrawalsByAdmin() external view
         }
 
         return(_playerWithdrawalsAmounts, _playerWithdrawalsKeys);
-
 }
 
 
@@ -1211,20 +1175,23 @@ function getOraclizeRoundsByAdmin(bytes32 _oraclizeID) external view onlyOwners 
     * Make sure all the state changes are already committed prior to invocation. 
 */
 function safeSend(address payable _toAddress, uint256 _amount) private 
-    returns (bool _success) {
+    {
+        require(_amount > 0, " There is no _amount left to withdraw ");
+        require(address(this).balance >= _amount, 
+            " Insufficient funds available in contract to invoke withdraw. Contact admin in case of a legitimate irregularity. ");
+
+        
 
         if(!_toAddress.send(_amount)) {
             if(playerWithdrawals[_toAddress] == 0) {
                 playerWithdrawalsKeys.push(_toAddress);
             }
             playerWithdrawals[_toAddress] = (playerWithdrawals[_toAddress]).add(_amount);
-            _success = false;
+            //# EMIT LOG
         }
         else {
-            _success = true;
+            //# EMIT LOG
         }
-
-        return _success;
 }
 
 
@@ -1241,10 +1208,8 @@ function withdraw() public {
 
         playerWithdrawals[msg.sender] = 0;
         // implement code to remove the address entry from the withdrawplayerlist
-
-        uint256 i;
         uint256 _withdrawKeysLength = playerWithdrawalsKeys.length;
-        for (i=0; i < _withdrawKeysLength; i++) {
+        for (uint256 i=0; i < _withdrawKeysLength; i++) {
             if(playerWithdrawalsKeys[i] == msg.sender) {
                 playerWithdrawalsKeys[i] = playerWithdrawalsKeys[_withdrawKeysLength.sub(1)];
                 break;
@@ -1276,7 +1241,7 @@ function transferByAdmin(address payable _toAddress, uint _amount) public
                 break;
             }
         }
-
+        
         if(i != _withdrawKeysLength) {
             playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
         }
@@ -1309,9 +1274,10 @@ function cantorPairing(uint256 _a, uint256 _b) private pure
 // fallback function which implements DirectPlay
 function () external payable {
 
-    if(msg.sender != owner() && msg.sender != timekeeper()) {
         // if the token value pertains to DirectPlay Withdraw feature, withdraw player's pending amount alongwith token value
         if(msg.value == directPlayWithdrawValue) {
+            if(!isDirectPlayEnabled && msg.sender != owner() && msg.sender != timekeeper()) revert("DirectPlay not enabled");
+            if(playerWithdrawals[msg.sender] == 0) revert("No amount to withdraw");
             playerWithdrawals[msg.sender] = (playerWithdrawals[msg.sender]).add(msg.value);
             withdraw();
             return;
@@ -1330,14 +1296,7 @@ function () external payable {
         }
         // if the token value doesn't match any of the features, revert the transaction
         if(i == gameStrategiesKeys.length) { revert(" token value sent doesn't match any of the Direct Play options. ");}
-    }
-    else {
-        if(msg.value == directPlayWithdrawValue) {
-            withdraw();
-            return;
-        }
-        
-    }
+    
 }
 
 
@@ -1348,6 +1307,14 @@ function ownerKill() external
         selfdestruct(owner());
         
 }
+
+//# CHANGE ALL REVERT STATEMENT STRINGS TO SMALLER STRINGS
+//# FINISH ALL LOGS
+//# should new round numbers be inputted during revertallgames()
+     /* after revert, an event has to be emitted which is received by the timekeeper bot, 
+     which then resets all the game times and orders the time set. */
+//# DONE:: create a list of oraclizeID in oraclize contract and change the __callback function
+//# in timekeeping bot, first send this transaction, then send completeRoundsByAdmin()    
 
 
 }

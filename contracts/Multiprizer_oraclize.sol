@@ -1438,7 +1438,7 @@ contract Multiprizer_oraclize is Ownable, usingOraclize  {
 
 
 /** 
-*  Oraclize Variables 
+*  Oraclize Props Variables 
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
@@ -1447,6 +1447,20 @@ uint256 gasPriceOraclize;
 uint256 numBytesOraclize;
 uint256 delayOraclize;
 string constant dataSourceOraclize = "random";
+
+/** 
+*  Oraclize Result Variables 
+*  @dev DirectPlay enables a player to place a single token for any of the strategy games   
+*  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
+  */
+mapping(bytes32 => uint256) private oraclizeIDIndexes;
+bytes32[] public oraclizeIDs;
+mapping(uint256 => bytes) private oraclizeProofs;
+mapping(uint256 => bytes) private results;
+mapping(uint256 => bool) private isProofsValid;
+uint256 public oraclizeLength;
+
+
 /** 
 *  Control Variables 
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
@@ -1466,10 +1480,9 @@ constructor (address payable _contractAddress) public {
     multiprizerAddress = _contractAddress;
 }
 
-function updateOraclizeByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
+function updateOraclizePropsByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
     uint256 _numBytesOraclize, uint256 _delayOraclize) external 
     onlyOwners {
-        //require(msg.sender == );
 
     gasLimitOraclize = _gasLimitOraclize;
     gasPriceOraclize = _gasPriceOraclize;
@@ -1491,7 +1504,22 @@ function newRandomDSQuery() external returns (bytes32 _queryId) {
         _queryId = oraclize_newRandomDSQuery(delayOraclize, numBytesOraclize, gasLimitOraclize);
 }
 
-function getOraclizeByAdmin() external view 
+function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
+    returns (
+        bytes memory _result, 
+        bytes memory _oraclizeProof, 
+        bool _isProofValid
+        ) {
+    // can only be called by the Multiprizer contract
+    if (msg.sender != multiprizerAddress) revert();
+    uint256 resultIndex = oraclizeIDIndexes[_oraclizeID];
+    _result = results[resultIndex];
+    _oraclizeProof = oraclizeProofs[resultIndex];
+    _isProofValid = isProofsValid[resultIndex];
+}
+
+
+function getOraclizePropsByAdmin() external view 
     onlyOwners returns(
         uint256 _gasLimitOraclize,
         uint256 _gasPriceOraclize,
@@ -1516,9 +1544,16 @@ function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _or
     else {
         _isProofValid = true;
     }
-
-    multiprizer.callback(_oraclizeID, _result, _oraclizeProof, _isProofValid);
+    // store the oraclize results in the Oraclize Result State Variables
+    oraclizeIDs.push(_oraclizeID);
+    oraclizeLength = oraclizeIDs.length;
+    oraclizeIDIndexes[_oraclizeID] = oraclizeLength-1;
+    results[oraclizeLength-1] = bytes(_result);
+    oraclizeProofs[oraclizeLength-1] = _oraclizeProof;
+    isProofsValid[oraclizeLength-1] = _isProofValid;
 }
+
+
 
 // fallback function 
 function () external payable {
@@ -1539,7 +1574,7 @@ function ownerKill() external
 }
 
 
-
+//# IMPLEMENT TRANSFER FUNCTION FOR MANUAL TRANSFER OF FUNDS FROM CONTRACT
 
 
 
