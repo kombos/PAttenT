@@ -1,5 +1,55 @@
 
+
 var Multiprizer = artifacts.require("Multiprizer");
+var Multiprizer_oraclize = artifacts.require("Multiprizer_oraclize");
+
+var multiprizer_oraclize, oraclize_instance;
+var multiprizer, instance;
+
+
+
+contract("Multiprizer_oraclize", accounts => {
+
+
+    it("should be successfully deployed", async () => {
+        let contract = await Multiprizer_oraclize.deployed();
+        
+        console.log("oraclize address: ",contract.address);
+        contract.multiprizerAddress().then(function(maddress) {console.log("multiprizer address in oraclize: ", maddress);})
+        
+        oraclize_instance = contract;
+        let owner = await oraclize_instance.owner();
+        console.log("owner of multiprizer_oraclize: ", owner);
+        multiprizer_oraclize = await new web3.eth.Contract(contract.abi, contract.address);
+        let balance = await web3.eth.getBalance(accounts[0]);
+        multiprizer_oraclize.options.gas = 1000000;
+        if (multiprizer_oraclize) {
+            console.log("Account Number: ", accounts[0], "|  Account[0] Balance : ", balance);
+            assert.ok(true);
+        }
+        else {
+            assert.fail("Deployment of Multiprizer contract failed !");
+        }
+
+    });
+
+    
+    it("should view  oraclize props by admin : positive scenario   : updateOraclizePropsByAdmin() ", async () => {
+
+        console.log("view oraclize props : ");
+        let updateData = await oraclize_instance.getOraclizePropsByAdmin({ from: accounts[0] });
+        console.log("updateData._gasLimitOraclize", updateData._gasLimitOraclize.toString());
+        console.log("updateData._numBytesOraclize", updateData._numBytesOraclize.toString());
+        console.log("updateData._gasPriceOraclize", updateData._gasPriceOraclize.toString());
+        console.log("updateData._delayOraclize", updateData._delayOraclize.toString());
+        console.log("updateData._priceOraclize", updateData._priceOraclize.toString());
+        assert.ok(true);
+
+    });
+
+
+
+});
 
 /**
     * _gameProperties::
@@ -22,16 +72,19 @@ var Multiprizer = artifacts.require("Multiprizer");
     * Function: π(a,b)=1/2(a+b)(a+b+1)+b  
 */
 contract("Multiprizer", accounts => {
-    var multiprizer, instance;
+
 
     const cantorPairing = (a, b) => {
-        return((((a+b)*(a+b+1))/2)+b);
+        return ((((a + b) * (a + b + 1)) / 2) + b);
 
-    } 
+    }
 
     it("should be successfully deployed", async () => {
         let contract = await Multiprizer.deployed();
+        console.log("multiprizer address: ", contract.address);
         instance = contract;
+        let owner = await instance.owner();
+        console.log("owner of multiprizer_oraclize: ", owner);
         multiprizer = await new web3.eth.Contract(contract.abi, contract.address);
         let balance = await web3.eth.getBalance(accounts[0]);
         multiprizer.options.gas = 1000000;
@@ -286,23 +339,6 @@ contract("Multiprizer", accounts => {
 
     });
 
-    it("should unlock or resume a locked mega Prize : Positive Scenario   : unlockMegaPrizeByAdmin() ", async () => {
-
-        let gasEstimate = await multiprizer.methods.unlockMegaPrizeByAdmin().estimateGas({ from: accounts[0] });
-        console.log(" unlockMegaPrizeByAdmin() Invocation Gas : ", gasEstimate);
-        await instance.unlockMegaPrizeByAdmin({ from: accounts[0] })
-            .then(async function (receipt) {
-                console.log("Transaction Receipt : " + receipt);
-                let gameData = await instance.getMegaPrizeByAdmin({ from: accounts[0] });
-                if (gameData._isMegaPrizeLateLocked == false && gameData._isMegaPrizeEnabled)
-                    assert.ok(true);
-                else
-                    assert.fail("Error: megaPrize unlocked but gameData parameters dont match! ");
-
-            })
-
-    });
-
     it("should late lock mega Prize : Positive Scenario   : lockMegaPrizeByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
 
@@ -316,6 +352,23 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: megaPrize locked but gameData parameters dont match! ");
+
+            })
+
+    });
+
+    it("should unlock or resume a locked mega Prize : Positive Scenario   : unlockMegaPrizeByAdmin() ", async () => {
+
+        let gasEstimate = await multiprizer.methods.unlockMegaPrizeByAdmin().estimateGas({ from: accounts[0] });
+        console.log(" unlockMegaPrizeByAdmin() Invocation Gas : ", gasEstimate);
+        await instance.unlockMegaPrizeByAdmin({ from: accounts[0] })
+            .then(async function (receipt) {
+                console.log("Transaction Receipt : " + receipt);
+                let gameData = await instance.getMegaPrizeByAdmin({ from: accounts[0] });
+                if (gameData._isMegaPrizeLateLocked == false && gameData._isMegaPrizeEnabled)
+                    assert.ok(true);
+                else
+                    assert.fail("Error: megaPrize unlocked but gameData parameters dont match! ");
 
             })
 
@@ -363,7 +416,7 @@ contract("Multiprizer", accounts => {
             await instance.playGame(_gameID, _numberofTokens, { from: _playerAddress[j], value: (gameData.tokenValue * _numberofTokens) });
             let rData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
             let _playerList = rData._playerList;
-            let i=0;
+            let i = 0;
             for (i = 0; i < _playerList.length; i++) {
                 if (_playerList[i] == _playerAddress[j])
                     break;
@@ -386,14 +439,13 @@ contract("Multiprizer", accounts => {
     it("should initiate revert game : Positive Scenario   : revertGame() ", async () => {
         // this has to be further combined with winners calculation for integration testing
         let _gameID = 102;
-        let _numberofTokens = 1;
         let _playerAddress = accounts[2];
 
         let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
         let _currentRound = gameData.currentRound.toNumber();
 
         let gasEstimate = await multiprizer.methods.revertGame(_gameID, _playerAddress)
-            .estimateGas({ from: accounts[0]});
+            .estimateGas({ from: accounts[0] });
         console.log(" revertGame() Invocation Gas : ", gasEstimate);
 
         await instance.revertGame(_gameID, _playerAddress, { from: _playerAddress });
@@ -401,25 +453,82 @@ contract("Multiprizer", accounts => {
         //let _playerTokens = await instance.rounds(_roundID, playerTokens(_playerAddress), { from: accounts[0] });
         let rData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
         let _playerList = rData._playerList;
-        let i=0;
-            for (i = 0; i < _playerList.length; i++) {
-                if (_playerList[i] == _playerAddress)
-                    break;
-            }
+        console.log("playerlist length: ", _playerList.length);
+        let i = 0;
+        for (i = 0; i < _playerList.length; i++) {
+            if (_playerList[i] == _playerAddress)
+                break;
+        }
 
-            if (i == _playerList.length)
-                assert.ok(true);
-            else {
-                console.log("Error: Player data found though reverted : Player Address: ", _playerList[i], " Player tokens: ", __playerTokensList[i]);
-                assert.fail("Error playGame : play game initiated but roundData parameters dont match! ");
-            }
-        
+        if (i == _playerList.length)
+            assert.ok(true);
+        else {
+            console.log("Error: Player data found though reverted : Player Address: ", _playerList[i], " Player tokens: ", __playerTokensList[i]);
+            assert.fail("Error playGame : play game initiated but roundData parameters dont match! ");
+        }
+
 
         //let rData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
         console.log("Player List : ", _playerList);
 
     });
 
+    it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundsByAdmin() ", async () => {
+        // this has to be further combined with winners calculation for integration testing
+        let _gameID = [102];
+        //let gasEstimate = await multiprizer.methods.completeRoundsByAdmin([_gameID]).estimateGas({ from: accounts[0] });
+        //console.log(" completeRoundsByAdmin() Invocation Gas : ", gasEstimate);
+        
+        //await instance.send(10, {from:accounts[0]});
+        await oraclize_instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
+        await instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
+        console.log("last?");
+        await instance.completeRoundsByAdmin(_gameID, { from: accounts[0], gas:10000000 })
+            .then(async function (receipt) {
+                console.log("Transaction Receipt : " + receipt);
+                let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
+                let _currentRound = gameData.currentRound;
+                if (gameData.currentRound != 0) {
+                    console.log("current round: ", _currentRound);
+                    assert.ok(true);
+                }
+                else {
+                    assert.fail("Error: round completed but gameData not set ");
+                }
+
+            })
+
+    });
+
+
+    it("should get oraclize result by admin   : getOraclizeResultByAdmin() ", async () => {
+        // this has to be further combined with winners calculation for integration testing
+        let _gameID = 102;
+        let _oraclizeID = await oraclize_instance.oraclizeIDs(0, { from: accounts[0] });
+        console.log("Oraclize ID: ", _oraclizeID);
+        let oraclizeResult = await oraclize_instance.getOraclizeResultByAdmin(_oraclizeID, { from: accounts[0] });
+        let gasEstimate = await multiprizer.methods.calculateWinnersByAdmin(_oraclizeID, oraclizeResult._result,
+            oraclizeResult._oraclizeProof, oraclizeResult._isProofValid).estimateGas({ from: accounts[0] });
+        console.log(" getOraclizeResultByAdmin() Invocation Gas : ", gasEstimate);
+        await instance.calculateWinnersByAdmin(_oraclizeID, oraclizeResult._result,
+            oraclizeResult._oraclizeProof, oraclizeResult._isProofValid)
+            .then(async function (receipt) {
+                console.log("Transaction Receipt : " + receipt);
+                let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
+                let _currentRound = gameData.currentRound;
+                let _roundID = cantorPairing(_gameID, _currentRound);
+                let roundData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
+                console.log("Round winner: ", roundData.winner);
+                if (roundData.winner) {
+                    assert.ok(true);
+                }
+                else {
+                    assert.fail("Error: winner computed  but roundData or oraclizer not set ");
+                }
+
+            })
+
+    });
 
 
 
@@ -430,7 +539,5 @@ contract("Multiprizer", accounts => {
     // revertFundsToPlayers
     // resume all games
 
-
-
-
 });
+

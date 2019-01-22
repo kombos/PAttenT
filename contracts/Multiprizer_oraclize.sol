@@ -1422,13 +1422,6 @@ END ORACLIZE_API
 */
 
 
- 
- contract MultiprizerAbstract {
-    function callback(bytes32 _oraclizeID, string calldata _result, bytes calldata _oraclizeProof, bool _isProofValid) external;
-}
-
-
-
 /**
  * @title Multiprizer_oraclize
  * @dev The Multiprizer contract is the core game.
@@ -1446,6 +1439,7 @@ uint256 gasLimitOraclize;
 uint256 gasPriceOraclize;
 uint256 numBytesOraclize;
 uint256 delayOraclize;
+uint256 priceOraclize;
 string constant dataSourceOraclize = "random";
 
 /** 
@@ -1466,8 +1460,7 @@ uint256 public oraclizeLength;
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
-MultiprizerAbstract private multiprizer;
-address payable multiprizerAddress;
+address payable public multiprizerAddress;
 
 /** 
 *  Constructor call 
@@ -1476,46 +1469,32 @@ address payable multiprizerAddress;
   */
 constructor (address payable _contractAddress) public {
     //# EMIT EVENT LOG - to be done
-    multiprizer = MultiprizerAbstract(_contractAddress);
     multiprizerAddress = _contractAddress;
+    // set proof type as 'ledger'. this needn't be changed further
+    oraclize_setProof(proofType_Ledger);
+    // push a zero-init value to the oraclizeIDs array to help it prevent malicious oraclize executions
+    oraclizeIDs.push("");
 }
+
 
 function updateOraclizePropsByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
     uint256 _numBytesOraclize, uint256 _delayOraclize) external 
     onlyOwners {
 
-    gasLimitOraclize = _gasLimitOraclize;
-    gasPriceOraclize = _gasPriceOraclize;
-    oraclize_setCustomGasPrice(_gasPriceOraclize);
-    oraclize_setProof(proofType_Ledger);
+    if(gasLimitOraclize != _gasLimitOraclize) {
+        gasLimitOraclize = _gasLimitOraclize;
+        if(gasPriceOraclize != _gasPriceOraclize) {
+            gasPriceOraclize = _gasPriceOraclize;
+            oraclize_setCustomGasPrice(_gasPriceOraclize);
+        }
+        priceOraclize = oraclize_getPrice(dataSourceOraclize, gasLimitOraclize);
+    }
     numBytesOraclize = _numBytesOraclize;
     delayOraclize = _delayOraclize;
+    // dataSource is constant to "random"
+    // proof type is fixed to 'ledger' proof
         
     //# EMIT EVENT LOG - to be done
-}
-
-function newRandomDSQuery() external returns (bytes32 _queryId) {
-    if (msg.sender != multiprizerAddress) revert();
-        //check if contract has enough funds to invoke oraclize
-        if(oraclize_getPrice(dataSourceOraclize, gasLimitOraclize) > address(this).balance) {
-            // pause all games until contract funds have been replenished
-            return(_queryId);
-        }
-        _queryId = oraclize_newRandomDSQuery(delayOraclize, numBytesOraclize, gasLimitOraclize);
-}
-
-function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
-    returns (
-        bytes memory _result, 
-        bytes memory _oraclizeProof, 
-        bool _isProofValid
-        ) {
-    // can only be called by the Multiprizer contract
-    if (msg.sender != multiprizerAddress) revert();
-    uint256 resultIndex = oraclizeIDIndexes[_oraclizeID];
-    _result = results[resultIndex];
-    _oraclizeProof = oraclizeProofs[resultIndex];
-    _isProofValid = isProofsValid[resultIndex];
 }
 
 
@@ -1524,22 +1503,59 @@ function getOraclizePropsByAdmin() external view
         uint256 _gasLimitOraclize,
         uint256 _gasPriceOraclize,
         uint256 _numBytesOraclize,
-        uint256 _delayOraclize,
-        string memory _dataSourceOraclize
+        uint256 _delayOraclize, 
+        uint256 _priceOraclize
     ) {
         _gasLimitOraclize = gasLimitOraclize;
         _gasPriceOraclize = gasPriceOraclize;
         _numBytesOraclize = numBytesOraclize;
         _delayOraclize = delayOraclize;
-        _dataSourceOraclize = dataSourceOraclize;
+        _priceOraclize = priceOraclize;
 }
 
+
+function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
+    onlyOwners returns (
+        bytes memory _result, 
+        bytes memory _oraclizeProof, 
+        bool _isProofValid
+        ) {
+    // can only be called by the Multiprizer contract
+    //if (msg.sender != multiprizerAddress) revert();
+    uint256 resultIndex = oraclizeIDIndexes[_oraclizeID];
+    if(resultIndex == 0) {
+        return("","",false);
+    }
+    _result = results[resultIndex];
+    _oraclizeProof = oraclizeProofs[resultIndex];
+    _isProofValid = isProofsValid[resultIndex];
+}
+
+
+function newRandomDSQuery() external returns (bytes32 _queryId) {
+    //if (msg.sender != multiprizerAddress) revert("newrandomdsquery: address is not of multiprizer");
+        //check if contract has enough funds to invoke oraclize
+        if(priceOraclize > address(this).balance) {
+            // pause all games until contract funds have been replenished
+            return(_queryId);
+        }
+        _queryId = oraclize_newRandomDSQuery(delayOraclize, numBytesOraclize, gasLimitOraclize);
+}
+
+
 function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _oraclizeProof) public {
+    // check if the callback was invoked by oraclize
     if (msg.sender != oraclize_cbAddress()) revert();
     bool _isProofValid;
-
-    if (oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof) != 0) {
+    uint256 _proofCode;
+    // if a round has been already decided by Oraclize callback, then continue with next round. 
+    // This will also help to prevent any possible malicious execution by Oraclize itself
+    if(oraclizeIDIndexes[_oraclizeID] != 0) return;
+    _proofCode = oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof);
+    if (_proofCode != 0) {
         _isProofValid = false;
+
+        //# EMIT THE _proofCode value
     }
     else {
         _isProofValid = true;

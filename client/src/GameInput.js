@@ -6,7 +6,7 @@ class GameInput extends React.Component {
     constructor(props, context) {
         super(props);
         this.state = { stackId: null };
-        console.log("___ instide GameStrategy constructor___");
+        console.log(this.props.gameID, ": ___ inside GameStrategy constructor___");
         console.log(context);
         this.context = context;
         this.getTxStatus = this.getTxStatus.bind();

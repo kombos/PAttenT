@@ -213,12 +213,6 @@ library SafeMath {
 
 contract Multiprizer_oraclizeAbstract {
     function newRandomDSQuery() external returns (bytes32 _queryId);
-    function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view 
-    returns (
-        bytes memory _result, 
-        bytes memory _oraclizeProof, 
-        bool _isProofValid
-        );
 }
 
 
@@ -242,6 +236,7 @@ struct Game{
     uint256 megaPrizeEdge;
     uint256 totalValueForGame;
     uint256 totalWinnings;
+    // directPlayTokenGas limit value initially set to upto 8 game iteration check in fallback function + playGame
     uint256 directPlayTokenGas;
     uint256 currentRound;
     bool isGameLocked;
@@ -282,21 +277,6 @@ bool private isGamesPaused;
 uint256 pauseTime;
 uint256 constant DIVISOR_POWER_5 = 100000;
 uint256 constant DIRECTPLAYTOKEN = 1;
-
-
-/** 
-*  Oraclize Variables 
-*  @dev DirectPlay enables a player to place a single token for any of the strategy games   
-*  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
-  */
-/*   
-uint256 gasLimitOraclize;
-uint256 gasPriceOraclize;
-uint256 numBytesOraclize;
-uint256 delayOraclize;
-string constant dataSourceOraclize = "random";
- */
-
 
 /** 
 *  Game Variables 
@@ -527,22 +507,6 @@ function updateMegaPrizeByAdmin(
     //# EMIT EVENT LOG - to be done
 }
 
-/* 
-function updateOraclizeByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
-    uint256 _numBytesOraclize, uint256 _delayOraclize) external 
-    onlyOwners {
-
-    gasLimitOraclize = _gasLimitOraclize;
-    gasPriceOraclize = _gasPriceOraclize;
-    oraclize_setCustomGasPrice(_gasPriceOraclize);
-    oraclize_setProof(proofType_Ledger);
-    numBytesOraclize = _numBytesOraclize;
-    delayOraclize = _delayOraclize;
-        
-    //# EMIT EVENT LOG - to be done
-}
- */
-
  
 function unlockMegaPrizeByAdmin() external 
     onlyOwners {
@@ -632,14 +596,17 @@ function revertFundsToPlayers() public
         pauseAllGamesByAdmin();
 
         uint256 _roundNumber;
+        uint256 _nextRoundNumber;
         uint256 _gameID;
         uint256 _tokenValue;
         uint256 _roundID;
+        uint256 _nextRoundID;
         uint256 _playerAmount;
         address payable _playerAddress;
         // revert all active tokens at play back to the players, for every game. 
         for(uint256 i=0; i<gameStrategiesKeys.length; i++) {
             _roundNumber = gameStrategies[gameStrategiesKeys[i]].currentRound;
+            if(_roundNumber == 0) continue;
             _gameID = gameStrategies[gameStrategiesKeys[i]].gameID;
             _tokenValue = gameStrategies[gameStrategiesKeys[i]].tokenValue;
             _roundID = cantorPairing(_gameID, _roundNumber);
@@ -647,20 +614,31 @@ function revertFundsToPlayers() public
             for(uint256 j=0; j<rounds[_roundID].playerList.length; j++) {
                 _playerAddress = rounds[_roundID].playerList[j];
                 _playerAmount = _tokenValue.mul(rounds[_roundID].playerTokens[_playerAddress]);
-                rounds[_roundID].playerTokens[_playerAddress] = 0;
+                delete rounds[_roundID].playerTokens[_playerAddress];
                 if(_playerAmount == 0) continue;
                 safeSend(_playerAddress, _playerAmount);
                 //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
             }
-
-            rounds[_roundID].totalTokensPurchased = 0;
+            // delete the current round data
+            delete rounds[_roundID].totalTokensPurchased;
             delete rounds[_roundID].playerList;
-            rounds[_roundID].isRoundOpen = false;
+            delete rounds[_roundID].isRoundOpen;
+            // start the next round but keep the game locked
+            _nextRoundNumber = _roundNumber.add(1);
+            gameStrategies[_gameID].currentRound = _nextRoundNumber;
+            _nextRoundID = cantorPairing(_gameID, _nextRoundNumber);
+            rounds[_nextRoundID].gameID = gameStrategies[_gameID].gameID;
+            rounds[_nextRoundID].roundNumber = _nextRoundNumber;
+            rounds[_nextRoundID].totalTokensPurchased = 0;
+            rounds[_nextRoundID].iterationStartTimeMS = now;
+            rounds[_nextRoundID].iterationStartTimeBlock = block.number;
+            rounds[_nextRoundID].isRoundOpen = true;
 
         }
 
 
-        // VERY IMPORTANT TO EMIT EVENT TO PAUSE TIMER AT TIMEKEEPER END!!!
+        // VERY IMPORTANT TO EMIT EVENT to RESET THE TIMEKEEPER'S TIMESET!!!
+
         //# EMIT EVENT LOG1  
         //emit unlockEvent("admin", _gameIDs);
 
@@ -809,7 +787,7 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 continue;
             }
             // set the _needsOraclize flag if in at least one of the games, the number of players is more than 1
-            _needsOraclize = _needsOraclize || ((rounds[_roundID].playerList.length > 1) || (isMegaPrizeMatured && isMegaPrizeEnabled)) ? true : false ;
+            _needsOraclize = ((rounds[_roundID].playerList.length > 1) || (isMegaPrizeMatured && isMegaPrizeEnabled)) ? true : false ;
             if(_needsOraclize) break;
         }
 
@@ -886,78 +864,78 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
 }
 
 
-function calculateWinnersByAdmin(bytes32 _oraclizeID) external onlyOwners {
+function calculateWinnersByAdmin(
+    bytes32 _oraclizeID, 
+    bytes calldata _result, 
+    bytes calldata _oraclizeProof, 
+    bool _isProofValid) external 
+    onlyOwners {
+        uint256 i;
+        uint256 j;
+        uint256 k;
+        uint256 _slabIndex=0;
 
-    uint256 i;
-    uint256 j;
-    uint256 k;
-    uint256 _slabIndex=0;
-
-    (bytes memory _result, bytes memory _oraclizeProof, bool _isProofValid) = 
-        multiprizer_oraclize.getOraclizeResultByAdmin(_oraclizeID);
-    
-    if (!_isProofValid) {
-
-        for(i=0;i < roundsOfOraclizeID[_oraclizeID].length; i++) {
-            pendingRoundsOraclize.push(roundsOfOraclizeID[_oraclizeID][i]);
-        }
-        delete roundsOfOraclizeID[_oraclizeID];
-        //# EMIT EVENT LOG
-        return;
-    }
-    uint256 _oraclizeRandomNumber;
-    address payable[] memory _tokenSlab;
-    uint256[] memory _numTokensSlab;
-    
-    for(i=0;i < pendingRoundsOraclize.length; i++) {
-        roundsOfOraclizeID[_oraclizeID].push(pendingRoundsOraclize[i]);
-    }
-    // remove the pending oraclize rounds since they have been included in the new array _roundsOfOraclizeID
-    delete pendingRoundsOraclize;
-    // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased (or _tokenSlab)
-    _oraclizeRandomNumber = uint256(keccak256(_result));
-    
-    uint256[] storage _roundsOfOraclizeID = roundsOfOraclizeID[_oraclizeID];
-    for(i=0; i < _roundsOfOraclizeID.length; i++) {
-        //_roundID = _roundsOfOraclizeID[i];
-        // if a round has been already decided by Oraclize callback, then continue with next round. 
-        // This will also help to prevent any possible malicious execution by Oraclize itself
-        if(rounds[_roundsOfOraclizeID[i]].oraclizeProof.length != 0) continue;
-        address payable[] storage _playerList = rounds[_roundsOfOraclizeID[i]].playerList;
-        // _tokenSlab will be the array in which we choose a random index provided by Oraclize to pick winner.
-        // _numTokensSlab is the array containing number of tokens purchased by each player of this round.
-        // We will use these two arrays, alongwith playerList to input values in the _tokenSlab in a transposing manner.
-        // This enables a very fine mixing of values before picking winner, and also prevents any outcome prediction.
-        _numTokensSlab = new uint256[](_playerList.length);
-        _tokenSlab = new address payable[](rounds[_roundsOfOraclizeID[i]].totalTokensPurchased);
-        // get the corresponding tokens of each player in the playerList to the array _numTokensSlab
-        for(j=0; j < _playerList.length; j++) {
-            _numTokensSlab[j] = rounds[_roundsOfOraclizeID[i]].playerTokens[_playerList[j]];
-        }
-        // input player address values in the _tokensSlab in a transposing manner. A player address value is input in 
-        //_tokenSlab multiple times if more than one token is bought, providing weighted probabilities of winning.
-        for(k=0; _slabIndex < rounds[_roundsOfOraclizeID[i]].totalTokensPurchased; k++) {
-            
-            if(_numTokensSlab[k.mod(_numTokensSlab.length)] == 0) {
-                continue;
+        if (!_isProofValid) {
+            for(i=0;i < roundsOfOraclizeID[_oraclizeID].length; i++) {
+                pendingRoundsOraclize.push(roundsOfOraclizeID[_oraclizeID][i]);
             }
-            else {
-                _tokenSlab[_slabIndex] = _playerList[k.mod(_playerList.length)];
-                _slabIndex = _slabIndex.add(1);
-                _numTokensSlab[k.mod(_numTokensSlab.length)] = (_numTokensSlab[k.mod(_numTokensSlab.length)]).sub(1);
-            }
+            delete roundsOfOraclizeID[_oraclizeID];
+            //# EMIT EVENT LOG
+            return;
         }
-        // select the winner address using Oraclize provided Provable Random Number
-        rounds[_roundsOfOraclizeID[i]].winner = _tokenSlab[_oraclizeRandomNumber.mod(_tokenSlab.length)];
-        // set the oraclizeProof data into the round data
-        rounds[_roundsOfOraclizeID[i]].oraclizeProof = _oraclizeProof;
-        //# EMIT EVENT LOG
-        delete _numTokensSlab; 
-        delete _tokenSlab;
-    }
+        uint256 _oraclizeRandomNumber;
+        address payable[] memory _tokenSlab;
+        uint256[] memory _numTokensSlab;
+        
+        for(i=0;i < pendingRoundsOraclize.length; i++) {
+            roundsOfOraclizeID[_oraclizeID].push(pendingRoundsOraclize[i]);
+        }
+        // remove the pending oraclize rounds since they have been included in the new array _roundsOfOraclizeID
+        delete pendingRoundsOraclize;
+        // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased (or _tokenSlab)
+        _oraclizeRandomNumber = uint256(keccak256(_result));
+        
+        uint256[] storage _roundsOfOraclizeID = roundsOfOraclizeID[_oraclizeID];
+        for(i=0; i < _roundsOfOraclizeID.length; i++) {
+            //_roundID = _roundsOfOraclizeID[i];
+            // if a round has been already decided by Oraclize callback, then continue with next round. 
+            // This will also help to prevent any possible malicious execution by Oraclize itself
+            if(rounds[_roundsOfOraclizeID[i]].oraclizeProof.length != 0) continue;
+            address payable[] storage _playerList = rounds[_roundsOfOraclizeID[i]].playerList;
+            // _tokenSlab will be the array in which we choose a random index provided by Oraclize to pick winner.
+            // _numTokensSlab is the array containing number of tokens purchased by each player of this round.
+            // We will use these two arrays, alongwith playerList to input values in the _tokenSlab in a transposing manner.
+            // This enables a very fine mixing of values before picking winner, and also prevents any outcome prediction.
+            _numTokensSlab = new uint256[](_playerList.length);
+            _tokenSlab = new address payable[](rounds[_roundsOfOraclizeID[i]].totalTokensPurchased);
+            // get the corresponding tokens of each player in the playerList to the array _numTokensSlab
+            for(j=0; j < _playerList.length; j++) {
+                _numTokensSlab[j] = rounds[_roundsOfOraclizeID[i]].playerTokens[_playerList[j]];
+            }
+            // input player address values in the _tokensSlab in a transposing manner. A player address value is input in 
+            //_tokenSlab multiple times if more than one token is bought, providing weighted probabilities of winning.
+            for(k=0; _slabIndex < rounds[_roundsOfOraclizeID[i]].totalTokensPurchased; k++) {
+                
+                if(_numTokensSlab[k.mod(_numTokensSlab.length)] == 0) {
+                    continue;
+                }
+                else {
+                    _tokenSlab[_slabIndex] = _playerList[k.mod(_playerList.length)];
+                    _slabIndex = _slabIndex.add(1);
+                    _numTokensSlab[k.mod(_numTokensSlab.length)] = (_numTokensSlab[k.mod(_numTokensSlab.length)]).sub(1);
+                }
+            }
+            // select the winner address using Oraclize provided Provable Random Number
+            rounds[_roundsOfOraclizeID[i]].winner = _tokenSlab[_oraclizeRandomNumber.mod(_tokenSlab.length)];
+            // set the oraclizeProof data into the round data
+            rounds[_roundsOfOraclizeID[i]].oraclizeProof = _oraclizeProof;
+            //# EMIT EVENT LOG
+            delete _numTokensSlab; 
+            delete _tokenSlab;
+        }
 
-    // compensate the winner and deduct houseEdge and megaPrizeEdge in a seperate private function
-    compensateWinner(_oraclizeID, _oraclizeRandomNumber);
+        // compensate the winner and deduct houseEdge and megaPrizeEdge in a seperate private function
+        compensateWinner(_oraclizeID, _oraclizeRandomNumber);
 
 }
 
@@ -1285,17 +1263,20 @@ function () external payable {
         // else scan through the tokenValue of every game to find which game the player wants to play
         uint256 _gameID;
         uint256 i;
-        require(!isGamesPaused, " All games are in Pause mode. Wait till admin resumes the game. ");
-        for(i=0;i < gameStrategiesKeys.length; i++) {
-            if(msg.value == gameStrategies[gameStrategiesKeys[i]].tokenValue) {
-                _gameID = gameStrategiesKeys[i];
-                playGame(_gameID, DIRECTPLAYTOKEN);
-                break;
+        // require(!isGamesPaused, " All games are in Pause mode. Wait till admin resumes the game. ");
+        if(msg.sender != owner() && msg.sender != timekeeper()) {
 
+            for(i=0;i < gameStrategiesKeys.length; i++) {
+                if(msg.value == gameStrategies[gameStrategiesKeys[i]].tokenValue) {
+                    _gameID = gameStrategiesKeys[i];
+                    playGame(_gameID, DIRECTPLAYTOKEN);
+                    break;
+
+                }
             }
+            // if the token value doesn't match any of the features, revert the transaction
+            if(i == gameStrategiesKeys.length) { revert(" token value sent doesn't match any of the Direct Play options. ");}
         }
-        // if the token value doesn't match any of the features, revert the transaction
-        if(i == gameStrategiesKeys.length) { revert(" token value sent doesn't match any of the Direct Play options. ");}
     
 }
 
@@ -1314,7 +1295,8 @@ function ownerKill() external
      /* after revert, an event has to be emitted which is received by the timekeeper bot, 
      which then resets all the game times and orders the time set. */
 //# DONE:: create a list of oraclizeID in oraclize contract and change the __callback function
-//# in timekeeping bot, first send this transaction, then send completeRoundsByAdmin()    
+//# in timekeeping bot, first send this transaction, then send completeRoundsByAdmin() 
+//# SOMETHING WRONG WITH MEGAPRIZE LATE LOCK AND ENABLED LOGIC   
 
 
 }

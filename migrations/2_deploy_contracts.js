@@ -74,6 +74,7 @@ module.exports = function(deployer, network, accounts) {
 
 
     if(network == "ganache") {
+        console.log("deploy Multiprizer ...");
         deployer.deploy(Multiprizer, {gas:10000000})
             .then(function(instance) {
                 multiprizerInstance = instance;
@@ -90,11 +91,23 @@ module.exports = function(deployer, network, accounts) {
                 console.log("deploy MultiprizerOraclize ....... ");
                 return deployer.deploy(MultiprizerOraclize, Multiprizer.address, {from:accounts[0], gas:10000000});
             })
-            // set deployed address of  Multiprizer_oraclize in Multiprizer
-            .then(function(instance) {
-                multiprizerOraclizeInstance = instance;
+            // update multiprizer_oraclize props
+            .then(function(oraclize_instance) {
+                multiprizerOraclizeInstance = oraclize_instance;
+                let _gasLimitOraclize = 900000;
+                let _gasPriceOraclize = 2e10;
+                let _numBytesOraclize = 7;
+                let _delayOraclize = 0;
+                console.log("Update Oraclize props .... ");
+                return multiprizerOraclizeInstance.updateOraclizePropsByAdmin(_gasLimitOraclize, _gasPriceOraclize,
+                    _numBytesOraclize, _delayOraclize, {from:accounts[0]});
+            })
+            // set deployed address of Multiprizer_oraclize in Multiprizer
+            .then(function(receipt) {
                 console.log("Set Oraclize by admin .... ");
-                return multiprizerInstance.setOraclizeByAdmin(MultiprizerOraclize.address, {from:accounts[0]});
+                console.log("Multiprizer.address", multiprizerInstance.address);
+                console.log("Oraclize address: ", multiprizerOraclizeInstance.address);
+                return multiprizerInstance.setOraclizeByAdmin(multiprizerOraclizeInstance.address, {from:accounts[0]});
             })
             // resume all games
             .then(function(receipt) {

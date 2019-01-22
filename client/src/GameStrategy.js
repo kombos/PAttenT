@@ -7,14 +7,13 @@ class GameStrategy extends Component {
     constructor(props, context) {
         super(props);
         this.state = { dataKey: null };
-        console.log("___ instide GameStrategy constructor___");
-        console.log(context);
+        console.log(this.props.gameID, ": ___ inside GameStrategy constructor___");
         this.context = context;
     }
 
     componentDidMount() {
+        console.log(this.props.gameID, " $$$$$ INSIDE COMPONENT DID MOUNT $$$$$");
         const multiprizer = this.context.drizzle.contracts.Multiprizer;
-
         // get and save the key for the variable we are interested in
         const dataKey = multiprizer.methods["gameStrategies"].cacheCall(this.props.gameID);
         console.log("datakey value is:" + dataKey);
@@ -23,20 +22,21 @@ class GameStrategy extends Component {
 
     render() {
 
-        console.log("!!!!!!!!! Context inside GameStrategy:  this.context is : ");
+        /* console.log("!!!!!!!!! Context inside GameStrategy:  this.context is : ");
         console.log(this.context);
+        console.log("this.state.datakey : ", this.props.dataKey); */
 
         const initialized = this.context.initialized;
-        console.log("initialized value: ");
-        console.log(initialized);
+        /* console.log("initialized value: ");
+        console.log(initialized); */
 
         if (!initialized) {
             return "Loading...";
         }
 
         const { Multiprizer } = this.context.drizzleState.contracts;
-        console.log("Multiprizer contract initialized? : ");
-        console.log(Multiprizer.initialized);
+        console.log(this.props.gameID, ": Multiprizer contract initialized? : ");
+        console.log(this.props.gameID, " : ", Multiprizer.initialized);
         const _gameObj = Multiprizer.gameStrategies[this.state.dataKey];
 
         const gameID = _gameObj && _gameObj.value["gameID"];

@@ -1,3 +1,4 @@
-info.txt
-build/contracts
-client/src/contracts
+/info.txt
+/build
+/client/src/contracts
+/node_modules

@@ -12,10 +12,13 @@ export default () => (
             }
 
             console.log("value of initialized: ");
-            console.log(initialized);
-
+            //console.log(initialized);
+            {/*  <DrizzleApp /> */}
             return (
-                <DrizzleApp />);
+                <div><p>What's good?</p></div>
+                
+               
+            );
         }}
     </DrizzleContext.Consumer>
 )
