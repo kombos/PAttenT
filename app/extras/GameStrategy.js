@@ -1,8 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component, PureComponent } from 'react'
 import { DrizzleContext } from "drizzle-react";
-import GameInput from "./GameInput";
+import GameInput from "../GameInput";
 
-class GameStrategy extends Component {
+
+class GameStrategy extends PureComponent {
     static contextType = DrizzleContext.Consumer;
     constructor(props, context) {
         super(props);
@@ -20,24 +21,37 @@ class GameStrategy extends Component {
         this.setState({ dataKey });
     }
 
+/* 
+    componentDidUpdate() {
+        console.log("# GameStrategy: INSIDE COMPONENTDIDUPDATE : ");
+        console.log("# _gameObj value now is : ", this._gameObj);
+        if (this._gameObj == null) {
+            console.log("null value verified");
+            //this.forceUpdate();
+            let _dataKey = this.state.dataKey;
+            this.setState({ _dataKey });
+        }
+    }
+     */
+
     render() {
 
-        /* console.log("!!!!!!!!! Context inside GameStrategy:  this.context is : ");
-        console.log(this.context);
-        console.log("this.state.datakey : ", this.props.dataKey); */
-
+        console.log(" inside gamestrategy render: ")
         const initialized = this.context.initialized;
-        /* console.log("initialized value: ");
-        console.log(initialized); */
 
         if (!initialized) {
             return "Loading...";
         }
 
-        const { Multiprizer } = this.context.drizzleState.contracts;
-        console.log(this.props.gameID, ": Multiprizer contract initialized? : ");
-        console.log(this.props.gameID, " : ", Multiprizer.initialized);
-        const _gameObj = Multiprizer.gameStrategies[this.state.dataKey];
+        const contractState = this.props.contractState;
+        console.log("contractState: ", contractState);
+        const _gameID = this.props.gameID;
+        console.log("# this.props.gameID : ", _gameID);
+
+        console.log("datakey inside GameStrategy is : ",  this.state.dataKey);
+        const _gameObj = contractState.gameStrategies[this.state.dataKey];
+        console.log("gameobj inside GameStrategy is : ",  _gameObj && _gameObj);
+        console.log(" is gameobj null ? ", (_gameObj == null));
 
         const gameID = _gameObj && _gameObj.value["gameID"];
         const maxTokens = _gameObj && _gameObj.value["maxTokens"];
@@ -49,16 +63,10 @@ class GameStrategy extends Component {
         const megaPrizeEdge = _gameObj && _gameObj.value["megaPrizeEdge"];
         const totalValueForGame = _gameObj && _gameObj.value["totalValueForGame"];
         const totalWinnings = _gameObj && _gameObj.value["totalWinnings"];
-        const directPlayTokenValue = _gameObj && _gameObj.value["directPlayTokenValue"];
+        const directPlayTokenGas = _gameObj && _gameObj.value["directPlayTokenGas"];
         const currentRound = _gameObj && _gameObj.value["currentRound"];
         const isGameLocked = _gameObj && (_gameObj.value["isGameLocked"] ? "true" : "false");
         const isGameLateLocked = _gameObj && (_gameObj.value["isGameLateLocked"] ? "true" : "false");
-
-        /*         console.log("@@@@@@@@ props inside DrizzleApp:  this.props is : ");
-                console.log(this.context);
-                console.log("____ gameObj value ______");
-                console.log(_gameObj);
-         */
 
         return (
             <div className="col-sm-3" >
@@ -73,14 +81,15 @@ class GameStrategy extends Component {
                     <li> {megaPrizeEdge} </li>
                     <li> {totalValueForGame} </li>
                     <li> {totalWinnings} </li>
-                    <li> {directPlayTokenValue} </li>
+                    <li> {directPlayTokenGas} </li>
                     <li> {currentRound} </li>
                     <li> {isGameLocked} </li>
                     <li> {isGameLateLocked} </li>
                 </ul>
-                <div className="GameInput"><GameInput gameID={this.props.gameID} gameStrategy={_gameObj} /></div>
+                <div className="GameInput"><GameInput gameID={_gameID} gameData={_gameObj} /></div>
             </div>
         );
+
     }
 
 }

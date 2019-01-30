@@ -16,7 +16,7 @@ module.exports = function(deployer, network, accounts) {
         _gameProperties[8] : uint256 currentRound,
         _gameProperties[9] : uint256 totalValueForGame,
         _gameProperties[10] : uint256 totalWinnings,
-        _gameProperties[11] : uint256 directPlayTokenValue
+        _gameProperties[11] : uint256 directPlayTokenGas
 */
 
     var _gameProperties = [

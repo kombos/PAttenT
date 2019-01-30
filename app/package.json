@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.9.0",
+    "@material-ui/icons": "^3.0.2",
+    "@material-ui/styles": "^3.0.0-alpha.8",
     "bignumber.js": "^8.0.2",
     "drizzle": "^1.2.4",
     "drizzle-react": "^1.2.0",

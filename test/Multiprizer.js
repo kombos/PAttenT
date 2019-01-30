@@ -15,8 +15,9 @@ contract("Multiprizer_oraclize", accounts => {
         let contract = await Multiprizer_oraclize.deployed();
         
         console.log("oraclize address: ",contract.address);
-        contract.multiprizerAddress().then(function(maddress) {console.log("multiprizer address in oraclize: ", maddress);})
-        
+        let mAddress = await contract.multiprizerAddress({from:accounts[0]});
+        console.log("multiprizer address in oraclize: ", mAddress);
+
         oraclize_instance = contract;
         let owner = await oraclize_instance.owner();
         console.log("owner of multiprizer_oraclize: ", owner);

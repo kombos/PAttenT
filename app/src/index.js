@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 import { Drizzle, generateStore } from "drizzle";
 import { DrizzleContext } from "drizzle-react";
 import './index.css';
-import App from './App';
+import App from './Components/App';
 //import * as serviceWorker from './serviceWorker';
 import drizzleOptions from './drizzleOptions';
+console.log("inside index.js");
 
 const drizzleStore = generateStore(drizzleOptions);
 const drizzle = new Drizzle(drizzleOptions, drizzleStore);

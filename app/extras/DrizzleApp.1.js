@@ -1,4 +1,5 @@
-import React from "react";
+import React from 'react';
+import { Component, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
@@ -19,7 +20,7 @@ const styles = theme => ({
 
 
 
-class DrizzleApp extends React.Component {
+class DrizzleApp extends PureComponent {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
@@ -62,16 +63,15 @@ class DrizzleApp extends React.Component {
         console.log("____ gameObj value ______");
         console.log(_gameObj);
 
-        const gameIDsJSX = _gameObj && (_gameIDsArray.map((gameID) =>
-            {
+        const gameIDsJSX = _gameObj && (_gameIDsArray.map((gameID) => {
             return (
-            <Grid item xs={12} sm={6} md={3} lg={3}>
-                <Paper className={classes.paper}>
-                    <GameStrategy key={gameID} gameID={gameID} dataKey={this.state.datakey} />
-                </Paper>
-            </Grid>
+                <Grid item xs={12} sm={6} md={3} lg={3}>
+                    <Paper className={classes.paper}>
+                        <GameStrategy key={gameID} gameID={gameID} dataKey={this.state.datakey} />
+                    </Paper>
+                </Grid>
             );
-            }
+        }
         ))
 
         return (
