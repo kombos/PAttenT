@@ -6,15 +6,26 @@ import './index.css';
 import App from './Components/App';
 //import * as serviceWorker from './serviceWorker';
 import drizzleOptions from './drizzleOptions';
+import { createMuiTheme } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/styles";
+
 console.log("inside index.js");
 
 const drizzleStore = generateStore(drizzleOptions);
 const drizzle = new Drizzle(drizzleOptions, drizzleStore);
+const theme = createMuiTheme({
+    typography: { useNextVariants: true }
+});
 
 ReactDOM.render(
-    (<DrizzleContext.Provider drizzle={drizzle} >
-        <App />
-    </DrizzleContext.Provider>), document.getElementById('root'));
+    (
+        <ThemeProvider theme={theme}>
+            <DrizzleContext.Provider drizzle={drizzle} >
+                <App />
+            </DrizzleContext.Provider>
+        </ThemeProvider>
+
+    ), document.getElementById('root'));
 
 
 // If you want your app to work offline and load faster, you can change

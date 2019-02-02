@@ -247,7 +247,7 @@ struct Round{
     uint256 gameID;
     uint256 roundNumber;
     uint256 totalTokensPurchased;
-    uint256 iterationStartTimeMS;
+    uint256 iterationStartTimeSecs;
     uint256 iterationStartTimeBlock;
     mapping (address => uint256) playerTokens;
     address payable[] playerList;
@@ -274,7 +274,8 @@ bool public isDirectPlayEnabled;
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
 bool private isGamesPaused;
-uint256 pauseTime;
+uint256 pauseTimeSecs;
+uint256 pauseTimeBlock;
 uint256 constant DIVISOR_POWER_5 = 100000;
 uint256 constant DIRECTPLAYTOKEN = 1;
 
@@ -565,7 +566,8 @@ function pauseAllGamesByAdmin() public
 
         }
 
-        pauseTime = now;
+        pauseTimeSecs = now;
+        pauseTimeBlock = block.number;
 
         // VERY IMPORTANT TO EMIT EVENT TO PAUSE TIMER AT TIMEKEEPER END!!!
         //# EMIT EVENT LOG1  
@@ -577,8 +579,17 @@ function resumeAllGamesByAdmin() public
     onlyOwners {
         // All games are instantly resumed from the exact same point when it was paused. The remaining time for the current round is 
         // also saved so no disruption to the round occurs. 
+        uint256 _currentRound;
+        uint256 _gameID;
+        uint256 _currentRoundID;
         isGamesPaused = false;
         for(uint256 i=0; i<gameStrategiesKeys.length; i++) {
+            _gameID = gameStrategies[gameStrategiesKeys[i]].gameID;
+            _currentRound = gameStrategies[gameStrategiesKeys[i]].currentRound;
+            if(_currentRound == 0) continue;
+            _currentRoundID = cantorPairing(_gameID, _currentRound);
+            rounds[_currentRoundID].iterationStartTimeSecs = rounds[_currentRoundID].iterationStartTimeSecs.add(now.sub(pauseTimeSecs));
+            rounds[_currentRoundID].iterationStartTimeBlock = rounds[_currentRoundID].iterationStartTimeBlock.add((block.number).sub(pauseTimeBlock));
             gameStrategies[gameStrategiesKeys[i]].isGameLocked = false;
             gameStrategies[gameStrategiesKeys[i]].isGameLateLocked = false;
 
@@ -590,7 +601,7 @@ function resumeAllGamesByAdmin() public
 
 }
 
-function revertFundsToPlayers() public 
+function revertFundsToPlayers(uint256[] memory _gameIDs) public 
     onlyOwner {
         // Pause all games if not already done. 
         pauseAllGamesByAdmin();
@@ -604,11 +615,11 @@ function revertFundsToPlayers() public
         uint256 _playerAmount;
         address payable _playerAddress;
         // revert all active tokens at play back to the players, for every game. 
-        for(uint256 i=0; i<gameStrategiesKeys.length; i++) {
-            _roundNumber = gameStrategies[gameStrategiesKeys[i]].currentRound;
+        for(uint256 i=0; i<_gameIDs.length; i++) {
+            _roundNumber = gameStrategies[_gameIDs[i]].currentRound;
             if(_roundNumber == 0) continue;
-            _gameID = gameStrategies[gameStrategiesKeys[i]].gameID;
-            _tokenValue = gameStrategies[gameStrategiesKeys[i]].tokenValue;
+            _gameID = gameStrategies[_gameIDs[i]].gameID;
+            _tokenValue = gameStrategies[_gameIDs[i]].tokenValue;
             _roundID = cantorPairing(_gameID, _roundNumber);
 
             for(uint256 j=0; j<rounds[_roundID].playerList.length; j++) {
@@ -616,7 +627,12 @@ function revertFundsToPlayers() public
                 _playerAmount = _tokenValue.mul(rounds[_roundID].playerTokens[_playerAddress]);
                 delete rounds[_roundID].playerTokens[_playerAddress];
                 if(_playerAmount == 0) continue;
-                safeSend(_playerAddress, _playerAmount);
+
+                if(playerWithdrawals[_playerAddress] == 0) {
+                    playerWithdrawalsKeys.push(_playerAddress);
+                }
+                playerWithdrawals[_playerAddress] = (playerWithdrawals[_playerAddress]).add(_playerAmount);
+
                 //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
             }
             // delete the current round data
@@ -630,7 +646,7 @@ function revertFundsToPlayers() public
             rounds[_nextRoundID].gameID = gameStrategies[_gameID].gameID;
             rounds[_nextRoundID].roundNumber = _nextRoundNumber;
             rounds[_nextRoundID].totalTokensPurchased = 0;
-            rounds[_nextRoundID].iterationStartTimeMS = now;
+            rounds[_nextRoundID].iterationStartTimeSecs = now;
             rounds[_nextRoundID].iterationStartTimeBlock = block.number;
             rounds[_nextRoundID].isRoundOpen = true;
 
@@ -849,7 +865,7 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 rounds[_nextRoundID].gameID = gameStrategies[_gameIDs[i]].gameID;
                 rounds[_nextRoundID].roundNumber = _nextRoundNumber;
                 rounds[_nextRoundID].totalTokensPurchased = 0;
-                rounds[_nextRoundID].iterationStartTimeMS = now;
+                rounds[_nextRoundID].iterationStartTimeSecs = now;
                 rounds[_nextRoundID].iterationStartTimeBlock = block.number;
                 rounds[_nextRoundID].isRoundOpen = true;
 
@@ -1051,7 +1067,7 @@ function viewMegaPrizeInfo() external view
 function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view  
     returns(
         uint256 _totalTokensPurchased,
-        uint256 _iterationStartTimeMS,
+        uint256 _iterationStartTimeSecs,
         uint256 _iterationStartTimeBlock,
         address payable[] memory _playerList,
         uint256[] memory _playerTokensList,
@@ -1070,7 +1086,7 @@ function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view
         /* require(rounds[roundID].isRoundOpen != true, " Round number chosen is stil open. "); */
 
         _totalTokensPurchased = rounds[roundID].totalTokensPurchased;
-        _iterationStartTimeMS = rounds[roundID].iterationStartTimeMS;
+        _iterationStartTimeSecs = rounds[roundID].iterationStartTimeSecs;
         _iterationStartTimeBlock = rounds[roundID].iterationStartTimeBlock;
         _playerList = rounds[roundID].playerList;
         _playerTokensList = new uint256[](_playerList.length);
@@ -1284,7 +1300,24 @@ function () external payable {
 // self destruct contract after reverting all pending games of players and sending back funds
 function ownerKill() external 
     onlyOwner{
-        revertFundsToPlayers();
+
+        uint256 _currentRound;
+        uint256 _gameID;
+        uint256 _currentRoundID;
+        // ownerKill() can only happen once all game rounds have completed and games locked
+        for(uint256 i=0; i<gameStrategiesKeys.length; i++) {
+            _gameID = gameStrategies[gameStrategiesKeys[i]].gameID;
+            _currentRound = gameStrategies[gameStrategiesKeys[i]].currentRound;
+            if(_currentRound == 0) continue;
+            _currentRoundID = cantorPairing(_gameID, _currentRound);
+            if(
+                gameStrategies[gameStrategiesKeys[i]].isGameLocked == false || 
+                gameStrategies[gameStrategiesKeys[i]].isGameLateLocked == false ||
+                rounds[_currentRoundID].isRoundOpen
+            ) revert("Games Open");
+
+        }
+
         selfdestruct(owner());
         
 }

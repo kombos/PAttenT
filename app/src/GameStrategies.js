@@ -10,6 +10,9 @@ import { DrizzleContext } from 'drizzle-react';
 const styles = theme => ({
     root: {
         flexGrow: 1,
+        padding: theme.spacing.unit * 2,
+        textAlign: 'center',
+        color: theme.palette.text.secondary
     },
     paper: {
         padding: theme.spacing.unit * 2,
@@ -40,7 +43,7 @@ class GameStrategies extends Component {
     }
 
     render() {
-        console.log("# DrizzleApp: INSIDE RENDER : ", initialized);
+        console.log("# DrizzleApp: INSIDE RENDER : ");
         const { classes } = this.props;
         const { initialized } = this.props;
         console.log("# initialized value: ", initialized);
@@ -65,10 +68,8 @@ class GameStrategies extends Component {
         const gameIDsJSX = gameIDs && (_gameIDsArray.map((gameID, index) => {
             console.log("GameID from DrizzleApp : ", gameID);
             return (
-                <Grid item xs={12} sm={6} md={3} lg={3}>
-                    <Paper className={classes.paper}>
+                <Grid item xs={12} sm={6} md={3} lg={3} >
                         <GameContainer key={gameID} gameID={gameID} drizzleState={drizzleState} />
-                    </Paper>
                 </Grid>
             );
         }
