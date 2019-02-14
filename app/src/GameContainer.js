@@ -5,6 +5,8 @@ import GameInput from "./GameInput";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Timer from "./Components/Timer";
+import { Route, Link } from "react-router-dom";
+
 
 const styles = theme => ({
     root: {
@@ -13,7 +15,8 @@ const styles = theme => ({
         //backgroundColor: "blue",
         //flexBasis:
         flexDirection: "column",
-        padding: theme.spacing.unit * 1
+        padding: theme.spacing.unit * 0.5,
+        //margin: "auto"
     },
     paper: {
         flexGrow: 1,
@@ -27,14 +30,13 @@ const styles = theme => ({
     },
     components: {
         flexGrow: 1,
+        //margin:"0.4rem",
+        //marginTop:"0rem",
+        //height:"100%",
+        //height:"auto",
         backgroundImage: `url("https://www.justpushstart.com/wp-content/uploads/2011/10/Batman_arkham_city_logo.jpg")`
     },
-    timer: {
-        backgroundColor: "rgba(12,54,76,0.7)",
-        fontFamily: "Orbitron",
-        color: "#17d4fe",
-        fontSize: 8
-    }
+
 });
 
 
@@ -89,8 +91,6 @@ class GameContainer extends React.Component {
         const roundKey = this.state.roundKey;
         const multiprizer = this.props.drizzleState.contracts.Multiprizer;
 
-
-
         console.log("# multiprizer: ", multiprizer);
         console.log("# gameKey inside GameStrategy is : ", gameKey);
 
@@ -112,6 +112,7 @@ class GameContainer extends React.Component {
         let tokenData = null;
         let playerList = null;
         let playerTokensList = null;
+        let isGameLocked = null;
         let playerTokens = 0;
         let defaultAccount = this.context.drizzleState.accounts[0];
         console.log("default account: ", defaultAccount);
@@ -120,7 +121,7 @@ class GameContainer extends React.Component {
             this.currentRound = gameData.value["currentRound"];
             maxTokens = gameData.value["maxTokens"];
             maxTokensPerPlayer = gameData.value["maxTokensPerPlayer"];
-            const isGameLocked = (gameData.value["isGameLocked"] ? "true" : "false");
+            isGameLocked = (gameData.value["isGameLocked"] ? "true" : "false");
             console.log("is game locked? : ", isGameLocked);
 
 
@@ -176,14 +177,16 @@ class GameContainer extends React.Component {
 
         return (
             <div className={classes.root}>
-                <div className={classes.picture}>
-                    <p>Game ID:  {this.gameID} | Round: {this.currentRound} </p>
+                <div className={classes.components}>
+                    <p>Game ID:  {this.gameID} | Round: {this.currentRound} | Locked: {isGameLocked && isGameLocked} </p>
                 </div>
-                <div className={classes.timer}>
+                <div className={classes.components}>
                     {timer}
                 </div>
                 <div className={classes.components}>
-                    {indicator}
+                    {/* {indicator} */}
+                    <Link to={`/gameDetails/${this.gameID}`}>{indicator}</Link>
+
                 </div>
                 <div className={classes.components}>
                     {tokenData}

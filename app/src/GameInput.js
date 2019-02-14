@@ -13,17 +13,16 @@ const styles = theme => ({
         //height: 500
         //backgroundColor: "blue",
         //flexBasis:
-        flexDirection: "column",
         padding: theme.spacing.unit * 1
     },
-    component: {
+    input: {
         flexGrow: 1,
         //backgroundColor: "blue",
-        // padding: theme.spacing.unit * 2,
+        padding: theme.spacing.unit * 0.5,
         //textAlign: "center",
         //fontSize:16,
-        margin:"auto",
-        height:"100%"
+        margin: "auto",
+        //height: "100%"
     },
     textField: {
         flexGrow: 1,
@@ -31,10 +30,18 @@ const styles = theme => ({
         // padding: theme.spacing.unit * 2,
         //textAlign: "center",
         //fontSize:16,
-        width: "45%",
+        width: "70%",
         //color: theme.palette.text.primary
-        height:"100%",
-        //margin:"auto"
+        //height: "100%",
+        margin:"0.5rem"
+    },
+    textFieldStyles: {
+        padding: theme.spacing.unit * 1,
+        fontSize: "0.9rem"
+    },
+    textLabelStyles: {
+        //padding: theme.spacing.unit * 0.8,
+        fontSize: "0.8rem"
     },
     button: {
         flexGrow: 1,
@@ -42,15 +49,17 @@ const styles = theme => ({
         // padding: theme.spacing.unit * 2,
         //textAlign: "center",
         //fontSize:16,
-        width: "30%",
-        height:"100%",
-        margin:"auto",
+        width: "100%",
+        //height: "100%",
+        margin: "auto",
+        //padding: theme.spacing.unit * 0.5,
+        fontSize: "0.8rem"
         //padding:"20px"
         //color: theme.palette.text.secondary
     }
 });
 
-class GameInput extends React.Component {
+class GameInput extends React.PureComponent {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
@@ -123,7 +132,7 @@ class GameInput extends React.Component {
         console.log("inside handle submit: : : ");
 
         if (this.state.numTokens == "" || isNaN(this.state.numTokens)) {
-            console.log("is NAN ",this.state.numTokens);
+            console.log("is NAN ", this.state.numTokens);
             return;
         }
 
@@ -193,7 +202,7 @@ class GameInput extends React.Component {
         ) ? true : false;
 
         return (
-            <div className={classes.component}>
+            <div className={classes.input}>
                 <form onSubmit={this.handleSubmit}>
                     {/* Tokens:
                      <input type="text" ref={this.valueRef} /> */}
@@ -208,7 +217,6 @@ class GameInput extends React.Component {
                         className={classes.input}
                     />
  */}
-
                     <TextField
                         id="standard-number"
                         label="Buy Tokens"
@@ -216,13 +224,21 @@ class GameInput extends React.Component {
                         onChange={this.handleChange}
                         onFocus={this.handleFocus}
                         type="number"
+                        InputProps={{
+                            classes: {
+                                input: classes.textFieldStyles,
+                            },
+                        }}
                         inputProps={{
                             min: this.MINTOKENS,
                             max: this.remainingTokens,
-                            step: "1"
+                            step: "1",
                         }}
                         InputLabelProps={{
                             shrink: true,
+                            classes: {
+                                root: classes.textLabelStyles,
+                            }
                         }}
                         placeholder={"(max: " + this.remainingTokens + ")"}
                         margin="normal"
@@ -246,9 +262,6 @@ class GameInput extends React.Component {
                             (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + " ethers")}
                     </Button>
                 </form>
-
-
-
                 <div>{this.getTxStatus()}</div>
             </div>
         );

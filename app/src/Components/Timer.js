@@ -3,9 +3,13 @@ import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
 const styles = theme => ({
-    root: {
+    timer: {
         //height: 500
         //flexBasis:
+        backgroundColor: "rgba(12,54,76,0.7)",
+        fontFamily: "Orbitron",
+        color: "#17d4fe",
+        fontSize: "1rem"
     },
     paper: {
         //height:700,
@@ -97,7 +101,10 @@ class Timer extends React.Component {
         const remTimeStr = this.secToString(this.state.remainingTime);
         //console.log("remaining Time: ", remTimeStr);
 
-        return <h1> {remTimeStr} </h1>;
+        return (
+            <div className={classes.timer}>
+                <h4> {remTimeStr} </h4>
+            </div>);
     }
 }
 

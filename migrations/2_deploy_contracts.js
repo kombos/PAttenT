@@ -33,6 +33,34 @@ module.exports = function(deployer, network, accounts) {
         0,
         web3.utils.toHex(1e16)
     ];
+    var _gameProperties2 = [
+        103,
+        200,
+        web3.utils.toHex(1e16),
+        (60*60*24*2),
+        (4*60*24*2),
+        5,
+        10000,
+        1000,
+        0,
+        0,
+        0,
+        web3.utils.toHex(1e16)
+    ];
+    var _gameProperties3 = [
+        104,
+        200,
+        web3.utils.toHex(1e16),
+        (60*60*24*2),
+        (4*60*24*2),
+        5,
+        10000,
+        1000,
+        0,
+        0,
+        0,
+        web3.utils.toHex(1e16)
+    ];
 
     var multiprizerInstance, multiprizerOraclizeInstance;
     
@@ -43,35 +71,6 @@ module.exports = function(deployer, network, accounts) {
         });
 
     }
-
-/* 
-    if(network == "ganache") {
-        console.log("deploy Multiprizer....... ");
-        deployer.deploy(Multiprizer, {gas:10000000})
-            .then(function(instance) {
-                multiprizerInstance = instance;
-                console.log("nominate timekeeper....... ");
-                return multiprizerInstance.transferTimekeeping(accounts[1], {from:accounts[0]});
-            })
-            // add a new game
-            .then(function(receipt) {
-                console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties, {from:accounts[0]});
-            })
-            // deploy Multiprizer_oraclize
-            .then(function(receipt) {
-                console.log("deploy MultiprizerOraclize ....... ");
-                return deployer.deploy(MultiprizerOraclize, Multiprizer.address, {from:accounts[0], gas:10000000});
-            })
-            .catch(function(e){
-                console.log(e);
-            });
-
-
-    }
- */
-
-
 
     if(network == "ganache") {
         console.log("deploy Multiprizer ...");
@@ -85,6 +84,16 @@ module.exports = function(deployer, network, accounts) {
             .then(function(receipt) {
                 console.log("Add Game by admin ......  ");
                 return multiprizerInstance.addGameByAdmin(_gameProperties, {from:accounts[0]});
+            })
+            // add a new game
+            .then(function(receipt) {
+                console.log("Add Game by admin ......  ");
+                return multiprizerInstance.addGameByAdmin(_gameProperties2, {from:accounts[0]});
+            })
+            // add a new game
+            .then(function(receipt) {
+                console.log("Add Game by admin ......  ");
+                return multiprizerInstance.addGameByAdmin(_gameProperties3, {from:accounts[0]});
             })
             // deploy Multiprizer_oraclize
             .then(function(receipt) {
@@ -109,10 +118,15 @@ module.exports = function(deployer, network, accounts) {
                 console.log("Oraclize address: ", multiprizerOraclizeInstance.address);
                 return multiprizerInstance.setOraclizeByAdmin(multiprizerOraclizeInstance.address, {from:accounts[0]});
             })
-            // resume all games
+            // unlock games
             .then(function(receipt) {
-                console.log("resume all games ..... ");
-                return multiprizerInstance.resumeAllGamesByAdmin({from:accounts[0]});
+                console.log("unlock game ..... ");
+                return multiprizerInstance.unlockGamesByAdmin([102,103,104],{from:accounts[0]});
+            })
+            // complete rounds
+            .then(function(receipt) {
+                console.log("complete round for current game ..... ");
+                return multiprizerInstance.completeRoundsByAdmin([102,103,104],{from:accounts[0]});
             })
             .catch(function(e){
                 console.log(e);

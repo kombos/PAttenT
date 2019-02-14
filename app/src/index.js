@@ -12,10 +12,13 @@ import { ThemeProvider } from "@material-ui/styles";
 console.log("inside index.js");
 
 const drizzleStore = generateStore(drizzleOptions);
+console.log("drizzlestore: ", drizzleStore);
+console.log("drizzleoptions: ", drizzleOptions);
 const drizzle = new Drizzle(drizzleOptions, drizzleStore);
 const theme = createMuiTheme({
     typography: { useNextVariants: true }
 });
+console.log("drizzle: ", drizzle);
 
 ReactDOM.render(
     (
