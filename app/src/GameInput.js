@@ -33,7 +33,7 @@ const styles = theme => ({
         width: "70%",
         //color: theme.palette.text.primary
         //height: "100%",
-        margin:"0.5rem"
+        margin: "0.5rem"
     },
     textFieldStyles: {
         padding: theme.spacing.unit * 1,
@@ -178,9 +178,16 @@ class GameInput extends React.PureComponent {
         // if transaction hash does not exist, don't display anything
         if (!txHash) return null;
 
-        // otherwise, return the transaction status
-        console.log("value of txHash status: ", transactions[txHash].status);
-        return `Transaction status: ${transactions[txHash].status}`;
+        if (transactions[txHash]) {
+            // otherwise, return the transaction status
+            console.log("value of txHash status: ", transactions[txHash].status);
+            return `Transaction status: ${transactions[txHash].status}`;
+        }
+        else {
+            return null;
+        }
+
+
 
     };
 

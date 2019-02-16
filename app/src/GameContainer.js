@@ -186,7 +186,6 @@ class GameContainer extends React.Component {
                 <div className={classes.components}>
                     {/* {indicator} */}
                     <Link to={`/gameDetails/${this.gameID}`}>{indicator}</Link>
-
                 </div>
                 <div className={classes.components}>
                     {tokenData}

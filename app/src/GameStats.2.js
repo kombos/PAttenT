@@ -33,7 +33,7 @@ const styles = theme => ({
 });
 
 class MuiVirtualizedTable extends React.PureComponent {
-
+    
     getRowClassName = ({ index }) => {
         const { classes, rowClassName, onRowClick } = this.props;
 
@@ -83,8 +83,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                 })}
                 variant="body"
                 style={{ height: rowHeight }}
-                //align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
-                align={'left'}
+                align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
             >
                 {cellData}
             </TableCell>
@@ -117,8 +116,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                 className={classNames(classes.tableCell, classes.flexContainer, classes.noClick)}
                 variant="head"
                 style={{ height: headerHeight }}
-                //align={columns[columnIndex].numeric || false ? 'right' : 'left'}
-                align={'left'}
+                align={columns[columnIndex].numeric || false ? 'right' : 'left'}
             >
                 {inner}
             </TableCell>
@@ -191,7 +189,7 @@ MuiVirtualizedTable.propTypes = {
     rowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
     sort: PropTypes.func,
     sortBy: PropTypes.string,
-
+    
 };
 
 MuiVirtualizedTable.defaultProps = {
@@ -234,32 +232,30 @@ function GameStats(props) {
     console.log("roundata inside gamestats: ", roundData);
     const playerList = roundData.value["_playerList"];
     const playerTokensList = roundData.value["_playerTokensList"];
-    var playersData = [];
+    const playersData = [];
     for (let i = 0; i < playerList.length; i += 1) {
         playersData.push({
-            serial: i + 1,
+            serial: i+1,
             player: playerList[i],
-            playerAddressAbbr:playerList[i].toString().substr(0,12) + "..",
             tokens: playerTokensList[i]
         });
     }
 
-    const [sortDirection, setSortDirection] = React.useState(SortDirection.ASC);
-    const [sortBy, setSortBy] = React.useState('serial');
-    //const [data, setData] = React.useState(playersData);
-    handleSort(sortBy, sortDirection);
+    const [sortDirection, setSortDirection] = React.useState(SortDirection.DESC);
+    const [sortBy, setSortBy] = React.useState('tokens');
+    const [data, setData] = React.useState(playersData);
+    //handleSort({ sortBy, sortDirection });
     console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-    console.log("state playersdata: ", playersData);
-    //setData(playersData);
-    //console.log("state playersdata (after): ", playersData);
+    console.log("state playersdata: ", data);
+    setData(playersData);
+    console.log("state playersdata (after): ", data);
 
 
     function handleRequestSort(event, property) {
         console.log("handlerequestsort() :: sortby: ", sortBy, " sort Direction: ", sortDirection, "  and property: ", property);
         const isAsc = sortBy === property && sortDirection === SortDirection.DESC;
         console.log("isAsc: ", isAsc);
-        //setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
-        setSortDirection(sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC);
+        setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
         setSortBy(property);
     }
 
@@ -267,13 +263,12 @@ function GameStats(props) {
         console.log("inside handlesort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => desc(a, b, sortBy) : (a, b) => -desc(a, b, sortBy);
-        const sortedData = stableSort(playersData, cmp);
+        const sortedData = stableSort(data, cmp);
         //const tempData = _.sortBy(data, item => item[sortBy]);
         console.log("sortedData: ", sortedData);
         //const orderedData = sortDirection === SortDirection.DESC ? tempList.reverse() : tempList
         //this.setState({ sortBy, sortDirection, sortedList });
-        //setData(sortedData);
-        playersData = sortedData;
+        setData(sortedData);
     }
 
     function desc(a, b, sortBy) {
@@ -299,8 +294,8 @@ function GameStats(props) {
     return (
         <Paper style={{ height: 400, width: '100%' }}>
             <WrappedVirtualizedTable
-                rowCount={playersData.length}
-                rowGetter={({ index }) => playersData[index]}
+                rowCount={data.length}
+                rowGetter={({ index }) => data[index]}
                 onRowClick={event => console.log(event)}
                 onRequestSort={handleRequestSort}
                 sortBy={sortBy}
@@ -314,14 +309,14 @@ function GameStats(props) {
                         numeric: true,
                     },
                     {
-                        width: 160,
+                        width: 200,
                         flexGrow: 1.0,
-                        label: 'Player',
-                        dataKey: 'playerAddressAbbr',
+                        label: 'Player Address',
+                        dataKey: 'player',
                     },
                     {
                         width: 120,
-                        label: 'Tokens',
+                        label: 'Number of Tokens',
                         dataKey: 'tokens',
                         numeric: true,
                     },

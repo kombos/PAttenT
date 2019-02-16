@@ -62,12 +62,13 @@ class MuiVirtualizedTable extends React.PureComponent {
         return (
             <TableCell
                 component="div"
-                className={classNames(classes.tableCell, classes.flexContainer, {
-                    [classes.noClick]: onRowClick == null,
-                })}
+                className={classNames(classes.tableCell, classes.flexContainer,
+                    {[classes.noClick]: onRowClick == null, }
+                )}
                 variant="body"
                 style={{ height: rowHeight }}
-                align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
+                //align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
+                align={'left'}
             >
                 {cellData}
             </TableCell>
@@ -100,7 +101,8 @@ class MuiVirtualizedTable extends React.PureComponent {
                 className={classNames(classes.tableCell, classes.flexContainer, classes.noClick)}
                 variant="head"
                 style={{ height: headerHeight }}
-                align={columns[columnIndex].numeric || false ? 'right' : 'left'}
+                //align={columns[columnIndex].numeric || false ? 'right' : 'left'}
+                align={'left'}
             >
                 {inner}
             </TableCell>
@@ -187,20 +189,51 @@ const WrappedVirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 function GameLogs(props) {
     console.log("inside gamestats");
 
-    const { gameID } = this.props;
-    
+    const { gameID } = props;
+    const {roundNumber} = props;
+    const { events } = props;
 
-    const [sortDirection, setSortDirection] = React.useState(SortDirection.DESC);
-    const [sortBy, setSortBy] = React.useState('tokens');
-    const [data, setData] = React.useState();
-    //handleSort({ sortBy, sortDirection });
+    const gameLogs = events.filter((eventLog, index, arr) => {
+        console.log("INSIDE EVENT FILTER _____________________");
+        if (index > 0 && eventLog.id == arr[index - 1].id) {
+            return false;
+        }
+        if ((eventLog.event == "logPlayGame" ||
+            eventLog.event == "logRevertGame") &&
+            eventLog.returnValues.gameID == gameID && 
+            eventLog.returnValues.roundNumber == roundNumber)
+            return true;
+        else
+            return false
+
+    });
+
+    // prune the events and reformat
+    let serial = 0;
+    var gameEvents = gameLogs.map((value, index) => {
+        let gameEvent = value.returnValues;
+        gameEvent.playerAddressAbbr = value.returnValues.playerAddress.toString().substr(0,12) + "..";
+        gameEvent.transactionHash = value.transactionHash;
+        gameEvent.serial = ++serial;
+        gameEvent.logID = value.id;
+        gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+        return gameEvent;
+    });
+
+    console.log("gameevents: ", gameEvents);
+
+    const [sortDirection, setSortDirection] = React.useState(SortDirection.ASC);
+    const [sortBy, setSortBy] = React.useState('serial');
+    //const [data, setData] = React.useState(gameEvents);
     console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
+    handleSort(sortBy, sortDirection);
 
     function handleRequestSort(event, property) {
         console.log("handlerequestsort() :: sortby: ", sortBy, " sort Direction: ", sortDirection, "  and property: ", property);
         const isAsc = sortBy === property && sortDirection === SortDirection.DESC;
         console.log("isAsc: ", isAsc);
-        setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
+        //setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
+        setSortDirection(sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC);
         setSortBy(property);
     }
 
@@ -208,12 +241,13 @@ function GameLogs(props) {
         console.log("inside handlesort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => desc(a, b, sortBy) : (a, b) => -desc(a, b, sortBy);
-        const sortedData = stableSort(data, cmp);
+        const sortedData = stableSort(gameEvents, cmp);
         //const tempData = _.sortBy(data, item => item[sortBy]);
         console.log("sortedData: ", sortedData);
         //const orderedData = sortDirection === SortDirection.DESC ? tempList.reverse() : tempList
         //this.setState({ sortBy, sortDirection, sortedList });
-        setData(sortedData);
+        //setData(sortedData);
+        gameEvents = sortedData;
     }
 
     function desc(a, b, sortBy) {
@@ -239,8 +273,8 @@ function GameLogs(props) {
     return (
         <Paper style={{ height: 400, width: '100%' }}>
             <WrappedVirtualizedTable
-                rowCount={data.length}
-                rowGetter={({ index }) => data[index]}
+                rowCount={gameEvents.length}
+                rowGetter={({ index }) => gameEvents[index]}
                 onRowClick={event => console.log(event)}
                 onRequestSort={handleRequestSort}
                 sortBy={sortBy}
@@ -248,22 +282,30 @@ function GameLogs(props) {
                 sort={handleSort}
                 columns={[
                     {
-                        width: 200,
+                        width: 80,
                         flexGrow: 1.0,
-                        label: 'Player Address',
-                        dataKey: 'player',
+                        label: 'Serial',
+                        dataKey: 'serial',
+                        numeric: true,
                     },
                     {
-                        width: 120,
-                        label: 'Number of Tokens',
-                        dataKey: 'tokens',
+                        width: 180,
+                        flexGrow: 3.0,
+                        label: 'Player',
+                        dataKey: 'playerAddressAbbr',
+                    },
+                    {
+                        width: 80,
+                        flexGrow: 1.0,
+                        label: 'Tokens',
+                        dataKey: 'playerTokens',
                         numeric: true,
                     },
                     {
                         width: 200,
-                        flexGrow: 1.0,
-                        label: 'Time Stamp',
-                        dataKey: 'timestamp',
+                        flexGrow: 3.0,
+                        label: 'Time',
+                        dataKey: 'timeStamp',
                     },
                 ]}
             />

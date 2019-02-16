@@ -30,7 +30,7 @@ const styles = theme => ({
 });
 
 
-class GameDetails extends Component {
+class Notifications extends Component {
 
     static contextType = DrizzleContext.Consumer;
     constructor(props, context) {
@@ -114,34 +114,6 @@ class GameDetails extends Component {
             console.log("current round is :::::: ", this.currentRound);
             console.log("expression value: ", isGameLocked != true && this.currentRound != 0);
 
-            /* 
-                        this.context.drizzle.contracts.Multiprizer.events
-                            .logPlayGame({
-                                filter: { gameID: this.gameID, roundNumber: this.currentRound },
-                                fromBlock: 0
-                            }, (error, event) => {
-                                console.log("error value is : ", error);
-                                console.log("event obj value is: ", event);
-                            });
-                          .on('data', (event) => console.log(event))
-                        .on('changed', (event) => console.log(event))
-                        .on('error', (error) => console.log(error)); */
-
-
-            /*  web3Multiprizer.getPastEvents(
-                 'logPlayGame',
-                 {
-                     filter: { gameID: this.gameID, roundNumber: this.currentRound },
-                     fromBlock: 0,
-                     toBlock: 'latest'
-                 }, (error, events) => {
-                     myEvents = events;
-                     gameLogs = myEvents != null ?
-                         <GameLogs gameID={this.gameID} roundNumber={this.currentRound} events={myEvents && myEvents} /> :
-                         null;
-                         console.log("gamelogs: ", gameLogs, " myevents: ", myEvents);
-                 });
-              */
 
 
             if (isGameLocked != true && this.currentRound != 0) {
@@ -162,13 +134,13 @@ class GameDetails extends Component {
                 <NotificationBar />
                 <Grid container spacing={24} className={classes.root}>
                     <Grid item xs={12} sm={12} md={5} lg={5} >
-                        {gameLogs}
+                        {gameNotifications}
                     </Grid>
                     <Grid item xs={12} sm={12} md={4} lg={4} >
-                        {gameStats}
+                        {gameWinners}
                     </Grid>
                     <Grid item xs={12} sm={12} md={3} lg={3} >
-                        {gameContainer}
+                        {gameMegaPrizeWinners}
                     </Grid>
                 </Grid>
             </Fragment>
@@ -176,4 +148,4 @@ class GameDetails extends Component {
     }
 }
 
-export default withStyles(styles)(GameDetails);
+export default withStyles(styles)(Notifications);

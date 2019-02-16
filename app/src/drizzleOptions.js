@@ -10,6 +10,7 @@ const drizzleOptions = {
         }
     },
     contracts: [Multiprizer],
+
     events: {
         Multiprizer: [
 
@@ -70,6 +71,7 @@ const drizzleOptions = {
         ]
 
     },
+    
     polls: {
         accounts: 3000
     }
