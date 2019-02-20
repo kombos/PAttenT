@@ -1,4 +1,4 @@
-/* 
+    /* 
   KOMBOS
 */  
 
@@ -308,6 +308,7 @@ address payable public oraclizeAddress;
 uint256 megaPrizeID;
 uint256 megaPrizeAmount;
 mapping (address => uint256) private megaPrizePlayers;
+mapping (address => uint256) private megaPrizeIndexes;
 address payable[] private megaPrizePlayersKeys;
 address payable[] public megaPrizeWinners;
 uint256 megaPrizeNumber;
@@ -324,13 +325,13 @@ bool private isMegaPrizeMatured;
   */
 event logPlayGame(uint256 indexed gameID, uint256 indexed roundNumber, address playerAddress, uint256 playerTokens, uint256 timeSecs, uint256 timeBlock);
 event logRevertGame(uint256 indexed gameID, uint256 indexed roundNumber, address playerAddress, uint256 playerTokens, uint256 timeSecs, uint256 timeBlock);
-event logPauseGames(bool isGamesPaused, uint256 pauseTimeSecs, uint256 pauseTimeBlock);
-event logResumeGames(bool isGamesPaused, uint256 iterationStartTimeSecs, uint256 iterationStartTimeBlock);
+event logPauseGames(bool isGamesPaused, uint256 timeSecs, uint256 timeBlock);
+event logResumeGames(bool isGamesPaused, uint256 timeSecs, uint256 timeBlock);
 event logRevertFunds(uint256 timeSecs, uint256 timeBlock);
 event logCompleteRound(uint256 gameID, uint256 roundNumber, uint256 timeSecs, uint256 timeBlock);
 event logGameLocked(uint256 gameID, uint256 roundNumber, uint256 timeSecs, uint256 timeBlock);
-event logWinner(uint256 gameID, uint256 roundNumber, address winnerAddress, uint256 winnerAmount);
-event logMegaPrizeWinner(uint256 megaPrizeNumber, address megaPrizeWinner, uint256 megaPrizeAmount);
+event logWinner(uint256 gameID, uint256 roundNumber, address winnerAddress, uint256 winnerAmount, uint256 timeSecs, uint256 timeBlock);
+event logMegaPrizeWinner(uint256 megaPrizeNumber, address megaPrizeWinner, uint256 megaPrizeAmount, uint256 timeSecs, uint256 timeBlock);
 
 /** 
 *  Constructor call 
@@ -587,6 +588,7 @@ function resumeAllGamesByAdmin() public
         uint256 _gameID;
         uint256 _currentRoundID;
         isGamesPaused = false;
+        // re-calibrate start times to get the remaining time
         for(uint256 i=0; i<gameStrategiesKeys.length; i++) {
             _gameID = gameStrategies[gameStrategiesKeys[i]].gameID;
             _currentRound = gameStrategies[gameStrategiesKeys[i]].currentRound;
@@ -699,6 +701,7 @@ function playGame(uint256 _gameID, uint256 _numberOfTokens ) public
 
             if(megaPrizePlayers[msg.sender] == 0) {
                 megaPrizePlayersKeys.push(msg.sender);
+                megaPrizeIndexes[msg.sender] = (megaPrizePlayersKeys.length).sub(1);
             }
             megaPrizePlayers[msg.sender] = megaPrizePlayers[msg.sender].add(_numberOfTokens);
             
@@ -736,19 +739,9 @@ function revertGame(uint256 _gameID, address payable _playerAddress ) public  {
         megaPrizePlayers[_playerAddress] = (megaPrizePlayers[_playerAddress]).sub(_playerTokens);
         // remove the player address from mega prize list if all tokens have been reverted
         if(megaPrizePlayers[_playerAddress] == 0) {
-            for(i=0;i<megaPrizePlayersKeys.length;i++) {
-                if(megaPrizePlayersKeys[i] == _playerAddress) {
-                    megaPrizePlayersKeys[i] = megaPrizePlayersKeys[(megaPrizePlayersKeys.length).sub(1)];
-                    break;
-                }
-            }
-
-            if(i == megaPrizePlayersKeys.length) {
-                revert(" Error during revert token function. Couldn't find the required megaPrize address in the keys array. ");
-            }
-            else {
-                megaPrizePlayersKeys.length = (megaPrizePlayersKeys.length).sub(1);
-            }
+            uint256 index = megaPrizeIndexes[_playerAddress];
+            megaPrizePlayersKeys[index] = megaPrizePlayersKeys[(megaPrizePlayersKeys.length).sub(1)];
+            megaPrizePlayersKeys.length = (megaPrizePlayersKeys.length).sub(1);
         }
     }
     
@@ -860,7 +853,7 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 }
                 // close the current round flag
                 rounds[_roundID].isRoundOpen = false;
-                
+                emit logCompleteRound(_gameIDs[i], _roundNumber, now, block.number);
                 
             }
 
@@ -875,7 +868,6 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 rounds[_nextRoundID].iterationStartTimeSecs = now;
                 rounds[_nextRoundID].iterationStartTimeBlock = block.number;
                 rounds[_nextRoundID].isRoundOpen = true;
-                emit logCompleteRound(_gameIDs[i], _roundNumber, now, block.number);
 
             }
             else {
@@ -1001,7 +993,7 @@ function compensateWinner(bytes32 _oraclizeID, uint256 _oraclizeRandomNumber) pr
         // send the winning amount to the winner using safeSend
         safeSend(_winnerAddress, _winnerAmount);
         //# EMIT EVENT LOG - Transfer unsuccessful, use pull withdrawals mechanism
-        emit logWinner(_gameID, rounds[_roundID].roundNumber, _winnerAddress, _winnerAmount);
+        emit logWinner(_gameID, rounds[_roundID].roundNumber, _winnerAddress, _winnerAmount, now, block.number);
     }
     
     if(isMegaPrizeMatured) {
@@ -1012,13 +1004,14 @@ function compensateWinner(bytes32 _oraclizeID, uint256 _oraclizeRandomNumber) pr
         _megaPrizeWinner = megaPrizePlayersKeys[_oraclizeRandomNumber.mod(megaPrizePlayersKeys.length)];
         megaPrizeWinners.push(_megaPrizeWinner);
         _megaPrizeAmount = megaPrizeAmount;
-        emit logMegaPrizeWinner(megaPrizeNumber, _megaPrizeWinner, _megaPrizeAmount);
+        emit logMegaPrizeWinner(megaPrizeNumber, _megaPrizeWinner, _megaPrizeAmount, now, block.number);
         // delete all megaPrize storage variable values pertaining to players
         isMegaPrizeMatured = false;
         megaPrizeAmount = 0;
         megaPrizeNumber = megaPrizeNumber.add(1);
         for(uint256 i=0; i < megaPrizePlayersKeys.length; i++) {
             megaPrizePlayers[megaPrizePlayersKeys[i]] = 0;
+            megaPrizeIndexes[megaPrizePlayersKeys[i]] = 0;
         }
         delete megaPrizePlayersKeys;
         // lock the next mega prize round if isMegaPrizeLateLocked flag is set

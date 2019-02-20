@@ -49,21 +49,6 @@ class MuiVirtualizedTable extends React.PureComponent {
         onRequestSort(event, property);
     };
 
-    /* 
-        sort = () => {
-            console.log("inside sort function of upper leveL");
-            const { sort } = this.props;
-            sort();
-        }
-     */
-    /* 
-        sortRenderer = ({sortBy:sortBy, sortDirection:sortDirection}) => {
-            console.log("inside sort function of lower leveL");
-            console.log("lower level sortby: ", sortBy, " sortdirection: ", sortDirection);
-            const { sort } = this.props;
-            sort( sortBy, sortDirection );
-        }
-     */
     sortRenderer = (sortObj) => {
         console.log("sortObj:::: ", sortObj);
         console.log("inside sort function of lower leveL");
@@ -72,15 +57,14 @@ class MuiVirtualizedTable extends React.PureComponent {
         sort(sortObj.sortBy, sortObj.sortDirection);
     }
 
-
     cellRenderer = ({ cellData, columnIndex = null }) => {
         const { columns, classes, rowHeight, onRowClick } = this.props;
         return (
             <TableCell
                 component="div"
-                className={classNames(classes.tableCell, classes.flexContainer, {
-                    [classes.noClick]: onRowClick == null,
-                })}
+                className={classNames(classes.tableCell, classes.flexContainer,
+                    { [classes.noClick]: onRowClick == null, }
+                )}
                 variant="body"
                 style={{ height: rowHeight }}
                 //align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
@@ -141,6 +125,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                         sortDirection={sortDirection}
                         sort={this.sortRenderer}
                     >
+
                         {columns.map(({ cellContentRenderer = null, className, dataKey, ...other }, index) => {
                             let renderer;
                             if (cellContentRenderer != null) {
@@ -201,33 +186,16 @@ MuiVirtualizedTable.defaultProps = {
 
 const WrappedVirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
-function GameStats(props) {
-    console.log("inside gamestats");
+function GameNotifications(props) {
+    console.log("inside gamewinners");
+    var gameEvents = props.events;
+    console.log("gameevents: ", gameEvents);
 
-    const { roundData } = props;
-    const { roundNumber } = props;
-    console.log("roundata inside gamestats: ", roundData);
-    const playerList = roundData.value["_playerList"];
-    const playerTokensList = roundData.value["_playerTokensList"];
-    var playersData = [];
-    for (let i = 0; i < playerList.length; i += 1) {
-        playersData.push({
-            serial: i + 1,
-            player: playerList[i],
-            playerAddressAbbr: playerList[i].toString().substr(0, 12) + "..",
-            tokens: playerTokensList[i]
-        });
-    }
-
-    const [sortDirection, setSortDirection] = React.useState(SortDirection.ASC);
-    const [sortBy, setSortBy] = React.useState('serial');
-    //const [data, setData] = React.useState(playersData);
-    handleSort(sortBy, sortDirection);
+    const [sortDirection, setSortDirection] = React.useState(SortDirection.DESC);
+    const [sortBy, setSortBy] = React.useState('timeStamp');
+    //const [data, setData] = React.useState(gameEvents);
     console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-    console.log("state playersdata: ", playersData);
-    //setData(playersData);
-    //console.log("state playersdata (after): ", playersData);
-
+    handleSort(sortBy, sortDirection);
 
     function handleRequestSort(event, property) {
         console.log("handlerequestsort() :: sortby: ", sortBy, " sort Direction: ", sortDirection, "  and property: ", property);
@@ -242,13 +210,13 @@ function GameStats(props) {
         console.log("inside handlesort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => desc(a, b, sortBy) : (a, b) => -desc(a, b, sortBy);
-        const sortedData = stableSort(playersData, cmp);
+        const sortedData = stableSort(gameEvents, cmp);
         //const tempData = _.sortBy(data, item => item[sortBy]);
         console.log("sortedData: ", sortedData);
         //const orderedData = sortDirection === SortDirection.DESC ? tempList.reverse() : tempList
         //this.setState({ sortBy, sortDirection, sortedList });
         //setData(sortedData);
-        playersData = sortedData;
+        gameEvents = sortedData;
     }
 
     function desc(a, b, sortBy) {
@@ -273,11 +241,11 @@ function GameStats(props) {
 
     return (
         <Fragment>
-            {playersData.length > 0 ? <p>Round {roundNumber} Tokens</p> : <p>Round {roundNumber} Tokens (empty)</p>}
+        {gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}
             <Paper style={{ height: 400, width: '100%' }}>
                 <WrappedVirtualizedTable
-                    rowCount={playersData.length}
-                    rowGetter={({ index }) => playersData[index]}
+                    rowCount={gameEvents.length}
+                    rowGetter={({ index }) => gameEvents[index]}
                     onRowClick={event => console.log(event)}
                     onRequestSort={handleRequestSort}
                     sortBy={sortBy}
@@ -285,22 +253,16 @@ function GameStats(props) {
                     sort={handleSort}
                     columns={[
                         {
-                            width: 80,
-                            label: 'Serial',
-                            dataKey: 'serial',
-                            numeric: true,
-                        },
-                        {
-                            width: 160,
+                            width: 100,
                             flexGrow: 1.0,
-                            label: 'Player',
-                            dataKey: 'playerAddressAbbr',
+                            label: 'Time',
+                            dataKey: 'timeStamp',
                         },
                         {
-                            width: 120,
-                            label: 'Tokens',
-                            dataKey: 'tokens',
-                            numeric: true,
+                            width: 250,
+                            flexGrow: 1.0,
+                            label: 'Notification',
+                            dataKey: 'notification',
                         },
                     ]}
                 />
@@ -309,4 +271,4 @@ function GameStats(props) {
     );
 }
 
-export default GameStats;
+export default GameNotifications;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -63,7 +63,7 @@ class MuiVirtualizedTable extends React.PureComponent {
             <TableCell
                 component="div"
                 className={classNames(classes.tableCell, classes.flexContainer,
-                    {[classes.noClick]: onRowClick == null, }
+                    { [classes.noClick]: onRowClick == null, }
                 )}
                 variant="body"
                 style={{ height: rowHeight }}
@@ -190,7 +190,7 @@ function GameLogs(props) {
     console.log("inside gamestats");
 
     const { gameID } = props;
-    const {roundNumber} = props;
+    const { roundNumber } = props;
     const { events } = props;
 
     const gameLogs = events.filter((eventLog, index, arr) => {
@@ -200,7 +200,7 @@ function GameLogs(props) {
         }
         if ((eventLog.event == "logPlayGame" ||
             eventLog.event == "logRevertGame") &&
-            eventLog.returnValues.gameID == gameID && 
+            eventLog.returnValues.gameID == gameID &&
             eventLog.returnValues.roundNumber == roundNumber)
             return true;
         else
@@ -212,7 +212,7 @@ function GameLogs(props) {
     let serial = 0;
     var gameEvents = gameLogs.map((value, index) => {
         let gameEvent = value.returnValues;
-        gameEvent.playerAddressAbbr = value.returnValues.playerAddress.toString().substr(0,12) + "..";
+        gameEvent.playerAddressAbbr = value.returnValues.playerAddress.toString().substr(0, 12) + "..";
         gameEvent.transactionHash = value.transactionHash;
         gameEvent.serial = ++serial;
         gameEvent.logID = value.id;
@@ -271,45 +271,48 @@ function GameLogs(props) {
     }
 
     return (
-        <Paper style={{ height: 400, width: '100%' }}>
-            <WrappedVirtualizedTable
-                rowCount={gameEvents.length}
-                rowGetter={({ index }) => gameEvents[index]}
-                onRowClick={event => console.log(event)}
-                onRequestSort={handleRequestSort}
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                sort={handleSort}
-                columns={[
-                    {
-                        width: 80,
-                        flexGrow: 1.0,
-                        label: 'Serial',
-                        dataKey: 'serial',
-                        numeric: true,
-                    },
-                    {
-                        width: 180,
-                        flexGrow: 3.0,
-                        label: 'Player',
-                        dataKey: 'playerAddressAbbr',
-                    },
-                    {
-                        width: 80,
-                        flexGrow: 1.0,
-                        label: 'Tokens',
-                        dataKey: 'playerTokens',
-                        numeric: true,
-                    },
-                    {
-                        width: 200,
-                        flexGrow: 3.0,
-                        label: 'Time',
-                        dataKey: 'timeStamp',
-                    },
-                ]}
-            />
-        </Paper>
+        <Fragment>
+            {gameEvents.length > 0 ? <p>Game Logs</p> : <p>Game Logs (empty)</p>}
+            <Paper style={{ height: 400, width: '100%' }}>
+                <WrappedVirtualizedTable
+                    rowCount={gameEvents.length}
+                    rowGetter={({ index }) => gameEvents[index]}
+                    onRowClick={event => console.log(event)}
+                    onRequestSort={handleRequestSort}
+                    sortBy={sortBy}
+                    sortDirection={sortDirection}
+                    sort={handleSort}
+                    columns={[
+                        {
+                            width: 80,
+                            flexGrow: 1.0,
+                            label: 'Serial',
+                            dataKey: 'serial',
+                            numeric: true,
+                        },
+                        {
+                            width: 180,
+                            flexGrow: 3.0,
+                            label: 'Player',
+                            dataKey: 'playerAddressAbbr',
+                        },
+                        {
+                            width: 80,
+                            flexGrow: 1.0,
+                            label: 'Tokens',
+                            dataKey: 'playerTokens',
+                            numeric: true,
+                        },
+                        {
+                            width: 200,
+                            flexGrow: 3.0,
+                            label: 'Time',
+                            dataKey: 'timeStamp',
+                        },
+                    ]}
+                />
+            </Paper>
+        </Fragment>
     );
 }
 

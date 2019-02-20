@@ -6,6 +6,8 @@ import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Timer from "./Components/Timer";
 import { Route, Link } from "react-router-dom";
+import Indicator from "./Indicator";
+import TokensData from './TokensData';
 
 
 const styles = theme => ({
@@ -14,9 +16,12 @@ const styles = theme => ({
         //height: 500
         //backgroundColor: "blue",
         //flexBasis:
+        display: 'flex',
+        //alignItems: 'center',
         flexDirection: "column",
         padding: theme.spacing.unit * 0.5,
-        //margin: "auto"
+        margin: 'auto',
+        borderRadius: '12px',
     },
     paper: {
         flexGrow: 1,
@@ -30,11 +35,12 @@ const styles = theme => ({
     },
     components: {
         flexGrow: 1,
+        //borderRadius:'12px',
         //margin:"0.4rem",
-        //marginTop:"0rem",
+        //marginTop:"0.5rem",
         //height:"100%",
         //height:"auto",
-        backgroundImage: `url("https://www.justpushstart.com/wp-content/uploads/2011/10/Batman_arkham_city_logo.jpg")`
+        //backgroundImage: `url("https://www.justpushstart.com/wp-content/uploads/2011/10/Batman_arkham_city_logo.jpg")`
     },
 
 });
@@ -110,6 +116,7 @@ class GameContainer extends React.Component {
         let maxTokens = 0;
         let maxTokensPerPlayer = 0;
         let tokenData = null;
+        let tokenValue = 0;
         let playerList = null;
         let playerTokensList = null;
         let isGameLocked = null;
@@ -121,6 +128,7 @@ class GameContainer extends React.Component {
             this.currentRound = gameData.value["currentRound"];
             maxTokens = gameData.value["maxTokens"];
             maxTokensPerPlayer = gameData.value["maxTokensPerPlayer"];
+            tokenValue = gameData.value["tokenValue"];
             isGameLocked = (gameData.value["isGameLocked"] ? "true" : "false");
             console.log("is game locked? : ", isGameLocked);
 
@@ -133,10 +141,10 @@ class GameContainer extends React.Component {
                     gameDurationInEpoch = gameData.value["gameDurationInEpoch"];
                     totalTokensPurchased = roundData.value["_totalTokensPurchased"];
                     iterationStartTimeSecs = roundData.value["_iterationStartTimeSecs"];
-                    tokenData = <div className={classes.tokenData}>
-                        <p> Tokens Left : {(maxTokens - totalTokensPurchased)}</p>
-                        <p> Out of: {maxTokens}</p>
-                    </div>;
+                    tokenData = <TokensData maxTokens={maxTokens}
+                        tokensLeft={(maxTokens - totalTokensPurchased)} />;
+
+
 
 
                     if (defaultAccount) {
@@ -147,27 +155,29 @@ class GameContainer extends React.Component {
                         if (playerList.indexOf(defaultAccount) > -1) {
                             playerTokens = playerTokensList[playerList.indexOf(defaultAccount)];
                         }
-                        /* else
-                            playerTokens = 0; */
+
                         if (playerTokens > 0) {
-                            indicator = <div className={classes.indicator}>
-                                <p> Purchased : {playerTokens}</p>
-                                <p> Out of: {maxTokensPerPlayer}</p>
-                            </div>;
+                            indicator =
+                                <div className={classes.indicator}>
+                                    {"Purchased: " + playerTokens}
+                                    {"Out of: " + maxTokensPerPlayer}
+                                </div>;
+                        }
+                        else {
+                            indicator = <Indicator userTokens={maxTokensPerPlayer}
+                                gameTokens={maxTokens} duration={gameDurationInEpoch} tokenValue={tokenValue} />
                         }
 
                     }
-                    console.log("game duration: ", gameDurationInEpoch, " startTime: ", iterationStartTimeSecs);
+                    console.log(" ***************************game duration: ", gameDurationInEpoch, " startTime: ", iterationStartTimeSecs, "gameID: ", this.gameID);
                     timer = <Timer duration={gameDurationInEpoch} startTime={iterationStartTimeSecs} />;
                 }
 
             }
 
             else {
-                tokenData = <div className={classes.tokenData}>
-                    <p> Tokens Left : {0}</p>
-                    <p> Out of: {0}</p>
-                </div>;
+                tokenData = <TokensData maxTokens={0}
+                    tokensLeft={0} />;
                 timer = <Timer duration={0} startTime={0} />;
 
             }
@@ -178,14 +188,14 @@ class GameContainer extends React.Component {
         return (
             <div className={classes.root}>
                 <div className={classes.components}>
-                    <p>Game ID:  {this.gameID} | Round: {this.currentRound} | Locked: {isGameLocked && isGameLocked} </p>
+                    <p>Game ID:  {this.gameID} | Round: {this.currentRound} </p>
+                    <p>Locked: {isGameLocked && isGameLocked} </p>
                 </div>
                 <div className={classes.components}>
                     {timer}
                 </div>
                 <div className={classes.components}>
-                    {/* {indicator} */}
-                    <Link to={`/gameDetails/${this.gameID}`}>{indicator}</Link>
+                    {indicator}
                 </div>
                 <div className={classes.components}>
                     {tokenData}

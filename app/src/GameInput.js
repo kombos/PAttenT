@@ -265,11 +265,11 @@ class GameInput extends React.PureComponent {
                         disabled={isDisabled}
                     >
                         Pay {this.state.numTokens == "" ?
-                            "" :
+                            "("+(web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + " eth per token")+")" :
                             (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + " ethers")}
                     </Button>
                 </form>
-                <div>{this.getTxStatus()}</div>
+                {/* <div>{this.getTxStatus()}</div> */}
             </div>
         );
     }

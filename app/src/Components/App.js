@@ -37,7 +37,7 @@ export default () => (
                             <Route path="/gameDetails/:gameID"
                                 render={({ match }) => <GameDetails gameID={match.params.gameID} drizzleState={drizzleState} />} />
                             <Route path="/notifications" component={
-                                () => <Notifications />} />
+                                () => <Notifications drizzleState={drizzleState} />} />
                             <Route render={() => <div><p> Error </p></div>} />
                         </Switch>
 

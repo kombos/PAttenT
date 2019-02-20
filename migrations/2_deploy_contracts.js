@@ -21,11 +21,11 @@ module.exports = function(deployer, network, accounts) {
 
     var _gameProperties = [
         102,
-        200,
+        500,
         web3.utils.toHex(1e16),
         (60*60*24*2),
         (4*60*24*2),
-        5,
+        10,
         10000,
         1000,
         0,
@@ -35,11 +35,11 @@ module.exports = function(deployer, network, accounts) {
     ];
     var _gameProperties2 = [
         103,
-        200,
-        web3.utils.toHex(1e16),
-        (60*60*24*2),
-        (4*60*24*2),
-        5,
+        300,
+        web3.utils.toHex(5e16),
+        (60*60*36),
+        (4*60*36),
+        30,
         10000,
         1000,
         0,
@@ -49,11 +49,25 @@ module.exports = function(deployer, network, accounts) {
     ];
     var _gameProperties3 = [
         104,
-        200,
-        web3.utils.toHex(1e16),
-        (60*60*24*2),
-        (4*60*24*2),
-        5,
+        40,
+        web3.utils.toHex(1e17),
+        (60*60*8),
+        (4*60*8),
+        2,
+        10000,
+        1000,
+        0,
+        0,
+        0,
+        web3.utils.toHex(1e16)
+    ];
+    var _gameProperties3 = [
+        105,
+        100,
+        web3.utils.toHex(1e18),
+        (60*60*24),
+        (4*60*24),
+        1,
         10000,
         1000,
         0,
@@ -94,6 +108,11 @@ module.exports = function(deployer, network, accounts) {
             .then(function(receipt) {
                 console.log("Add Game by admin ......  ");
                 return multiprizerInstance.addGameByAdmin(_gameProperties3, {from:accounts[0]});
+            })
+            // add a new game
+            .then(function(receipt) {
+                console.log("Add Game by admin ......  ");
+                return multiprizerInstance.addGameByAdmin(_gameProperties4, {from:accounts[0]});
             })
             // deploy Multiprizer_oraclize
             .then(function(receipt) {

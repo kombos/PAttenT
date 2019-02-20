@@ -82,7 +82,7 @@ class GameDetails extends Component {
         const roundKey = this.state.roundKey;
         const multiprizer = this.props.drizzleState.contracts.Multiprizer;
         const drizzleState = this.props.drizzleState;
-        const logEvents = this.context.drizzleState.contracts.Multiprizer.events;
+        const logEvents = this.props.drizzleState.contracts.Multiprizer.events;
 
         console.log("logevents: ", logEvents);
         console.log("# multiprizer: ", multiprizer);
@@ -148,7 +148,7 @@ class GameDetails extends Component {
                 if (roundData) {
                     console.log("rounddata: ", roundData);
 
-                    gameStats = <GameStats roundData={roundData} />;
+                    gameStats = <GameStats roundData={roundData} roundNumber={this.currentRound} />;
                     gameLogs = <GameLogs gameID={this.gameID} roundNumber={this.currentRound} events={logEvents} />;
                     console.log("gamelogs: ", gameLogs, " myevents: ", logEvents);
                 }
