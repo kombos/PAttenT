@@ -17,6 +17,14 @@ const styles = theme => ({
         textAlign: 'center',
         color: theme.palette.text.secondary
     },
+    flexChild: {
+        flexGrow: 1,
+        width: '100%',
+        height: 'auto',
+        margin: '1.5rem auto 1.5rem auto',
+        //padding: theme.spacing.unit * 1,
+        //backgroundColor: "rgba(32,114,76,0.7)",
+    },
     paper: {
         padding: theme.spacing.unit * 2,
         textAlign: 'center',
@@ -31,7 +39,7 @@ const styles = theme => ({
 });
 
 
-class Notifications extends Component {
+class Notifications extends React.Component {
 
     static contextType = DrizzleContext.Consumer;
     constructor(props, context) {
@@ -39,16 +47,21 @@ class Notifications extends Component {
         this.context = context;
     }
 
+    componentDidUpdate() {
+        console.log("inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ");
+
+    }
+
     render() {
 
-        console.log(" inside GameDetails render: ");
+        console.log(" inside Notifications render: ");
         this.gameID = this.props.gameID;
         const { classes } = this.props;
         const initialized = this.context.initialized;
         let gameNotifications = null;
         let gameWinners = null;
         let gameMegaPrizeWinners = null;
-
+        
         if (!initialized) {
             return "Loading...";
         }
@@ -59,7 +72,7 @@ class Notifications extends Component {
         if (logEvents) {
 
             const gameNotificationsLogs = logEvents.filter((eventLog, index, arr) => {
-                console.log("INSIDE EVENT FILTER _____________________");
+                console.log("INSIDE gameNotif EVENT FILTER _____________________");
                 if (index > 0 && eventLog.id == arr[index - 1].id) {
                     return false;
                 }
@@ -73,43 +86,10 @@ class Notifications extends Component {
                     return false
 
             });
-            // prune the events and reformat
-            let serial = 0;
-            var gameNotificationsEvents = gameNotificationsLogs.map((value, index) => {
-                let gameEvent = value.returnValues;
-                gameEvent.transactionHash = value.transactionHash;
-                gameEvent.serial = ++serial;
-                gameEvent.logID = value.id;
-                gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
-                switch (value.event) {
-                    case "logPauseGames":
-                        gameEvent.notification =
-                            `All games are paused by Admin, until resumed. You can still revert your played tokens`;
-                        break;
-
-                    case "logResumeGames":
-                        gameEvent.notification =
-                            `All games are resumed by Admin now.`;
-                        break;
-
-                    case "logRevertFunds":
-                        gameEvent.notification = `All played tokens have been reverted. Please click on withdraw button on top right corner to withdraw your funds.`;
-                        break;
-
-                    case "logCompleteRound":
-                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
-                        break;
-
-                    case "logGameLocked":
-                        gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
-                        break;
-                }
-
-                return gameEvent;
-            });
+            
 
             const gameWinnersLogs = logEvents.filter((eventLog, index, arr) => {
-                console.log("INSIDE EVENT FILTER _____________________");
+                console.log("INSIDE  Winner EVENT FILTER _____________________");
                 if (index > 0 && eventLog.id == arr[index - 1].id) {
                     return false;
                 }
@@ -120,23 +100,9 @@ class Notifications extends Component {
 
             });
 
-            // prune the events and reformat
-            serial = 0;
-            var gameWinnersEvents = gameWinnersLogs.map((value, index) => {
-                let gameEvent = value.returnValues;
-                gameEvent.transactionHash = value.transactionHash;
-                gameEvent.serial = ++serial;
-                gameEvent.logID = value.id;
-                gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
-                gameEvent.playerAddressAbbr = value.returnValues.winnerAddress.toString().substr(0,12) + "..";
-                gameEvent.prize = (web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether') + " eth");
-
-                return gameEvent;
-            });
-
 
             const gameMegaPrizeWinnersLogs = logEvents.filter((eventLog, index, arr) => {
-                console.log("INSIDE EVENT FILTER _____________________");
+                console.log("INSIDE MegaPrize winner EVENT FILTER _____________________");
                 if (index > 0 && eventLog.id == arr[index - 1].id) {
                     return false;
                 }
@@ -147,34 +113,21 @@ class Notifications extends Component {
 
             });
 
-            // prune the events and reformat
-            serial = 0;
-            var gameMegaPrizeEvents = gameMegaPrizeWinnersLogs.map((value, index) => {
-                let gameEvent = value.returnValues;
-                gameEvent.transactionHash = value.transactionHash;
-                gameEvent.serial = ++serial;
-                gameEvent.logID = value.id;
-                gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
-                gameEvent.playerAddressAbbr = value.returnValues.megaPrizeWinner.toString().substr(0,12) + "..";
-                gameEvent.prize = (web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether') + " eth");
 
-                return gameEvent;
-            });
-
-            gameNotifications = <GameNotifications events={gameNotificationsEvents} />;
-            gameWinners = <GameWinners events={gameWinnersEvents} />;
-            gameMegaPrizeWinners = <GameMegaPrizeWinners events={gameMegaPrizeEvents} />;
+            gameNotifications = <GameNotifications events={gameNotificationsLogs} />;
+            gameWinners = <GameWinners events={gameWinnersLogs} />;
+            gameMegaPrizeWinners = <GameMegaPrizeWinners events={gameMegaPrizeWinnersLogs} />;
         }
 
         return (
-                <Grid container spacing={24} className={classes.root}>
+                <Grid container spacing={0} className={classes.flexChild}>
                     <Grid item xs={12} sm={12} md={4} lg={4} >
                         {gameNotifications}
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4} lg={4} >
+                    <Grid item xs={12} sm={12} md={4} lg={5} >
                         {gameWinners}
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4} lg={4} >
+                    <Grid item xs={12} sm={12} md={4} lg={3} >
                         {gameMegaPrizeWinners}
                     </Grid>
                 </Grid>

@@ -28,7 +28,12 @@ export default () => (
 
             return (
                 <Router>
-                    <div>
+                    <div style={{
+                        display:"flex",
+                        width:"100%",
+                        minHeight:"100%",
+                        flexDirection:"column",
+                    }}>
                         <Header />
 
                         <Switch>
@@ -36,7 +41,7 @@ export default () => (
                                 () => { return (<GameStrategies initialized={initialized} drizzleState={drizzleState} />); }} />
                             <Route path="/gameDetails/:gameID"
                                 render={({ match }) => <GameDetails gameID={match.params.gameID} drizzleState={drizzleState} />} />
-                            <Route path="/notifications" component={
+                            <Route path="/notifications" render={
                                 () => <Notifications drizzleState={drizzleState} />} />
                             <Route render={() => <div><p> Error </p></div>} />
                         </Switch>

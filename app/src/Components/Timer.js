@@ -3,13 +3,22 @@ import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
 const styles = theme => ({
-    timer: {
-        //height: 500
-        //flexBasis:
-        backgroundColor: "rgba(12,54,76,0.7)",
+    flexContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: "rgba(12,54,76,0.90)",
+        //boxSizing: 'border-box',
+        height: 'auto',
+        width: '100%',
+        margin: 'auto',
+    },
+    flexChild: {
+        flexGrow: 1,
+        textAlign: 'center',
+        alignItems: 'center',
         fontFamily: "Orbitron",
         color: "#17d4fe",
-        fontSize: "1rem"
+        //padding: theme.spacing.unit * 0.5,
     },
     smallText: {
         fontSize: "0.6rem",
@@ -23,27 +32,9 @@ const styles = theme => ({
     components: {
         flexGrow: 1
     },
-    flexContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: "rgba(12,54,76,0.99)",
-        //boxSizing: 'border-box',
-        height: 'auto',
-        maxWidth: '100%',
-        margin: 'auto',
-    },
-    flexChild: {
-        flexGrow: 1,
-        textAlign: 'center',
-        alignItems: 'center',
-        fontFamily: "Orbitron",
-        color: "#17d4fe",
-        //padding: theme.spacing.unit * 0.5,
-    },
-
 });
 
-class Timer extends React.Component {
+class Timer extends React.PureComponent {
     constructor(props) {
         super(props);
         const duration = this.props.duration;

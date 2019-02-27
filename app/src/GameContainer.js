@@ -8,20 +8,20 @@ import Timer from "./Components/Timer";
 import { Route, Link } from "react-router-dom";
 import Indicator from "./Indicator";
 import TokensData from './TokensData';
+import PurchasedTokens from './PurchasedTokens';
+import GameProps from './GameProps';
+import MastHead from './MastHead';
+import bg from './img/bg1.png';
 
 
 const styles = theme => ({
     root: {
-        backgroundImage: `url("https://www.pixelstalk.net/wp-content/uploads/2016/03/Blue-Butterfly-Wallpaper-download-free.jpg")`,
-        //height: 500
-        //backgroundColor: "blue",
-        //flexBasis:
+        backgroundImage: `url("https://i.pinimg.com/originals/31/61/6c/31616c298eb3e33eeb461bdb857e515e.jpg")`,
         display: 'flex',
-        //alignItems: 'center',
         flexDirection: "column",
         padding: theme.spacing.unit * 0.5,
-        margin: 'auto',
-        borderRadius: '12px',
+        margin: '0.75rem 0.75rem 0.75rem 0.75rem',
+        borderRadius: `${theme.shape.borderRadius * 3}px`,
     },
     paper: {
         flexGrow: 1,
@@ -107,6 +107,7 @@ class GameContainer extends React.Component {
         const roundData = multiprizer.viewRoundInfo[roundKey];
         console.log("# roundData inside GameStrategy is : ", roundData && roundData);
 
+        let mastHead = null;
         let timer = null;
         let gameInput = null;
         let indicator = null;
@@ -121,7 +122,11 @@ class GameContainer extends React.Component {
         let playerTokensList = null;
         let isGameLocked = null;
         let playerTokens = 0;
+        let totalWinnings = 0;
+        let totalValueForGame = 0;
+        let gameProps = null;
         let defaultAccount = this.context.drizzleState.accounts[0];
+
         console.log("default account: ", defaultAccount);
 
         if (gameData) {
@@ -129,12 +134,15 @@ class GameContainer extends React.Component {
             maxTokens = gameData.value["maxTokens"];
             maxTokensPerPlayer = gameData.value["maxTokensPerPlayer"];
             tokenValue = gameData.value["tokenValue"];
-            isGameLocked = (gameData.value["isGameLocked"] ? "true" : "false");
+            isGameLocked = (gameData.value["isGameLocked"] ? true : false);
+            totalValueForGame = gameData.value["totalValueForGame"];
+            totalWinnings = gameData.value["totalWinnings"];
             console.log("is game locked? : ", isGameLocked);
-
-
             console.log("current round is :::::: ", this.currentRound);
             console.log("expression value: ", isGameLocked != true && this.currentRound != 0);
+            mastHead = <MastHead gameID={this.gameID} />
+            gameProps = <GameProps gameID={this.gameID} currentRound={this.currentRound}
+                totalValueForGame={totalValueForGame} totalWinnings={totalWinnings} />
 
             if (isGameLocked != true && this.currentRound != 0) {
                 if (roundData) {
@@ -143,9 +151,6 @@ class GameContainer extends React.Component {
                     iterationStartTimeSecs = roundData.value["_iterationStartTimeSecs"];
                     tokenData = <TokensData maxTokens={maxTokens}
                         tokensLeft={(maxTokens - totalTokensPurchased)} />;
-
-
-
 
                     if (defaultAccount) {
                         console.log("updated default account: ", this.context.drizzleState.accounts[0]);
@@ -157,19 +162,16 @@ class GameContainer extends React.Component {
                         }
 
                         if (playerTokens > 0) {
-                            indicator =
-                                <div className={classes.indicator}>
-                                    {"Purchased: " + playerTokens}
-                                    {"Out of: " + maxTokensPerPlayer}
-                                </div>;
+                            indicator = <PurchasedTokens playerTokens={playerTokens}
+                                maxTokensPerPlayer={maxTokensPerPlayer} gameID={this.gameID} />
                         }
                         else {
-                            indicator = <Indicator userTokens={maxTokensPerPlayer}
-                                gameTokens={maxTokens} duration={gameDurationInEpoch} tokenValue={tokenValue} />
+                            indicator = <Indicator userTokens={maxTokensPerPlayer} gameTokens={maxTokens}
+                                duration={gameDurationInEpoch} tokenValue={tokenValue} isGameLocked={isGameLocked} />
                         }
 
                     }
-                    console.log(" ***************************game duration: ", gameDurationInEpoch, " startTime: ", iterationStartTimeSecs, "gameID: ", this.gameID);
+                    console.log(" *************************** game duration: ", gameDurationInEpoch, " startTime: ", iterationStartTimeSecs, "gameID: ", this.gameID);
                     timer = <Timer duration={gameDurationInEpoch} startTime={iterationStartTimeSecs} />;
                 }
 
@@ -179,7 +181,8 @@ class GameContainer extends React.Component {
                 tokenData = <TokensData maxTokens={0}
                     tokensLeft={0} />;
                 timer = <Timer duration={0} startTime={0} />;
-
+                indicator = <Indicator userTokens={0} gameTokens={0}
+                    duration={0} tokenValue={0} isGameLocked={isGameLocked} />
             }
             gameInput = <GameInput gameData={gameData} playerTokens={playerTokens} />;
 
@@ -188,8 +191,10 @@ class GameContainer extends React.Component {
         return (
             <div className={classes.root}>
                 <div className={classes.components}>
-                    <p>Game ID:  {this.gameID} | Round: {this.currentRound} </p>
-                    <p>Locked: {isGameLocked && isGameLocked} </p>
+                    {mastHead}
+                </div>
+                <div className={classes.components}>
+                    {gameProps}
                 </div>
                 <div className={classes.components}>
                     {timer}

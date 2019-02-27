@@ -6,8 +6,20 @@ import TableCell from '@material-ui/core/TableCell';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
+import { DrizzleContext } from 'drizzle-react';
 
 const styles = theme => ({
+    root: {
+        //padding: theme.spacing.unit * 0.5,
+        margin: '0.75rem 0.75rem 0.75rem 0.75rem',
+        boxSizing: 'border-box',
+        flex: '1 1 auto',
+        //height:'auto',
+    },
+    tableContainer: {
+        backgroundColor: theme.palette.grey[50],
+        height: 400,
+    },
     table: {
         fontFamily: theme.typography.fontFamily,
     },
@@ -186,40 +198,41 @@ MuiVirtualizedTable.defaultProps = {
 
 const WrappedVirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
-function GameMegaPrizeWinners(props) {
-    console.log("inside gamewinners");
-    var gameEvents = props.events;
-    console.log("gameevents: ", gameEvents);
+class GameMegaPrizeWinners extends React.Component {
+    static contextType = DrizzleContext.Consumer;
 
-    const [sortDirection, setSortDirection] = React.useState(SortDirection.DESC);
-    const [sortBy, setSortBy] = React.useState('megaPrizeNumber');
-    //const [data, setData] = React.useState(gameEvents);
-    console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-    handleSort(sortBy, sortDirection);
+    constructor(props, context) {
+        super(props);
+        this.state = { sortDirection: SortDirection.DESC, sortBy: 'megaPrizeNumber' };
+        this.context = context;
+    }
 
-    function handleRequestSort(event, property) {
+    handleRequestSort = (event, property) => {
+        let sortBy = this.state.sortBy;
+        let sortDirection = this.state.sortDirection;
         console.log("handlerequestsort() :: sortby: ", sortBy, " sort Direction: ", sortDirection, "  and property: ", property);
         const isAsc = sortBy === property && sortDirection === SortDirection.DESC;
         console.log("isAsc: ", isAsc);
-        //setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
-        setSortDirection(sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC);
-        setSortBy(property);
+        this.setState({
+            sortDirection: (sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC),
+            sortBy: property
+        });
     }
 
-    function handleSort(sortBy, sortDirection) {
+    handleSort = (sortBy, sortDirection) => {
         console.log("inside handlesort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
 
-        const cmp = sortDirection === SortDirection.DESC ? (a, b) => desc(a, b, sortBy) : (a, b) => -desc(a, b, sortBy);
-        const sortedData = stableSort(gameEvents, cmp);
+        const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
+        const sortedData = this.stableSort(this.gameEvents, cmp);
         //const tempData = _.sortBy(data, item => item[sortBy]);
         console.log("sortedData: ", sortedData);
         //const orderedData = sortDirection === SortDirection.DESC ? tempList.reverse() : tempList
         //this.setState({ sortBy, sortDirection, sortedList });
         //setData(sortedData);
-        gameEvents = sortedData;
+        this.gameEvents = sortedData;
     }
 
-    function desc(a, b, sortBy) {
+    desc = (a, b, sortBy) => {
         if (b[sortBy] < a[sortBy]) {
             return -1;
         }
@@ -229,7 +242,7 @@ function GameMegaPrizeWinners(props) {
         return 0;
     }
 
-    function stableSort(array, cmp) {
+    stableSort = (array, cmp) => {
         const stabilizedThis = array.map((el, index) => [el, index]);
         stabilizedThis.sort((a, b) => {
             const order = cmp(a[0], b[0]);
@@ -239,42 +252,81 @@ function GameMegaPrizeWinners(props) {
         return stabilizedThis.map(el => el[0]);
     }
 
-    return (
-        <Fragment>
-            {gameEvents.length > 0 ? <p>MegaPrize Winners</p> : <p>MegaPrize Winners (empty)</p>}
-            <Paper style={{ height: 400, width: '100%' }}>
-                <WrappedVirtualizedTable
-                    rowCount={gameEvents.length}
-                    rowGetter={({ index }) => gameEvents[index]}
-                    onRowClick={event => console.log(event)}
-                    onRequestSort={handleRequestSort}
-                    sortBy={sortBy}
-                    sortDirection={sortDirection}
-                    sort={handleSort}
-                    columns={[
-                        {
-                            width: 80,
-                            flexGrow: 3.0,
-                            label: 'MegaPrize No.',
-                            dataKey: 'megaPrizeNumber',
-                        },
-                        {
-                            width: 180,
-                            flexGrow: 3.0,
-                            label: 'Winner',
-                            dataKey: 'playerAddressAbbr',
-                        },
-                        {
-                            width: 120,
-                            flexGrow: 3.0,
-                            label: 'Prize Won',
-                            dataKey: 'prize',
-                        },
-                    ]}
-                />
-            </Paper>
-        </Fragment>
-    );
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
+        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
+        console.log("expression: ", (this.props.events.length != nextProps.events.length))
+        if (this.props.events.length != nextProps.events.length ||
+            this.state.sortBy != nextState.sortBy ||
+            this.state.sortDirection != nextState.sortDirection)
+            return true;
+        else
+            return false;
+    }
+
+    render() {
+        console.log("inside megaprizewinners");
+        let sortBy = this.state.sortBy;
+        let sortDirection = this.state.sortDirection;
+        const web3 = this.context.drizzle.web3;
+        const { events, classes } = this.props;
+
+        // prune the events and reformat
+        let serial = 0;
+        this.gameEvents = events.map((value, index) => {
+            let gameEvent = value.returnValues;
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.serial = ++serial;
+            gameEvent.logID = value.id;
+            gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+            gameEvent.playerAddressAbbr = value.returnValues.megaPrizeWinner.toString().substr(0, 12) + "..";
+            gameEvent.prize = (web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether') + " eth");
+
+            return gameEvent;
+        });
+
+        console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
+        this.handleSort(sortBy, sortDirection);
+
+        return (
+            <div className={classes.root}>
+                {this.gameEvents.length > 0 ? <p>MegaPrize Winners</p> : <p>MegaPrize Winners (empty)</p>}
+                <div className={classes.tableContainer}>
+                    <WrappedVirtualizedTable
+                        rowCount={this.gameEvents.length}
+                        rowGetter={({ index }) => this.gameEvents[index]}
+                        onRowClick={event => console.log(event)}
+                        onRequestSort={this.handleRequestSort}
+                        sortBy={sortBy}
+                        sortDirection={sortDirection}
+                        sort={this.handleSort}
+                        columns={[
+                            {
+                                width: 80,
+                                flexGrow: 1.0,
+                                label: 'MP No.',
+                                dataKey: 'megaPrizeNumber',
+                            },
+                            {
+                                width: 180,
+                                flexGrow: 2.0,
+                                label: 'Winner',
+                                dataKey: 'playerAddressAbbr',
+                            },
+                            {
+                                width: 180,
+                                flexGrow: 3.0,
+                                label: 'Prize Won',
+                                dataKey: 'prize',
+                            },
+                        ]}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+
 }
 
-export default GameMegaPrizeWinners;
+export default withStyles(styles)(GameMegaPrizeWinners);

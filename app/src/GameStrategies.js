@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react';
-import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
@@ -9,27 +8,34 @@ import { DrizzleContext } from 'drizzle-react';
 import NotificationBar from './NotificationBar';
 
 const styles = theme => ({
-    root: {
+    flexContainer: {
+        display: 'flex',
+        flexDirection: "column",
         flexGrow: 1,
-        padding: theme.spacing.unit * 1,
-        textAlign: 'center',
-        color: theme.palette.text.secondary
+        width:'100%',
+        height: 'auto',
+        //maxWidth: '85%',
+        margin: 'auto',
+        //backgroundColor: "rgba(62,54,76,0.7)",
     },
-    paper: {
-        padding: theme.spacing.unit * 2,
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
+    flexChild: {
+        flexGrow: 1,
+        width:'100%',
+        margin: '1.5rem auto 1.5rem auto',
+        //padding: theme.spacing.unit * 1,
+        //backgroundColor: "rgba(32,14,76,0.7)",
     },
     notification: {
+        flexBasis: "150px",
         //padding: theme.spacing.unit * 1,
-        flexGrow: 1,
+        //flexGrow: 1,
         //textAlign: 'center',
         //color: theme.palette.text.secondary,
     },
 });
 
 
-class GameStrategies extends Component {
+class GameStrategies extends React.Component {
 
     static contextType = DrizzleContext.Consumer;
 
@@ -46,7 +52,7 @@ class GameStrategies extends Component {
         // get and save the key for the variable we are interested in
         const dataKey = Multiprizer.methods.viewGameIDs.cacheCall();
         console.log("# GameStrategy datakey value is:" + dataKey);
-        this.setState({ dataKey });
+        this.setState({ dataKey:dataKey });
     }
 
     render() {
@@ -64,31 +70,43 @@ class GameStrategies extends Component {
         console.log("multiprizer:  ", multiprizer);
         console.log("# datakey inside GameStrategy is  : ", dataKey);
 
-
+        let gameIDsJSX = null;
         const gameIDs = multiprizer.viewGameIDs[dataKey];
-        const _gameIDsArray = gameIDs && gameIDs.value["_gameIDs"];
-        const _gameIDsLength = gameIDs && gameIDs.value["_gameIDsLength"];
+        console.log("gameIDS: ", gameIDs);
 
-        console.log("# ____ gameObj value ______");
-        console.log(gameIDs);
+        if (gameIDs && gameIDs.value && gameIDs.value != null) {
+            const _gameIDsArray = gameIDs.value["_gameIDs"];
+            const _gameIDsLength = gameIDs.value["_gameIDsLength"];
+            console.log(" array: ", _gameIDsArray);
+            const _gameIDsRevArray = _gameIDsArray.slice().reverse();
+            console.log("reverse array: ", _gameIDsRevArray);
 
-        const gameIDsJSX = gameIDs && (_gameIDsArray.map((gameID, index) => {
-            console.log("GameID from GameStrategy : ", gameID);
-            return (
-                    <Grid item xs={12} sm={6} md={3} lg={3} >
-                        <GameContainer key={gameID} gameID={gameID} drizzleState={drizzleState} />
-                    </Grid>
-            );
+            console.log("# ____ gameObj value ______");
+            console.log(gameIDs);
+
+            gameIDsJSX = (_gameIDsRevArray
+                .map(
+                    (gameID, index) => {
+                        console.log("GameID from GameStrategy : ", gameID);
+                        return (
+                            <Grid item xs={12} sm={6} md={3} lg={3} >
+                                <GameContainer key={gameID} gameID={gameID} drizzleState={drizzleState} />
+                            </Grid>
+                        );
+                    }
+                )
+            )
+
         }
-        ))
+
 
         return (
-            <Fragment>
+            <div className={classes.flexContainer}>
                 <NotificationBar />
-                <Grid container spacing={24} className={classes.root}>
+                <Grid container spacing={0} className={classes.flexChild} direction='row'>
                     {gameIDsJSX}
                 </Grid>
-            </Fragment>
+            </div>
         );
     }
 }

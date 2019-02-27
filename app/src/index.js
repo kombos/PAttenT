@@ -16,7 +16,14 @@ console.log("drizzlestore: ", drizzleStore);
 console.log("drizzleoptions: ", drizzleOptions);
 const drizzle = new Drizzle(drizzleOptions, drizzleStore);
 const theme = createMuiTheme({
-    typography: { useNextVariants: true }
+    palette: {
+        secondary: {
+            light: "#00ffff",
+            main: "#33ccff",
+            dark: "#00b8e6",
+        },
+    },
+    typography: { useNextVariants: true },
 });
 console.log("drizzle: ", drizzle);
 

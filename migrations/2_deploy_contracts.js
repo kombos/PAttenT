@@ -61,7 +61,7 @@ module.exports = function(deployer, network, accounts) {
         0,
         web3.utils.toHex(1e16)
     ];
-    var _gameProperties3 = [
+    var _gameProperties4 = [
         105,
         100,
         web3.utils.toHex(1e18),
@@ -140,12 +140,12 @@ module.exports = function(deployer, network, accounts) {
             // unlock games
             .then(function(receipt) {
                 console.log("unlock game ..... ");
-                return multiprizerInstance.unlockGamesByAdmin([102,103,104],{from:accounts[0]});
+                return multiprizerInstance.unlockGamesByAdmin([102,103,104,105],{from:accounts[0]});
             })
             // complete rounds
             .then(function(receipt) {
                 console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundsByAdmin([102,103,104],{from:accounts[0]});
+                return multiprizerInstance.completeRoundsByAdmin([102,103,104,105],{from:accounts[0]});
             })
             .catch(function(e){
                 console.log(e);

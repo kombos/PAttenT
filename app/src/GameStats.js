@@ -8,6 +8,13 @@ import Paper from '@material-ui/core/Paper';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 
 const styles = theme => ({
+    root: {
+        margin: '0.75rem 0.75rem 0.75rem 0.75rem',
+        boxSizing: 'border-box',
+        flex: '1 1 auto',
+        backgroundColor: theme.palette.grey[50],
+        height: 400,
+    },
     table: {
         fontFamily: theme.typography.fontFamily,
     },
@@ -71,7 +78,6 @@ class MuiVirtualizedTable extends React.PureComponent {
         const { sort } = this.props;
         sort(sortObj.sortBy, sortObj.sortDirection);
     }
-
 
     cellRenderer = ({ cellData, columnIndex = null }) => {
         const { columns, classes, rowHeight, onRowClick } = this.props;
@@ -204,8 +210,7 @@ const WrappedVirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 function GameStats(props) {
     console.log("inside gamestats");
 
-    const { roundData } = props;
-    const { roundNumber } = props;
+    const { roundData, roundNumber, classes } = props;
     console.log("roundata inside gamestats: ", roundData);
     const playerList = roundData.value["_playerList"];
     const playerTokensList = roundData.value["_playerTokensList"];
@@ -272,9 +277,8 @@ function GameStats(props) {
     }
 
     return (
-        <Fragment>
-            {playersData.length > 0 ? <p>Round {roundNumber} Tokens</p> : <p>Round {roundNumber} Tokens (empty)</p>}
-            <Paper style={{ height: 400, width: '100%' }}>
+        <div className={classes.root}>
+            {/*  {playersData.length > 0 ? <p>Round {roundNumber} Tokens</p> : <p>Round {roundNumber} Tokens (empty)</p>} */}
                 <WrappedVirtualizedTable
                     rowCount={playersData.length}
                     rowGetter={({ index }) => playersData[index]}
@@ -285,28 +289,29 @@ function GameStats(props) {
                     sort={handleSort}
                     columns={[
                         {
-                            width: 80,
+                            width: 90,
+                            flexGrow: 1.0,
                             label: 'Serial',
                             dataKey: 'serial',
                             numeric: true,
                         },
                         {
-                            width: 160,
-                            flexGrow: 1.0,
+                            width: 180,
+                            flexGrow: 2.0,
                             label: 'Player',
                             dataKey: 'playerAddressAbbr',
                         },
                         {
-                            width: 120,
+                            width: 80,
+                            flexGrow: 1.0,
                             label: 'Tokens',
                             dataKey: 'tokens',
                             numeric: true,
                         },
                     ]}
                 />
-            </Paper>
-        </Fragment>
+        </div>
     );
 }
 
-export default GameStats;
+export default withStyles(styles)(GameStats);

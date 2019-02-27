@@ -10,8 +10,10 @@ import { Route, Link } from "react-router-dom";
 const styles = theme => ({
     notification: {
         //padding: theme.spacing.unit * 1,
+        flexBasis: "50px",
         flexGrow: 1,
         width: "100%",
+        //minHeight:"50px",
         backgroundColor: "rgba(12,54,76,0.7)"
         //textAlign: 'center',
         //color: theme.palette.text.secondary,
@@ -19,7 +21,7 @@ const styles = theme => ({
 });
 
 
-class NotificationBar extends Component {
+class NotificationBar extends React.PureComponent {
 
     static contextType = DrizzleContext.Consumer;
 
@@ -33,12 +35,13 @@ class NotificationBar extends Component {
         const { classes } = this.props;
 
         return (
-            <Link to={`/notifications`}>
-                <div className={classes.notification}>
-                    <p>Notification</p>
-                    <p>...</p>
-                </div>
-            </Link>
+
+            <div className={classes.notification}>
+                <Link to={`/notifications`}>
+                    {"Notification"}
+                </Link>
+            </div>
+
         );
     }
 }

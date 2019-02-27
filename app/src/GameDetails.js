@@ -10,27 +10,34 @@ import GameStats from './GameStats';
 import GameLogs from './GameLogs';
 
 const styles = theme => ({
-    root: {
+    flexContainer: {
+        display: 'flex',
+        flexDirection: "column",
         flexGrow: 1,
-        padding: theme.spacing.unit * 1,
-        textAlign: 'center',
-        color: theme.palette.text.secondary
+        width: '100%',
+        height: 'auto',
+        //maxWidth: '85%',
+        margin: 'auto',
+        //backgroundColor: "rgba(162,54,176,0.7)",
     },
-    paper: {
-        padding: theme.spacing.unit * 2,
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-    },
-    notification: {
+    flexChild: {
+        flexGrow: 1,
+        width: '100%',
+        height: 'auto',
+        margin: '1.5rem auto 1.5rem auto',
         //padding: theme.spacing.unit * 1,
-        flexGrow: 1,
+        //backgroundColor: "rgba(32,114,76,0.7)",
+    },
+    gridItem: {
+        flex: '1 1 auto',
+        //padding: theme.spacing.unit * 2,
         //textAlign: 'center',
         //color: theme.palette.text.secondary,
     },
 });
 
 
-class GameDetails extends Component {
+class GameDetails extends React.Component {
 
     static contextType = DrizzleContext.Consumer;
     constructor(props, context) {
@@ -102,11 +109,9 @@ class GameDetails extends Component {
 
         if (this.gameID) {
             gameContainer = <GameContainer key={this.gameID} gameID={this.gameID} drizzleState={drizzleState} />;
-
         }
 
         if (gameData) {
-
             let myEvents = null;
             this.currentRound = gameData.value["currentRound"];
             isGameLocked = (gameData.value["isGameLocked"] ? "true" : "false");
@@ -114,53 +119,36 @@ class GameDetails extends Component {
             console.log("current round is :::::: ", this.currentRound);
             console.log("expression value: ", isGameLocked != true && this.currentRound != 0);
 
-            /* 
-                        this.context.drizzle.contracts.Multiprizer.events
-                            .logPlayGame({
-                                filter: { gameID: this.gameID, roundNumber: this.currentRound },
-                                fromBlock: 0
-                            }, (error, event) => {
-                                console.log("error value is : ", error);
-                                console.log("event obj value is: ", event);
-                            });
-                          .on('data', (event) => console.log(event))
-                        .on('changed', (event) => console.log(event))
-                        .on('error', (error) => console.log(error)); */
-
-
-            /*  web3Multiprizer.getPastEvents(
-                 'logPlayGame',
-                 {
-                     filter: { gameID: this.gameID, roundNumber: this.currentRound },
-                     fromBlock: 0,
-                     toBlock: 'latest'
-                 }, (error, events) => {
-                     myEvents = events;
-                     gameLogs = myEvents != null ?
-                         <GameLogs gameID={this.gameID} roundNumber={this.currentRound} events={myEvents && myEvents} /> :
-                         null;
-                         console.log("gamelogs: ", gameLogs, " myevents: ", myEvents);
-                 });
-              */
-
-
             if (isGameLocked != true && this.currentRound != 0) {
                 if (roundData) {
                     console.log("rounddata: ", roundData);
 
+                    const gameLogEvents = logEvents.filter((eventLog, index, arr) => {
+                        console.log("INSIDE EVENT FILTER _____________________");
+                        if (index > 0 && eventLog.id == arr[index - 1].id) {
+                            return false;
+                        }
+                        if ((eventLog.event == "logPlayGame" ||
+                            eventLog.event == "logRevertGame") &&
+                            eventLog.returnValues.gameID == this.gameID &&
+                            eventLog.returnValues.roundNumber == this.currentRound)
+                            return true;
+                        else
+                            return false
+                
+                    });
+
                     gameStats = <GameStats roundData={roundData} roundNumber={this.currentRound} />;
-                    gameLogs = <GameLogs gameID={this.gameID} roundNumber={this.currentRound} events={logEvents} />;
+                    gameLogs = <GameLogs events={gameLogEvents} />;
                     console.log("gamelogs: ", gameLogs, " myevents: ", logEvents);
                 }
             }
-
-
         }
 
         return (
-            <Fragment>
+            <div className={classes.flexContainer}>
                 <NotificationBar />
-                <Grid container spacing={24} className={classes.root}>
+                <Grid container spacing={0} className={classes.flexChild} direction='row'>
                     <Grid item xs={12} sm={12} md={5} lg={5} >
                         {gameLogs}
                     </Grid>
@@ -171,7 +159,7 @@ class GameDetails extends Component {
                         {gameContainer}
                     </Grid>
                 </Grid>
-            </Fragment>
+            </div>
         );
     }
 }

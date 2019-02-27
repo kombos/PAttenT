@@ -8,6 +8,15 @@ import Paper from '@material-ui/core/Paper';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 
 const styles = theme => ({
+    root: {
+        //padding: theme.spacing.unit * 0.5,
+        margin: '0.75rem 0.75rem 0.75rem 0.75rem',
+        boxSizing: 'border-box',
+        flex: '1 1 auto',
+        backgroundColor: theme.palette.grey[50],
+        height: 400,
+        //height:'auto',
+    },
     table: {
         fontFamily: theme.typography.fontFamily,
     },
@@ -114,48 +123,51 @@ class MuiVirtualizedTable extends React.PureComponent {
         console.log("inside MuiVirtualizedTable render. sortby: ", sortBy, " and sortDirection: ", sortDirection);
         return (
             <AutoSizer>
-                {({ height, width }) => (
-                    <Table
-                        className={classes.table}
-                        height={height}
-                        width={width}
-                        {...tableProps}
-                        rowClassName={this.getRowClassName}
-                        sortBy={sortBy}
-                        sortDirection={sortDirection}
-                        sort={this.sortRenderer}
-                    >
+                {({ height, width }) => {
+                    console.log("autosizer hw: ", height, " and width: ", width);
+                    return (
+                        <Table
+                            className={classes.table}
+                            height={height}
+                            width={width}
+                            {...tableProps}
+                            rowClassName={this.getRowClassName}
+                            sortBy={sortBy}
+                            sortDirection={sortDirection}
+                            sort={this.sortRenderer}
+                        >
 
-                        {columns.map(({ cellContentRenderer = null, className, dataKey, ...other }, index) => {
-                            let renderer;
-                            if (cellContentRenderer != null) {
-                                renderer = cellRendererProps =>
-                                    this.cellRenderer({
-                                        cellData: cellContentRenderer(cellRendererProps),
-                                        columnIndex: index,
-                                    });
-                            } else {
-                                renderer = this.cellRenderer;
-                            }
-
-                            return (
-                                <Column
-                                    key={dataKey}
-                                    headerRenderer={headerProps =>
-                                        this.headerRenderer({
-                                            ...headerProps,
+                            {columns.map(({ cellContentRenderer = null, className, dataKey, ...other }, index) => {
+                                let renderer;
+                                if (cellContentRenderer != null) {
+                                    renderer = cellRendererProps =>
+                                        this.cellRenderer({
+                                            cellData: cellContentRenderer(cellRendererProps),
                                             columnIndex: index,
-                                        })
-                                    }
-                                    className={classNames(classes.flexContainer, className)}
-                                    cellRenderer={renderer}
-                                    dataKey={dataKey}
-                                    {...other}
-                                />
-                            );
-                        })}
-                    </Table>
-                )}
+                                        });
+                                } else {
+                                    renderer = this.cellRenderer;
+                                }
+
+                                return (
+                                    <Column
+                                        key={dataKey}
+                                        headerRenderer={headerProps =>
+                                            this.headerRenderer({
+                                                ...headerProps,
+                                                columnIndex: index,
+                                            })
+                                        }
+                                        className={classNames(classes.flexContainer, className)}
+                                        cellRenderer={renderer}
+                                        dataKey={dataKey}
+                                        {...other}
+                                    />
+                                );
+                            })}
+                        </Table>
+                    )
+                }}
             </AutoSizer>
         );
     }
@@ -186,71 +198,39 @@ MuiVirtualizedTable.defaultProps = {
 
 const WrappedVirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
-function GameLogs(props) {
-    console.log("inside gamestats");
+class GameLogs extends React.Component {
 
-    const { gameID } = props;
-    const { roundNumber } = props;
-    const { events } = props;
+    constructor(props) {
+        super(props);
+        this.state = { sortDirection: SortDirection.ASC, sortBy: 'serial' };
+    }
 
-    const gameLogs = events.filter((eventLog, index, arr) => {
-        console.log("INSIDE EVENT FILTER _____________________");
-        if (index > 0 && eventLog.id == arr[index - 1].id) {
-            return false;
-        }
-        if ((eventLog.event == "logPlayGame" ||
-            eventLog.event == "logRevertGame") &&
-            eventLog.returnValues.gameID == gameID &&
-            eventLog.returnValues.roundNumber == roundNumber)
-            return true;
-        else
-            return false
-
-    });
-
-    // prune the events and reformat
-    let serial = 0;
-    var gameEvents = gameLogs.map((value, index) => {
-        let gameEvent = value.returnValues;
-        gameEvent.playerAddressAbbr = value.returnValues.playerAddress.toString().substr(0, 12) + "..";
-        gameEvent.transactionHash = value.transactionHash;
-        gameEvent.serial = ++serial;
-        gameEvent.logID = value.id;
-        gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
-        return gameEvent;
-    });
-
-    console.log("gameevents: ", gameEvents);
-
-    const [sortDirection, setSortDirection] = React.useState(SortDirection.ASC);
-    const [sortBy, setSortBy] = React.useState('serial');
-    //const [data, setData] = React.useState(gameEvents);
-    console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-    handleSort(sortBy, sortDirection);
-
-    function handleRequestSort(event, property) {
+    handleRequestSort = (event, property) => {
+        let sortBy = this.state.sortBy;
+        let sortDirection = this.state.sortDirection;
         console.log("handlerequestsort() :: sortby: ", sortBy, " sort Direction: ", sortDirection, "  and property: ", property);
         const isAsc = sortBy === property && sortDirection === SortDirection.DESC;
         console.log("isAsc: ", isAsc);
-        //setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
-        setSortDirection(sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC);
-        setSortBy(property);
+        this.setState({
+            sortDirection: (sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC),
+            sortBy: property
+        });
     }
 
-    function handleSort(sortBy, sortDirection) {
+    handleSort = (sortBy, sortDirection) => {
         console.log("inside handlesort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
 
-        const cmp = sortDirection === SortDirection.DESC ? (a, b) => desc(a, b, sortBy) : (a, b) => -desc(a, b, sortBy);
-        const sortedData = stableSort(gameEvents, cmp);
+        const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
+        const sortedData = this.stableSort(this.gameEvents, cmp);
         //const tempData = _.sortBy(data, item => item[sortBy]);
         console.log("sortedData: ", sortedData);
         //const orderedData = sortDirection === SortDirection.DESC ? tempList.reverse() : tempList
         //this.setState({ sortBy, sortDirection, sortedList });
         //setData(sortedData);
-        gameEvents = sortedData;
+        this.gameEvents = sortedData;
     }
 
-    function desc(a, b, sortBy) {
+    desc = (a, b, sortBy) => {
         if (b[sortBy] < a[sortBy]) {
             return -1;
         }
@@ -260,7 +240,7 @@ function GameLogs(props) {
         return 0;
     }
 
-    function stableSort(array, cmp) {
+    stableSort = (array, cmp) => {
         const stabilizedThis = array.map((el, index) => [el, index]);
         stabilizedThis.sort((a, b) => {
             const order = cmp(a[0], b[0]);
@@ -270,21 +250,55 @@ function GameLogs(props) {
         return stabilizedThis.map(el => el[0]);
     }
 
-    return (
-        <Fragment>
-            {gameEvents.length > 0 ? <p>Game Logs</p> : <p>Game Logs (empty)</p>}
-            <Paper style={{ height: 400, width: '100%' }}>
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
+        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
+        console.log("expression: ", (this.props.events.length != nextProps.events.length))
+        if (this.props.events.length != nextProps.events.length ||
+            this.state.sortBy != nextState.sortBy ||
+            this.state.sortDirection != nextState.sortDirection)
+            return true;
+        else
+            return false;
+    }
+
+    render() {
+        console.log("inside gamelogs");
+        let sortBy = this.state.sortBy;
+        let sortDirection = this.state.sortDirection;
+        const { events, classes } = this.props;
+        
+
+        // prune the events and reformat
+        let serial = 0;
+        this.gameEvents = events.map((value, index) => {
+            let gameEvent = value.returnValues;
+            gameEvent.playerAddressAbbr = value.returnValues.playerAddress.toString().substr(0, 12) + "..";
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.serial = ++serial;
+            gameEvent.logID = value.id;
+            gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+            return gameEvent;
+        });
+
+        console.log("gameevents: ", this.gameEvents);
+        console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
+        this.handleSort(sortBy, sortDirection);
+
+        return (
+            <div className={classes.root}>
+                {/* {gameEvents.length > 0 ? <p>Game Logs</p> : <p>Game Logs (empty)</p>} */}
                 <WrappedVirtualizedTable
-                    rowCount={gameEvents.length}
-                    rowGetter={({ index }) => gameEvents[index]}
+                    rowCount={this.gameEvents.length}
+                    rowGetter={({ index }) => this.gameEvents[index]}
                     onRowClick={event => console.log(event)}
-                    onRequestSort={handleRequestSort}
+                    onRequestSort={this.handleRequestSort}
                     sortBy={sortBy}
                     sortDirection={sortDirection}
-                    sort={handleSort}
+                    sort={this.handleSort}
                     columns={[
                         {
-                            width: 80,
+                            width: 90,
                             flexGrow: 1.0,
                             label: 'Serial',
                             dataKey: 'serial',
@@ -292,7 +306,7 @@ function GameLogs(props) {
                         },
                         {
                             width: 180,
-                            flexGrow: 3.0,
+                            flexGrow: 2.0,
                             label: 'Player',
                             dataKey: 'playerAddressAbbr',
                         },
@@ -304,16 +318,19 @@ function GameLogs(props) {
                             numeric: true,
                         },
                         {
-                            width: 200,
+                            width: 190,
                             flexGrow: 3.0,
                             label: 'Time',
                             dataKey: 'timeStamp',
                         },
                     ]}
                 />
-            </Paper>
-        </Fragment>
-    );
+
+            </div>
+        );
+    }
+
+
 }
 
-export default GameLogs;
+export default withStyles(styles)(GameLogs);

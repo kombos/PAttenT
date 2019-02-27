@@ -8,6 +8,17 @@ import Paper from '@material-ui/core/Paper';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 
 const styles = theme => ({
+    root: {
+        //padding: theme.spacing.unit * 0.5,
+        margin: '0.75rem 0.75rem 0.75rem 0.75rem',
+        boxSizing: 'border-box',
+        flex: '1 1 auto',
+        //height:'auto',
+    },
+    tableContainer: {
+        backgroundColor: theme.palette.grey[50],
+        height: 400,
+    },
     table: {
         fontFamily: theme.typography.fontFamily,
     },
@@ -186,40 +197,40 @@ MuiVirtualizedTable.defaultProps = {
 
 const WrappedVirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
-function GameNotifications(props) {
-    console.log("inside gamewinners");
-    var gameEvents = props.events;
-    console.log("gameevents: ", gameEvents);
 
-    const [sortDirection, setSortDirection] = React.useState(SortDirection.DESC);
-    const [sortBy, setSortBy] = React.useState('timeStamp');
-    //const [data, setData] = React.useState(gameEvents);
-    console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-    handleSort(sortBy, sortDirection);
+class GameNotifications extends React.Component {
 
-    function handleRequestSort(event, property) {
+    constructor(props) {
+        super(props);
+        this.state = { sortDirection: SortDirection.DESC, sortBy: 'timeStamp' };
+    }
+
+    handleRequestSort = (event, property) => {
+        let sortBy = this.state.sortBy;
+        let sortDirection = this.state.sortDirection;
         console.log("handlerequestsort() :: sortby: ", sortBy, " sort Direction: ", sortDirection, "  and property: ", property);
         const isAsc = sortBy === property && sortDirection === SortDirection.DESC;
         console.log("isAsc: ", isAsc);
-        //setSortDirection(isAsc == true ? SortDirection.ASC : SortDirection.DESC);
-        setSortDirection(sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC);
-        setSortBy(property);
+        this.setState({
+            sortDirection: (sortDirection == SortDirection.DESC ? SortDirection.ASC : SortDirection.DESC),
+            sortBy: property
+        });
     }
 
-    function handleSort(sortBy, sortDirection) {
+    handleSort = (sortBy, sortDirection) => {
         console.log("inside handlesort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
 
-        const cmp = sortDirection === SortDirection.DESC ? (a, b) => desc(a, b, sortBy) : (a, b) => -desc(a, b, sortBy);
-        const sortedData = stableSort(gameEvents, cmp);
+        const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
+        const sortedData = this.stableSort(this.gameEvents, cmp);
         //const tempData = _.sortBy(data, item => item[sortBy]);
         console.log("sortedData: ", sortedData);
         //const orderedData = sortDirection === SortDirection.DESC ? tempList.reverse() : tempList
         //this.setState({ sortBy, sortDirection, sortedList });
         //setData(sortedData);
-        gameEvents = sortedData;
+        this.gameEvents = sortedData;
     }
 
-    function desc(a, b, sortBy) {
+    desc = (a, b, sortBy) => {
         if (b[sortBy] < a[sortBy]) {
             return -1;
         }
@@ -229,7 +240,7 @@ function GameNotifications(props) {
         return 0;
     }
 
-    function stableSort(array, cmp) {
+    stableSort = (array, cmp) => {
         const stabilizedThis = array.map((el, index) => [el, index]);
         stabilizedThis.sort((a, b) => {
             const order = cmp(a[0], b[0]);
@@ -239,36 +250,105 @@ function GameNotifications(props) {
         return stabilizedThis.map(el => el[0]);
     }
 
-    return (
-        <Fragment>
-        {gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}
-            <Paper style={{ height: 400, width: '100%' }}>
-                <WrappedVirtualizedTable
-                    rowCount={gameEvents.length}
-                    rowGetter={({ index }) => gameEvents[index]}
-                    onRowClick={event => console.log(event)}
-                    onRequestSort={handleRequestSort}
-                    sortBy={sortBy}
-                    sortDirection={sortDirection}
-                    sort={handleSort}
-                    columns={[
-                        {
-                            width: 100,
-                            flexGrow: 1.0,
-                            label: 'Time',
-                            dataKey: 'timeStamp',
-                        },
-                        {
-                            width: 250,
-                            flexGrow: 1.0,
-                            label: 'Notification',
-                            dataKey: 'notification',
-                        },
-                    ]}
-                />
-            </Paper>
-        </Fragment>
-    );
+    componentDidUpdate() {
+        console.log("inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ");
+
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
+        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
+        console.log("expression: ", (this.props.events.length != nextProps.events.length ||
+            this.state.sortBy != nextState.sortBy ||
+            this.state.sortDirection != nextState.sortDirection));
+        if (this.props.events.length != nextProps.events.length ||
+            this.state.sortBy != nextState.sortBy ||
+            this.state.sortDirection != nextState.sortDirection)
+            return true;
+        else
+            return false;
+    }
+
+    render() {
+        console.log("inside gamenotifications");
+        let sortBy = this.state.sortBy;
+        let sortDirection = this.state.sortDirection;
+        const { events, classes } = this.props;
+        
+        // prune the events and reformat
+        let serial = 0;
+        this.gameEvents = events.map((value, index) => {
+            let gameEvent = value.returnValues;
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.serial = ++serial;
+            gameEvent.logID = value.id;
+            gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+            switch (value.event) {
+                case "logPauseGames":
+                    gameEvent.notification =
+                        `All games are paused by Admin, until resumed. You can still revert your played tokens`;
+                    break;
+
+                case "logResumeGames":
+                    gameEvent.notification =
+                        `All games are resumed by Admin now.`;
+                    break;
+
+                case "logRevertFunds":
+                    gameEvent.notification = `All played tokens have been reverted. Please click on withdraw button on top right corner to withdraw your funds.`;
+                    break;
+
+                case "logCompleteRound":
+                    gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
+                    break;
+
+                case "logGameLocked":
+                    gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
+                    break;
+            }
+
+            return gameEvent;
+        });
+
+
+        console.log("gameevents: ", this.gameEvents);
+        console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
+        console.log("fn;;;;;;;;s  sortby: ", this.state.sortBy, " sort Direction: ", this.state.sortDirection);
+        this.handleSort(sortBy, sortDirection);
+
+        return (
+            <div className={classes.root}>
+                {this.gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}
+                <div className={classes.tableContainer}>
+                    <WrappedVirtualizedTable
+                        rowCount={this.gameEvents.length}
+                        rowGetter={({ index }) => this.gameEvents[index]}
+                        onRowClick={event => console.log(event)}
+                        onRequestSort={this.handleRequestSort}
+                        sortBy={sortBy}
+                        sortDirection={sortDirection}
+                        sort={this.handleSort}
+                        columns={[
+                            {
+                                width: 100,
+                                flexGrow: 1.0,
+                                label: 'Time',
+                                dataKey: 'timeStamp',
+                            },
+                            {
+                                width: 250,
+                                flexGrow: 1.0,
+                                label: 'Notification',
+                                dataKey: 'notification',
+                            },
+                        ]}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+
 }
 
-export default GameNotifications;
+export default withStyles(styles)(GameNotifications);

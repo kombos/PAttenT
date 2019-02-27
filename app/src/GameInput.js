@@ -5,61 +5,61 @@ import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Button from '@material-ui/core/Button';
 
-
-
 const styles = theme => ({
-    root: {
-        backgroundImage: `url("https://www.pixelstalk.net/wp-content/uploads/2016/03/Blue-Butterfly-Wallpaper-download-free.jpg")`,
-        //height: 500
-        //backgroundColor: "blue",
-        //flexBasis:
-        padding: theme.spacing.unit * 1
-    },
-    input: {
-        flexGrow: 1,
-        //backgroundColor: "blue",
+
+    flexContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        //backgroundColor: "rgba(122,54,16,0.99)",
+        boxSizing: 'border-box',
+        height: 'auto',
+        width: '100%',
+        margin: 'auto',
         padding: theme.spacing.unit * 0.5,
-        //textAlign: "center",
-        //fontSize:16,
-        margin: "auto",
-        //height: "100%"
+    },
+    flexChild: {
+        flexGrow: 1,
+        textAlign: 'center',
+        alignItems: 'center',
+        fontFamily: "Orbitron",
+        color: "#17d4fe",
+        //padding: theme.spacing.unit * 0.5,
     },
     textField: {
         flexGrow: 1,
-        //backgroundColor: "blue",
-        // padding: theme.spacing.unit * 2,
-        //textAlign: "center",
-        //fontSize:16,
+        //fontSize:16
+        //alignItems: 'center',
+        //textAlign: 'center',
+        //backgroundColor: "rgba(12,54,126,0.99)",
+        //boxSizing: 'border-box',
+        margin: "0.5rem auto 0.5rem auto",
+        //margin:'auto',
         width: "70%",
         //color: theme.palette.text.primary
         //height: "100%",
-        margin: "0.5rem"
     },
     textFieldStyles: {
         padding: theme.spacing.unit * 1,
-        fontSize: "0.9rem"
+        fontSize: "0.9rem",
+        backgroundColor: "rgba(255,255,255,0.49)",
     },
     textLabelStyles: {
         //padding: theme.spacing.unit * 0.8,
-        fontSize: "0.8rem"
+        fontSize: "0.8rem",
+        color: theme.palette.text.primary,
     },
     button: {
         flexGrow: 1,
-        //backgroundColor: "blue",
-        // padding: theme.spacing.unit * 2,
-        //textAlign: "center",
-        //fontSize:16,
         width: "100%",
-        //height: "100%",
         margin: "auto",
         //padding: theme.spacing.unit * 0.5,
         fontSize: "0.8rem"
-        //padding:"20px"
-        //color: theme.palette.text.secondary
+        //color: theme.palette.text.primary
     }
 });
 
-class GameInput extends React.PureComponent {
+class GameInput extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
@@ -186,9 +186,6 @@ class GameInput extends React.PureComponent {
         else {
             return null;
         }
-
-
-
     };
 
     render() {
@@ -209,68 +206,52 @@ class GameInput extends React.PureComponent {
         ) ? true : false;
 
         return (
-            <div className={classes.input}>
-                <form onSubmit={this.handleSubmit}>
-                    {/* Tokens:
-                     <input type="text" ref={this.valueRef} /> */}
-                    {/* <input
-                        type="number"
-                        ref={this.valueRef}
-                        placeholder={"(Max Allowed: " + this.maxTokensPerPlayer + ")"}
-                        name="numTokens"
-                        min="1"
-                        max={this.maxTokensPerPlayer}
-                        onFocus={this.handleFocus}
-                        className={classes.input}
-                    />
- */}
-                    <TextField
-                        id="standard-number"
-                        label="Buy Tokens"
-                        value={this.state.numTokens}
-                        onChange={this.handleChange}
-                        onFocus={this.handleFocus}
-                        type="number"
-                        InputProps={{
-                            classes: {
-                                input: classes.textFieldStyles,
-                            },
-                        }}
-                        inputProps={{
-                            min: this.MINTOKENS,
-                            max: this.remainingTokens,
-                            step: "1",
-                        }}
-                        InputLabelProps={{
-                            shrink: true,
-                            classes: {
-                                root: classes.textLabelStyles,
-                            }
-                        }}
-                        placeholder={"(max: " + this.remainingTokens + ")"}
-                        margin="normal"
-                        //className={classes.textField}
-                        //inputRef={this.valueRef}
-                        margin="normal"
-                        variant="outlined"
-                        className={classes.textField}
-                        disabled={isDisabled}
-                    />
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                        className={classes.button}
-                        disabled={isDisabled}
-                    >
-                        Pay {this.state.numTokens == "" ?
-                            "("+(web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + " eth per token")+")" :
-                            (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + " ethers")}
-                    </Button>
-                </form>
-                {/* <div>{this.getTxStatus()}</div> */}
-            </div>
+            <form onSubmit={this.handleSubmit} className={classes.flexContainer}>
+                <TextField
+                    id="standard-number"
+                    label="Buy Tokens"
+                    value={this.state.numTokens}
+                    onChange={this.handleChange}
+                    onFocus={this.handleFocus}
+                    type="number"
+                    InputProps={{
+                        classes: {
+                            input: classes.textFieldStyles,
+                        },
+                    }}
+                    inputProps={{
+                        min: this.MINTOKENS,
+                        max: this.remainingTokens,
+                        step: "1",
+                    }}
+                    InputLabelProps={{
+                        shrink: true,
+                        classes: {
+                            root: classes.textLabelStyles,
+                        }
+                    }}
+                    placeholder={"(max: " + this.remainingTokens + ")"}
+                    margin="normal"
+                    className={classes.textField}
+                    //inputRef={this.valueRef}
+                    margin="normal"
+                    variant="outlined"
+                    className={classes.textField}
+                    disabled={isDisabled}
+                />
+                <Button
+                    type="submit"
+                    variant="contained"
+                    size="small"
+                    color="primary"
+                    className={classes.button}
+                    disabled={isDisabled}
+                >
+                    Pay {this.state.numTokens == "" ?
+                        "(" + (web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + " eth per token") + ")" :
+                        (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + " ethers")}
+                </Button>
+            </form>
         );
     }
 }
@@ -280,4 +261,4 @@ GameInput.propTypes = {
     classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(GameInput);
+export default withStyles(styles)(GameInput); 
