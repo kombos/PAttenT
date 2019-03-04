@@ -220,7 +220,7 @@ function GameStats(props) {
             serial: i + 1,
             player: playerList[i],
             playerAddressAbbr: playerList[i].toString().substr(0, 12) + "..",
-            tokens: playerTokensList[i]
+            tokens: parseInt(playerTokensList[i])   
         });
     }
 

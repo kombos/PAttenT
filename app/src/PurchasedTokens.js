@@ -17,8 +17,8 @@ const styles = theme => ({
         //backgroundColor: "rgba(12,54,6,0.99)",
         paddingTop: (theme.spacing.unit * 1.5),
         paddingBottom: (theme.spacing.unit * 1),
-        paddingLeft: (theme.spacing.unit * 1),
-        paddingRight: (theme.spacing.unit * 1),
+        //paddingLeft: (theme.spacing.unit * 1),
+        //paddingRight: (theme.spacing.unit * 1),
     },
     flexContainer: {
         display: 'flex',
@@ -27,15 +27,20 @@ const styles = theme => ({
         boxSizing: 'border-box',
         height: 'auto',
         width: '100%',
-        margin: 'auto',
+        //margin: 'auto',
         color: "17d4fe",
         padding: theme.spacing.unit * 1.5,
+        /* paddingTop: theme.spacing.unit * 1.5,
+        paddingBottom: theme.spacing.unit * 1.5,
+        paddingLeft: theme.spacing.unit * 0.5,
+        paddingRight: theme.spacing.unit * 0.5, */
         fontFamily: theme.typography.fontFamily,
         //backgroundColor: "rgba(12,54,7,0.99)",
     },
     flexChild: {
-        flexGrow: 1,
-        backgroundColor: "#17d4fe",
+        flexGrow: 2.5,
+        //backgroundColor: "#17d4fe",
+        backgroundColor: "#11d2fe",
         //fontFamily: 'Helvetica, sans-serif',
         padding: theme.spacing.unit * 0.75,
         //minHeight: '40px',
@@ -44,13 +49,13 @@ const styles = theme => ({
         flexGrow: 1,
         //backgroundColor: "#12f4fe",
         fontFamily: 'Helvetica, sans-serif',
-        margin: 'auto',
+        
         height: 'auto',
     },
     button: {
         flexGrow: 1,
         color: theme.palette.secondary,
-        fontSize: "0.7rem"
+        fontSize: "0.7rem",
     },
     smallText: {
         fontSize: "0.7rem",

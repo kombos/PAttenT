@@ -14,7 +14,23 @@ const styles = theme => ({
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         boxSizing: 'border-box',
         flex: '1 1 auto',
-        //height:'auto',
+        height: 'auto',
+        backgroundColor: "rgba(0,0,0,0.69)",
+    },
+    transPanel: {
+        color: theme.palette.primary.light,
+        fontWeight: 'bold',
+        //alignItems: 'center',
+        flexGrow: 1,
+        //backgroundColor: "rgba(0,0,0,0.69)",
+        boxSizing: 'border-box',
+        height: 'auto',
+        width: '75%',
+        margin: 'auto',
+        //margin: '0.5rem auto 0.5rem auto',
+        /* borderRadius: theme.shape.borderRadius * 2,
+        paddingTop: theme.spacing.unit * 0.05,
+        paddingBottom: theme.spacing.unit * 0.05, */
     },
     tableContainer: {
         backgroundColor: theme.palette.grey[50],
@@ -22,14 +38,19 @@ const styles = theme => ({
     },
     table: {
         fontFamily: theme.typography.fontFamily,
+
     },
     flexContainer: {
         display: 'flex',
         alignItems: 'center',
         boxSizing: 'border-box',
+
+        //textAlign:'left',
     },
     tableRow: {
         cursor: 'pointer',
+
+
     },
     tableRowHover: {
         '&:hover': {
@@ -38,6 +59,10 @@ const styles = theme => ({
     },
     tableCell: {
         flex: 1,
+        /* border:'2px solid',
+        justifyContent: 'center',
+        alignItems:'center',
+        textAlign:'left', */
     },
     noClick: {
         cursor: 'initial',
@@ -79,8 +104,8 @@ class MuiVirtualizedTable extends React.PureComponent {
                 )}
                 variant="body"
                 style={{ height: rowHeight }}
-                //align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
-                align={'left'}
+                align={(columns[columnIndex] && columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
+            //align={'left'}
             >
                 {cellData}
             </TableCell>
@@ -113,8 +138,8 @@ class MuiVirtualizedTable extends React.PureComponent {
                 className={classNames(classes.tableCell, classes.flexContainer, classes.noClick)}
                 variant="head"
                 style={{ height: headerHeight }}
-                //align={columns[columnIndex].numeric || false ? 'right' : 'left'}
-                align={'left'}
+                align={columns[columnIndex].numeric || false ? 'right' : 'left'}
+            //align={'left'}
             >
                 {inner}
             </TableCell>
@@ -268,20 +293,46 @@ class GameWinners extends React.Component {
         let sortBy = this.state.sortBy;
         let sortDirection = this.state.sortDirection;
         const web3 = this.context.drizzle.web3;
-        const { classes } = this.props;
-        const gameWinnersLogs = this.props.events;
+        const { events, classes } = this.props;
+        //const { classes } = this.props;
+        //const gameWinnersLogs = this.props.events;
         let serial = 0;
+
+        /* let events = [{
+            transactionHash: "0x7d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
+            id: "log_dcf38a3b",
+            returnValues: {
+                gameID: "109",
+                winnerAddress: "0xd0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
+                winnerAmount: 50000000000000000,
+                timeSecs: "1551180548",
+                roundNumber: "2"
+            }
+        },
+        {
+            transactionHash: "0x8d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
+            id: "log_dcf88a3b",
+            returnValues: {
+                gameID: "110",
+                winnerAddress: "0xb0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
+                winnerAmount: 5000000000000000,
+                timeSecs: "1651180548",
+                roundNumber: "4"
+            }
+        }]; */
 
         // prune the events and reformat
         serial = 0;
-        this.gameEvents = gameWinnersLogs.map((value, index) => {
+        this.gameEvents = events.map((value, index) => {
             let gameEvent = value.returnValues;
             gameEvent.transactionHash = value.transactionHash;
             gameEvent.serial = ++serial;
             gameEvent.logID = value.id;
             gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
             gameEvent.playerAddressAbbr = value.returnValues.winnerAddress.toString().substr(0, 12) + "..";
-            gameEvent.prize = (web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether') + " eth");
+            //gameEvent.prize = (web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether') + " eth");
+            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
+            gameEvent.gameID = parseInt(value.returnValues.gameID);
 
             return gameEvent;
         });
@@ -294,7 +345,7 @@ class GameWinners extends React.Component {
 
         return (
             <div className={classes.root}>
-                {this.gameEvents.length > 0 ? <p>Game Winners</p> : <p>Game Winners (empty)</p>}
+                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Winners</p> : <p>Game Winners (empty)</p>}</div>
                 <div className={classes.tableContainer}>
                     <WrappedVirtualizedTable
                         rowCount={this.gameEvents.length}
@@ -310,6 +361,7 @@ class GameWinners extends React.Component {
                                 flexGrow: 1.0,
                                 label: 'GameID',
                                 dataKey: 'gameID',
+                                numeric: true,
                             },
                             {
                                 width: 90,
@@ -327,8 +379,9 @@ class GameWinners extends React.Component {
                             {
                                 width: 180,
                                 flexGrow: 2.0,
-                                label: 'Prize Won',
+                                label: 'Prize (eth)',
                                 dataKey: 'prize',
+                                numeric: true,
                             },
                         ]}
                     />

@@ -64,7 +64,7 @@ class MuiVirtualizedTable extends React.PureComponent {
         console.log("lower level sortby: ", sortObj.sortBy, " sortdirection: ", sortObj.sortDirection, " default: ", sortObj.defaultSortDirection);
         const { sort } = this.props;
         sort(sortObj.sortBy, sortObj.sortDirection);
-    }
+        }
 
     cellRenderer = ({ cellData, columnIndex = null }) => {
         const { columns, classes, rowHeight, onRowClick } = this.props;
@@ -267,7 +267,7 @@ class GameLogs extends React.Component {
         let sortBy = this.state.sortBy;
         let sortDirection = this.state.sortDirection;
         const { events, classes } = this.props;
-        
+        console.log("events::: ", events);
 
         // prune the events and reformat
         let serial = 0;
@@ -278,6 +278,7 @@ class GameLogs extends React.Component {
             gameEvent.serial = ++serial;
             gameEvent.logID = value.id;
             gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+            gameEvent.playerTokens = parseInt(value.returnValues.playerTokens);
             return gameEvent;
         });
 

@@ -3,7 +3,6 @@ import { DrizzleContext } from "drizzle-react";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import whaleTank from './img/whaleTank.png';
 
 const styles = theme => ({
     flexContainer: {
@@ -44,12 +43,11 @@ class MastHead extends React.PureComponent {
         console.log("inside gameProps");
         const web3 = this.context.drizzle.web3;
 
-        const { gameID, currentRound, totalValueForGame, totalWinnings, classes } = this.props;
-        console.log("currentRound? : ", currentRound);
+        const { gameID, classes } = this.props;
 
         return (
             <div className={classes.flexContainer}>
-                <img src={whaleTank} alt="Whale Tank Img" className={classes.mastHeadImg}/>
+                <img src={require(`./img/${gameID}.png`)} alt="MastHead Img" className={classes.mastHeadImg}/>
             </div>
         );
     }

@@ -14,10 +14,28 @@ const styles = theme => ({
         boxSizing: 'border-box',
         flex: '1 1 auto',
         //height:'auto',
+        backgroundColor: "rgba(0,0,0,0.69)",
+    },
+    transPanel: {
+        color: theme.palette.primary.light,
+        fontWeight: 'bold',
+        //alignItems: 'center',
+        flexGrow: 1,
+        //backgroundColor: "rgba(100,0,0,0.69)",
+        boxSizing: 'border-box',
+        height: 'auto',
+        width: '75%',
+        margin: 'auto',
+        //margin: '0.5rem auto 0.5rem auto',
+        //borderRadius: theme.shape.borderRadius * 2,
+        //paddingTop: theme.spacing.unit * 0.05,
+        //paddingBottom: theme.spacing.unit * 0.05,
+        //paddingBottom: '0.02rem',
     },
     tableContainer: {
         backgroundColor: theme.palette.grey[50],
         height: 400,
+        margin: '0rem auto auto auto',
     },
     table: {
         fontFamily: theme.typography.fontFamily,
@@ -26,6 +44,7 @@ const styles = theme => ({
         display: 'flex',
         alignItems: 'center',
         boxSizing: 'border-box',
+        
     },
     tableRow: {
         cursor: 'pointer',
@@ -41,6 +60,7 @@ const styles = theme => ({
     noClick: {
         cursor: 'initial',
     },
+    
 });
 
 class MuiVirtualizedTable extends React.PureComponent {
@@ -274,7 +294,7 @@ class GameNotifications extends React.Component {
         let sortBy = this.state.sortBy;
         let sortDirection = this.state.sortDirection;
         const { events, classes } = this.props;
-        
+
         // prune the events and reformat
         let serial = 0;
         this.gameEvents = events.map((value, index) => {
@@ -318,7 +338,7 @@ class GameNotifications extends React.Component {
 
         return (
             <div className={classes.root}>
-                {this.gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}
+                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}</div>
                 <div className={classes.tableContainer}>
                     <WrappedVirtualizedTable
                         rowCount={this.gameEvents.length}

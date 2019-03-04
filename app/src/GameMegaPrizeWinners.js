@@ -15,6 +15,22 @@ const styles = theme => ({
         boxSizing: 'border-box',
         flex: '1 1 auto',
         //height:'auto',
+        backgroundColor: "rgba(0,0,0,0.69)",
+    },
+    transPanel: {
+        color: theme.palette.primary.light,
+        fontWeight: 'bold',
+        //alignItems: 'center',
+        flexGrow: 1,
+        //backgroundColor: "rgba(0,0,0,0.69)",
+        boxSizing: 'border-box',
+        height: 'auto',
+        width: '75%',
+        margin: 'auto',
+        //margin: '0.5rem auto 0.5rem auto',
+        /* borderRadius: theme.shape.borderRadius * 2,
+        paddingTop: theme.spacing.unit * 0.05,
+        paddingBottom: theme.spacing.unit * 0.05, */
     },
     tableContainer: {
         backgroundColor: theme.palette.grey[50],
@@ -270,6 +286,30 @@ class GameMegaPrizeWinners extends React.Component {
         let sortDirection = this.state.sortDirection;
         const web3 = this.context.drizzle.web3;
         const { events, classes } = this.props;
+        //const { classes } = this.props;
+
+        /* let events = [{
+            transactionHash: "0x7d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
+            id: "log_dcf38a3b",
+            returnValues: {
+                megaPrizeNumber: "10",
+                megaPrizeWinner: "0xd0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
+                winnerAmount: 50000000000000000,
+                timeSecs: "1551180548",
+                roundNumber: "2"
+            }
+        },
+        {
+            transactionHash: "0x8d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
+            id: "log_dcf88a3b",
+            returnValues: {
+                megaPrizeNumber: "11",
+                megaPrizeWinner: "0xb0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
+                winnerAmount: 5000000000000000,
+                timeSecs: "1651180548",
+                roundNumber: "4"
+            }
+        }]; */
 
         // prune the events and reformat
         let serial = 0;
@@ -280,7 +320,9 @@ class GameMegaPrizeWinners extends React.Component {
             gameEvent.logID = value.id;
             gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
             gameEvent.playerAddressAbbr = value.returnValues.megaPrizeWinner.toString().substr(0, 12) + "..";
-            gameEvent.prize = (web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether') + " eth");
+            //gameEvent.prize = (web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether') + " eth");
+            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'))
+            gameEvent.megaPrizeNumber = parseInt(value.returnValues.megaPrizeNumber);
 
             return gameEvent;
         });
@@ -290,7 +332,7 @@ class GameMegaPrizeWinners extends React.Component {
 
         return (
             <div className={classes.root}>
-                {this.gameEvents.length > 0 ? <p>MegaPrize Winners</p> : <p>MegaPrize Winners (empty)</p>}
+                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>MegaPrize Winners</p> : <p>MegaPrize Winners (empty)</p>}</div>
                 <div className={classes.tableContainer}>
                     <WrappedVirtualizedTable
                         rowCount={this.gameEvents.length}
@@ -306,6 +348,7 @@ class GameMegaPrizeWinners extends React.Component {
                                 flexGrow: 1.0,
                                 label: 'MP No.',
                                 dataKey: 'megaPrizeNumber',
+                                numeric: true,
                             },
                             {
                                 width: 180,
@@ -318,6 +361,7 @@ class GameMegaPrizeWinners extends React.Component {
                                 flexGrow: 3.0,
                                 label: 'Prize Won',
                                 dataKey: 'prize',
+                                numeric: true,
                             },
                         ]}
                     />

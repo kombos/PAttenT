@@ -122,7 +122,6 @@ class GameDetails extends React.Component {
             if (isGameLocked != true && this.currentRound != 0) {
                 if (roundData) {
                     console.log("rounddata: ", roundData);
-
                     const gameLogEvents = logEvents.filter((eventLog, index, arr) => {
                         console.log("INSIDE EVENT FILTER _____________________");
                         if (index > 0 && eventLog.id == arr[index - 1].id) {
@@ -147,7 +146,7 @@ class GameDetails extends React.Component {
 
         return (
             <div className={classes.flexContainer}>
-                <NotificationBar />
+                <NotificationBar events={logEvents} />
                 <Grid container spacing={0} className={classes.flexChild} direction='row'>
                     <Grid item xs={12} sm={12} md={5} lg={5} >
                         {gameLogs}

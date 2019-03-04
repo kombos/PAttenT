@@ -5,15 +5,22 @@ import { Header, Footer } from './Layouts';
 import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
 import GameDetails from '../GameDetails';
 import Notifications from '../Notifications';
+import backgroundImage from '../img/bg.jpg';
+import './App.css';
 
 export default () => (
     <DrizzleContext.Consumer>
         {drizzleContext => {
             console.log("inside App.js");
             const { drizzle, drizzleState, initialized } = drizzleContext;
-            //const gameStrategies = <GameStrategies initialized={initialized} drizzleState={drizzleState} />;
-            //const gameDetails = <GameDetails gameID={gameID} drizzleState={drizzleState} />;
-            //const notifications = <Notifications />;
+            let header = null;
+            if (drizzleState) {
+                const playerAddress = drizzleState.accounts[0];
+                console.log("playeraddress: ", playerAddress);
+                header = <Header playerAddress={playerAddress} />;
+            }
+
+
             console.log("initialized: ", initialized);
             console.log("drizzleState: ", drizzleState);
             console.log("drizzle: ", drizzle);
@@ -28,13 +35,8 @@ export default () => (
 
             return (
                 <Router>
-                    <div style={{
-                        display:"flex",
-                        width:"100%",
-                        minHeight:"100%",
-                        flexDirection:"column",
-                    }}>
-                        <Header />
+                    <div className="App">
+                        {header}
 
                         <Switch>
                             <Route exact path="/" render={

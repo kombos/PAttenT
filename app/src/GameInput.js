@@ -198,6 +198,7 @@ class GameInput extends React.Component {
         this.maxTokensPerPlayer = gameData.value.maxTokensPerPlayer;
         this.playerTokens = this.props.playerTokens;
         this.remainingTokens = (this.maxTokensPerPlayer - this.playerTokens);
+        console.log("tokenvalue: ", tokenValue);
 
         const isDisabled = (
             isGameLocked == true ||
