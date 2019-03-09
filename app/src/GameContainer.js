@@ -70,10 +70,10 @@ class GameContainer extends React.Component {
 
     componentDidUpdate() {
         console.log("inside componentDidUpdate :: ");
-        console.log("gameKey: ", this.state.gameKey, " gameID: ", this.gameID, " currentRound: ", this.currentRound);
+        console.log("gameKey: ", this.state.gameKey, " gameID: ", this.gameID, " currentRound: ", this.currentRound, " roundkey: ", this.state.roundKey);
         console.log("expression: ", this.currentRound && this.state.gameKey && this.gameID && !this.state.roundKey && this.currentRound != 0);
         if (this.currentRound && this.state.gameKey && this.gameID && !this.state.roundKey && this.currentRound != 0) {
-            console.log("inside if loop");
+            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@inside if loop");
             const multiprizer = this.context.drizzle.contracts.Multiprizer;
             // get and save the key for the variable we are interested in
             const roundKey = multiprizer.methods["viewRoundInfo"].cacheCall(this.gameID, this.currentRound);
@@ -151,6 +151,7 @@ class GameContainer extends React.Component {
                     iterationStartTimeSecs = roundData.value["_iterationStartTimeSecs"];
                     tokenData = <TokensData maxTokens={maxTokens}
                         tokensLeft={(maxTokens - totalTokensPurchased)} />;
+                        
 
                     if (defaultAccount) {
                         console.log("updated default account: ", this.context.drizzleState.accounts[0]);
@@ -163,15 +164,32 @@ class GameContainer extends React.Component {
 
                         if (playerTokens > 0) {
                             indicator = <PurchasedTokens playerTokens={playerTokens}
-                                maxTokensPerPlayer={maxTokensPerPlayer} gameID={this.gameID} />
+                                maxTokensPerPlayer={maxTokensPerPlayer} gameID={this.gameID} roundNumber={this.currentRound} />
                         }
                         else {
                             indicator = <Indicator userTokens={maxTokensPerPlayer} gameTokens={maxTokens}
                                 duration={gameDurationInEpoch} tokenValue={tokenValue} isGameLocked={isGameLocked} />
                         }
 
+                        if (this.gameID == 104) {
+
+                            console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                            console.log("game duration: ", gameDurationInEpoch, " startTime: ", iterationStartTimeSecs, "gameID: ", this.gameID);
+                            console.log("total tokens purchased: ", totalTokensPurchased);
+                            console.log("playerLIst : ", playerList);
+                            console.log(" tokenslist: ", playerTokensList);
+                            console.log("playerTokens: ", playerTokens);
+                            console.log("gameID: ", this.gameID, " round: ", this.currentRound);
+                            console.log("%%%%%%%%%%%%%%%%%%%%%%%%% tokens left: ", (maxTokens - totalTokensPurchased));
+                            console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+
+                        }
+
+
+
                     }
-                    console.log(" *************************** game duration: ", gameDurationInEpoch, " startTime: ", iterationStartTimeSecs, "gameID: ", this.gameID);
+
+
                     timer = <Timer duration={gameDurationInEpoch} startTime={iterationStartTimeSecs} />;
                 }
 

@@ -13,15 +13,17 @@ import InfoIcon from '@material-ui/icons/Info';
 
 
 const styles = theme => ({
-    notification: {
-        padding: theme.spacing.unit * 0.5,
+    container: {
+        //padding: theme.spacing.unit * 0.5,
         display: 'flex',
+        lineHeight: '1.2em',
         [theme.breakpoints.down(theme.breakpoints.keys[2])]: {
-            height: "62px",
+            height: '4.8em',
         },
         [theme.breakpoints.up(theme.breakpoints.keys[2])]: {
-            height: "47px",
+            height: '2.4em',
         },
+        margin: '0.3em auto auto auto',
         flexGrow: 1,
         width: "100%",
         overflow: 'hidden',
@@ -30,10 +32,11 @@ const styles = theme => ({
         //textAlign: 'center',
         //color: theme.palette.text.secondary,
     },
-    notificationContainer: {
-        padding: theme.spacing.unit * 0.7,
+    child: {
+        //padding: theme.spacing.unit * 0.7,
         //display: 'inline-block',
         flexGrow: 1,
+        //lineHeight: '1.2em',
         //margin:'auto',
         //width: "100%",
         //height: 'auto',
@@ -52,7 +55,7 @@ const styles = theme => ({
         //color: theme.palette.text.secondary,
     },
     infoIcon: {
-        fontSize: "0.8rem",
+        fontSize: "0.9em",
     },
 });
 
@@ -75,6 +78,25 @@ class NotificationBar extends React.Component {
         else
             return false;
     }
+
+    componentDidUpdate() {
+        console.log("did update  notificationDIV: ", document.getElementById('notificationDiv').clientHeight);
+        console.log("notificationDIV(ext): ", document.getElementById('notificationDiv').offsetHeight);
+        console.log("bounding obj:", document.getElementById('notificationDiv').getBoundingClientRect());
+        console.log("did update  notificationDIV: ", document.getElementById('container').clientHeight);
+        console.log("notificationDIV(ext): ", document.getElementById('container').offsetHeight);
+        console.log("bounding obj:", document.getElementById('container').getBoundingClientRect());
+    }
+
+    componentDidMount() {
+        console.log("did mount  notificationDIV: ", document.getElementById('notificationDiv').clientHeight);
+        console.log("notificationDIV(ext): ", document.getElementById('notificationDiv').offsetHeight);
+        console.log("bounding obj:", document.getElementById('notificationDiv').getBoundingClientRect());
+        console.log("did update  notificationDIV: ", document.getElementById('container').clientHeight);
+        console.log("notificationDIV(ext): ", document.getElementById('container').offsetHeight);
+        console.log("bounding obj:", document.getElementById('container').getBoundingClientRect());
+    }
+
     render() {
 
         const { classes, history } = this.props;
@@ -110,7 +132,7 @@ class NotificationBar extends React.Component {
         let defaultNotification = "Welcome! Input number of tokens to purchase and click 'Pay' to play!"
         let gameEvent = null;
         let gameEvents = [];
-        for (let i = gameNotificationsLogs.length-1; i >= 0; i--) {
+        for (let i = gameNotificationsLogs.length - 1; i >= 0; i--) {
             if (gameNotificationsLogs[i].transactionHash == gameNotificationsLogs[gameNotificationsLogs.length - 1].transactionHash) {
                 gameEvent = gameNotificationsLogs[i].returnValues;
                 gameEvent.transactionHash = gameNotificationsLogs[i].transactionHash;
@@ -142,6 +164,7 @@ class NotificationBar extends React.Component {
 
                     case "logWinner":
                         gameEvent.notification = `Game: ${gameEvent.gameID}, Round: ${gameEvent.roundNumber} winner is ${gameEvent.winnerAddress}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.winnerAmount)).toString(), 'ether') + " eth")}.`;
+                        
                         break;
 
                     case "logMegaPrizeWinner":
@@ -162,6 +185,7 @@ class NotificationBar extends React.Component {
                 break;
             }
         }
+
 
         console.log("gameevents:: ", gameEvents);
         console.log("notificationJSX: ", notificationJSX);
@@ -213,24 +237,24 @@ class NotificationBar extends React.Component {
  */
 
         console.log("notification: : ", notificationJSX);
+
         const renderLink = () => {
             history.push(`/notifications`);
         };
 
         return (
-            <div className={classes.notification}>
-                <ButtonBase className={classes.notificationContainer} onClick={renderLink}>
-                    <Tooltip title="Notification Bar" placement="top">
-                        <div>
-                            {/* {notification} */}
-                            {notificationJSX.length!=0 ? notificationJSX : defaultNotification}
-                            {notificationJSX.length!=0 ? notificationJSX : defaultNotification}
-                            {notificationJSX.length!=0 ? notificationJSX : defaultNotification}
-                            {notificationJSX.length!=0 ? notificationJSX : defaultNotification}
+            <ButtonBase onClick={renderLink}>
+                <Tooltip title="Notification Bar" placement="top">
+                    <div id="container" className={classes.container}>
+                        <div id="notificationDiv" className={classes.child}>
+                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
+                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
+                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
+                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
                         </div>
-                    </Tooltip>
-                </ButtonBase>
-            </div>
+                    </div >
+                </Tooltip>
+            </ButtonBase >
         );
     }
 }

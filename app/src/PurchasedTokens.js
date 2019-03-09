@@ -97,7 +97,8 @@ class PurchasedTokens extends React.PureComponent {
     }
 
     render() {
-        const { playerTokens, maxTokensPerPlayer, classes } = this.props;
+        const { playerTokens, maxTokensPerPlayer, roundNumber, classes } = this.props;
+        console.log("roundnumber: ", roundNumber);
         console.log("playerTokens: ", playerTokens);
         console.log("maxTokensPerPlayer: ", maxTokensPerPlayer);
         let revertConfirm = null;

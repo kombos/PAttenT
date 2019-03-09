@@ -247,8 +247,8 @@ struct Round{
     uint256 gameID;
     uint256 roundNumber;
     uint256 totalTokensPurchased;
-    uint256 iterationStartTimeSecs;
-    uint256 iterationStartTimeBlock;
+    uint256 roundStartTimeSecs;
+    uint256 roundStartTimeBlock;
     mapping (address => uint256) playerTokens;
     address payable[] playerList;
     address payable winner;
@@ -305,15 +305,15 @@ address payable public oraclizeAddress;
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
-uint256 megaPrizeID;
-uint256 megaPrizeAmount;
+uint256 public megaPrizeStartTimeSecs;
+uint256 public megaPrizeAmount;
 mapping (address => uint256) private megaPrizePlayers;
 mapping (address => uint256) private megaPrizeIndexes;
 address payable[] private megaPrizePlayersKeys;
 address payable[] public megaPrizeWinners;
-uint256 megaPrizeNumber;
-uint256 megaPrizeDurationInEpoch;
-uint256 megaPrizeDurationInBlocks;
+uint256 public megaPrizeNumber;
+uint256 public megaPrizeDurationInEpoch;
+uint256 public megaPrizeDurationInBlocks;
 bool private isMegaPrizeEnabled;
 bool private isMegaPrizeLateLocked;
 bool private isMegaPrizeMatured;
@@ -489,11 +489,8 @@ function updateDirectPlayByAdmin( uint256 _directPlayWithdrawValue, bool _isDire
 
 
 function updateMegaPrizeByAdmin(
-    uint256 _megaPrizeID, 
     uint256 _megaPrizeAmount, 
-    bool _isMegaPrizeEnabled, 
     bool _isMegaPrizeLateLocked, 
-    bool _isMegaPrizeMatured, 
     uint256 _megaPrizeDurationInEpoch, 
     uint256 _megaPrizeDurationInBlocks) external payable
     onlyOwners {
@@ -503,34 +500,13 @@ function updateMegaPrizeByAdmin(
         require(!isMegaPrizeEnabled && isMegaPrizeLateLocked, 
             " MegaPrize round has to finish and locks set before the game can be updated. ");
         // note that admins cannot deduct the mega prize amount, only infuse additional amount to it.
-        megaPrizeID = _megaPrizeID;
         megaPrizeAmount = megaPrizeAmount.add(_megaPrizeAmount);
-        isMegaPrizeEnabled = _isMegaPrizeEnabled;
         isMegaPrizeLateLocked = _isMegaPrizeLateLocked;
-        isMegaPrizeMatured = _isMegaPrizeMatured;
         megaPrizeDurationInEpoch = _megaPrizeDurationInEpoch;
         megaPrizeDurationInBlocks = _megaPrizeDurationInBlocks;
         
     //# EMIT EVENT LOG - to be done
 }
-
- 
-function unlockMegaPrizeByAdmin() external 
-    onlyOwners {
-
-        isMegaPrizeLateLocked = false;
-        isMegaPrizeEnabled = true;
-        //# EMIT EVENT LOG1
-}
-
-
-function lockMegaPrizeByAdmin() external 
-    onlyOwners {
-
-        isMegaPrizeLateLocked = true;
-        //# EMIT EVENT LOG1
-}
-
 
 function unlockGamesByAdmin(uint256[] calldata _gameIDs) external 
     onlyOwners {
@@ -594,15 +570,15 @@ function resumeAllGamesByAdmin() public
             _currentRound = gameStrategies[gameStrategiesKeys[i]].currentRound;
             if(_currentRound == 0) continue;
             _currentRoundID = cantorPairing(_gameID, _currentRound);
-            rounds[_currentRoundID].iterationStartTimeSecs = rounds[_currentRoundID].iterationStartTimeSecs.add(now.sub(pauseTimeSecs));
-            rounds[_currentRoundID].iterationStartTimeBlock = rounds[_currentRoundID].iterationStartTimeBlock.add((block.number).sub(pauseTimeBlock));
+            rounds[_currentRoundID].roundStartTimeSecs = rounds[_currentRoundID].roundStartTimeSecs.add(now.sub(pauseTimeSecs));
+            rounds[_currentRoundID].roundStartTimeBlock = rounds[_currentRoundID].roundStartTimeBlock.add((block.number).sub(pauseTimeBlock));
             gameStrategies[gameStrategiesKeys[i]].isGameLocked = false;
             gameStrategies[gameStrategiesKeys[i]].isGameLateLocked = false;
 
         }
 
         // VERY IMPORTANT TO EMIT EVENT TO RESUME TIMER AT TIMEKEEPER END!!!
-        emit logResumeGames(isGamesPaused, rounds[_currentRoundID].iterationStartTimeSecs, rounds[_currentRoundID].iterationStartTimeBlock);
+        emit logResumeGames(isGamesPaused, rounds[_currentRoundID].roundStartTimeSecs, rounds[_currentRoundID].roundStartTimeBlock);
 
 }
 
@@ -651,8 +627,8 @@ function revertFundsToPlayers(uint256[] memory _gameIDs) public
             rounds[_nextRoundID].gameID = gameStrategies[_gameID].gameID;
             rounds[_nextRoundID].roundNumber = _nextRoundNumber;
             rounds[_nextRoundID].totalTokensPurchased = 0;
-            rounds[_nextRoundID].iterationStartTimeSecs = now;
-            rounds[_nextRoundID].iterationStartTimeBlock = block.number;
+            rounds[_nextRoundID].roundStartTimeSecs = now;
+            rounds[_nextRoundID].roundStartTimeBlock = block.number;
             rounds[_nextRoundID].isRoundOpen = true;
 
         }
@@ -771,12 +747,29 @@ function revertGame(uint256 _gameID, address payable _playerAddress ) public  {
 
 }
 
-
-function completeMegaprizeRoundByAdmin() external 
+ 
+function unlockMegaPrizeByAdmin() external 
     onlyOwners {
-        isMegaPrizeMatured = true;
-        isMegaPrizeEnabled = false;  
-        
+
+        isMegaPrizeLateLocked = false;
+        isMegaPrizeEnabled = true;
+        megaPrizeStartTimeSecs = now;
+        //# EMIT EVENT LOG1
+}
+
+function lockMegaPrizeByAdmin() external 
+    onlyOwners {
+
+        isMegaPrizeLateLocked = true;
+        //# EMIT EVENT LOG1
+}
+
+function completeMegaPrizeRoundByAdmin() external 
+    onlyOwners {
+        if(isMegaPrizeEnabled == true && megaPrizePlayersKeys.length > 1) {
+            isMegaPrizeMatured = true;
+            isMegaPrizeEnabled = false;  
+        }
     }
 
 function completeRoundsByAdmin(uint256[] calldata _gameIDs) external 
@@ -802,7 +795,7 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 continue;
             }
             // set the _needsOraclize flag if in at least one of the games, the number of players is more than 1
-            _needsOraclize = ((rounds[_roundID].playerList.length > 1) || (isMegaPrizeMatured && isMegaPrizeEnabled)) ? true : false ;
+            _needsOraclize = ((rounds[_roundID].playerList.length > 1) || (isMegaPrizeMatured)) ? true : false ;
             if(_needsOraclize) break;
         }
 
@@ -865,8 +858,8 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 rounds[_nextRoundID].gameID = gameStrategies[_gameIDs[i]].gameID;
                 rounds[_nextRoundID].roundNumber = _nextRoundNumber;
                 rounds[_nextRoundID].totalTokensPurchased = 0;
-                rounds[_nextRoundID].iterationStartTimeSecs = now;
-                rounds[_nextRoundID].iterationStartTimeBlock = block.number;
+                rounds[_nextRoundID].roundStartTimeSecs = now;
+                rounds[_nextRoundID].roundStartTimeBlock = block.number;
                 rounds[_nextRoundID].isRoundOpen = true;
 
             }
@@ -1017,6 +1010,11 @@ function compensateWinner(bytes32 _oraclizeID, uint256 _oraclizeRandomNumber) pr
         // lock the next mega prize round if isMegaPrizeLateLocked flag is set
         if(isMegaPrizeLateLocked) {
             isMegaPrizeEnabled = false;
+            megaPrizeStartTimeSecs = 0;
+        }
+        else {
+            isMegaPrizeEnabled = true;
+            megaPrizeStartTimeSecs = now;
         }
         
         // safeSend the relevant mega prize amount to the mega prize winner
@@ -1050,7 +1048,7 @@ function viewWithdrawalInfo(address payable _playerAddress) external view
         //SOME ERROR IN PLAYERWITHDRAWAL KEYS, THEY WAY THEY DEDUCT WHEN WITHDRAWN. FIX IT.
 }
 
-
+/* 
 function viewMegaPrizeInfo() external view  
     returns(
         uint256 _megaPrizeAmount,
@@ -1067,13 +1065,13 @@ function viewMegaPrizeInfo() external view
             isMegaPrizeMatured
         );
 }
-
+ */
 
 function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view  
     returns(
         uint256 _totalTokensPurchased,
-        uint256 _iterationStartTimeSecs,
-        uint256 _iterationStartTimeBlock,
+        uint256 _roundStartTimeSecs,
+        uint256 _roundStartTimeBlock,
         address payable[] memory _playerList,
         uint256[] memory _playerTokensList,
         address payable _winner,
@@ -1091,8 +1089,8 @@ function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view
         /* require(rounds[roundID].isRoundOpen != true, " Round number chosen is stil open. "); */
 
         _totalTokensPurchased = rounds[roundID].totalTokensPurchased;
-        _iterationStartTimeSecs = rounds[roundID].iterationStartTimeSecs;
-        _iterationStartTimeBlock = rounds[roundID].iterationStartTimeBlock;
+        _roundStartTimeSecs = rounds[roundID].roundStartTimeSecs;
+        _roundStartTimeBlock = rounds[roundID].roundStartTimeBlock;
         _playerList = rounds[roundID].playerList;
         _playerTokensList = new uint256[](_playerList.length);
         for (uint256 i=0; i<rounds[roundID].playerList.length; i++) {
@@ -1121,7 +1119,7 @@ function viewGameIDs() external view
 
 function getMegaPrizeByAdmin() external view  
     onlyOwners returns(
-        uint256 _megaPrizeID,
+        uint256 _megaPrizeStartTimeSecs,
         uint256 _megaPrizeAmount,
         uint256 _megaPrizeNumber,
         uint256 _megaPrizeDurationInEpoch,
@@ -1132,7 +1130,7 @@ function getMegaPrizeByAdmin() external view
         bool _isMegaPrizeLateLocked,
         bool _isMegaPrizeMatured
     ){
-        _megaPrizeID = megaPrizeID;
+        _megaPrizeStartTimeSecs = megaPrizeStartTimeSecs;
         _megaPrizeAmount = megaPrizeAmount;
         _megaPrizeNumber = megaPrizeNumber;
         _megaPrizeDurationInEpoch = megaPrizeDurationInEpoch;

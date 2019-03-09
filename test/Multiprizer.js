@@ -482,6 +482,8 @@ contract("Multiprizer", accounts => {
         
         //await instance.send(10, {from:accounts[0]});
         await oraclize_instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
+        web3.eth.getBalance(oraclize_instance.address).then((balance) => (console.log("oraclize balance: ", balance)));
+        //console.log("oraclize instance balance: ", web3.eth.getBalance(oraclize_instance.address));
         await instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
         console.log("last?");
         await instance.completeRoundsByAdmin(_gameID, { from: accounts[0], gas:10000000 })
