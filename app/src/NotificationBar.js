@@ -102,10 +102,11 @@ class NotificationBar extends React.Component {
         const { classes, history } = this.props;
         const logEvents = this.props.events;
         const web3 = this.context.drizzle.web3;
+        let gameNotificationsLogs = [];
 
         console.log("logss: ", logEvents);
 
-        const gameNotificationsLogs = logEvents.filter((eventLog, index, arr) => {
+       /*  const gameNotificationsLogs = logEvents.filter((eventLog, index, arr) => {
             console.log("INSIDE gameNotif EVENT FILTER _____________________");
             if (index > 0 && eventLog.id == arr[index - 1].id) {
                 return false;
@@ -122,6 +123,22 @@ class NotificationBar extends React.Component {
             else
                 return false
 
+        }); */
+
+        logEvents.forEach((logEvent, index) => {
+
+            if (logEvent.event == "logPauseGames" ||
+                logEvent.event == "logResumeGames" ||
+                logEvent.event == "logRevertFunds" ||
+                logEvent.event == "logCompleteRound" ||
+                logEvent.event == "logGameLocked" ||
+                logEvent.event == "logWinner" ||
+                logEvent.event == "logPlayGame" ||
+                logEvent.event == "logMegaPrizeWinner") {
+                if (!(logEvents.findIndex(i => i.id === logEvent.id) < index)) {
+                    gameNotificationsLogs.push(logEvent);
+                }
+            }
         });
 
         console.log("logevents: ", gameNotificationsLogs);
@@ -164,7 +181,7 @@ class NotificationBar extends React.Component {
 
                     case "logWinner":
                         gameEvent.notification = `Game: ${gameEvent.gameID}, Round: ${gameEvent.roundNumber} winner is ${gameEvent.winnerAddress}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.winnerAmount)).toString(), 'ether') + " eth")}.`;
-                        
+
                         break;
 
                     case "logMegaPrizeWinner":
@@ -247,9 +264,6 @@ class NotificationBar extends React.Component {
                 <Tooltip title="Notification Bar" placement="top">
                     <div id="container" className={classes.container}>
                         <div id="notificationDiv" className={classes.child}>
-                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
-                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
-                            {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
                             {notificationJSX.length != 0 ? notificationJSX : defaultNotification}
                         </div>
                     </div >

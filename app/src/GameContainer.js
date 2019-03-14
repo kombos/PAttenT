@@ -72,7 +72,7 @@ class GameContainer extends React.Component {
         console.log("inside componentDidUpdate :: ");
         console.log("gameKey: ", this.state.gameKey, " gameID: ", this.gameID, " currentRound: ", this.currentRound, " roundkey: ", this.state.roundKey);
         console.log("expression: ", this.currentRound && this.state.gameKey && this.gameID && !this.state.roundKey && this.currentRound != 0);
-        if (this.currentRound && this.state.gameKey && this.gameID && !this.state.roundKey && this.currentRound != 0) {
+        if (this.currentRound && this.prevRound && this.state.gameKey && this.gameID && (!this.state.roundKey || this.currentRound != this.prevRound) && this.currentRound != 0) {
             console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@inside if loop");
             const multiprizer = this.context.drizzle.contracts.Multiprizer;
             // get and save the key for the variable we are interested in
@@ -130,6 +130,7 @@ class GameContainer extends React.Component {
         console.log("default account: ", defaultAccount);
 
         if (gameData) {
+            this.prevRound = this.currentRound;
             this.currentRound = gameData.value["currentRound"];
             maxTokens = gameData.value["maxTokens"];
             maxTokensPerPlayer = gameData.value["maxTokensPerPlayer"];
@@ -148,14 +149,12 @@ class GameContainer extends React.Component {
                 if (roundData) {
                     gameDurationInEpoch = gameData.value["gameDurationInEpoch"];
                     totalTokensPurchased = roundData.value["_totalTokensPurchased"];
-                    iterationStartTimeSecs = roundData.value["_iterationStartTimeSecs"];
+                    iterationStartTimeSecs = roundData.value["_roundStartTimeSecs"];
                     tokenData = <TokensData maxTokens={maxTokens}
                         tokensLeft={(maxTokens - totalTokensPurchased)} />;
-                        
 
                     if (defaultAccount) {
                         console.log("updated default account: ", this.context.drizzleState.accounts[0]);
-
                         playerList = roundData.value["_playerList"];
                         playerTokensList = roundData.value["_playerTokensList"];
                         if (playerList.indexOf(defaultAccount) > -1) {
@@ -184,11 +183,7 @@ class GameContainer extends React.Component {
                             console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
                         }
-
-
-
                     }
-
 
                     timer = <Timer duration={gameDurationInEpoch} startTime={iterationStartTimeSecs} />;
                 }

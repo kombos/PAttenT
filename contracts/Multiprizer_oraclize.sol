@@ -88,6 +88,18 @@ contract Ownable {
     
 }
 
+/**
+ * @title Multiprizer_abstract
+ * @dev The Multiprizer contract is the core game.
+ */
+contract Multiprizer_abstract {
+    function calculateWinnerByOracle(
+    bytes32 _oraclizeID, 
+    bytes calldata _result, 
+    bytes calldata _oraclizeProof, 
+    bool _isProofValid) external;
+}
+
 
 /**
  * @title Multiprizer_oraclize
@@ -96,6 +108,12 @@ contract Ownable {
 
 contract Multiprizer_oraclize is Ownable, usingOraclize  {
 
+/** 
+*  Contract Variable
+*  @dev DirectPlay enables a player to place a single token for any of the strategy games   
+*  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
+  */
+Multiprizer_abstract private multiprizer;
 
 /** 
 *  Oraclize Props Variables 
@@ -137,12 +155,12 @@ address payable public multiprizerAddress;
 constructor (address payable _contractAddress) public {
     //# EMIT EVENT LOG - to be done
     multiprizerAddress = _contractAddress;
+    multiprizer = Multiprizer_abstract(multiprizerAddress);
     // set proof type as 'ledger'. this needn't be changed further
     oraclize_setProof(proofType_Ledger);
     // push a zero-init value to the oraclizeIDs array to help it prevent malicious oraclize executions
     oraclizeIDs.push("");
 }
-
 
 function updateOraclizePropsByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
     uint256 _numBytesOraclize, uint256 _delayOraclize) external 
@@ -164,7 +182,6 @@ function updateOraclizePropsByAdmin(uint256 _gasLimitOraclize, uint256 _gasPrice
     //# EMIT EVENT LOG - to be done
 }
 
-
 function getOraclizePropsByAdmin() external view 
     onlyOwners returns(
         uint256 _gasLimitOraclize,
@@ -179,7 +196,6 @@ function getOraclizePropsByAdmin() external view
         _delayOraclize = delayOraclize;
         _priceOraclize = priceOraclize;
 }
-
 
 function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
     onlyOwners returns (
@@ -198,9 +214,8 @@ function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
     _isProofValid = isProofsValid[resultIndex];
 }
 
-
 function newRandomDSQuery() external returns (bytes32 _queryId) {
-    //if (msg.sender != multiprizerAddress) revert("newrandomdsquery: address is not of multiprizer");
+    if (msg.sender != multiprizerAddress) revert("caller_err");
         //check if contract has enough funds to invoke oraclize
         if(priceOraclize > address(this).balance) {
             // pause all games until contract funds have been replenished
@@ -209,10 +224,9 @@ function newRandomDSQuery() external returns (bytes32 _queryId) {
         _queryId = oraclize_newRandomDSQuery(delayOraclize, numBytesOraclize, gasLimitOraclize);
 }
 
-
 function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _oraclizeProof) public {
     // check if the callback was invoked by oraclize
-    if (msg.sender != oraclize_cbAddress()) revert();
+    if (msg.sender != oraclize_cbAddress()) revert("caller_err");
     bool _isProofValid;
     uint256 _proofCode;
     // if a round has been already decided by Oraclize callback, then continue with next round. 
@@ -221,8 +235,6 @@ function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _or
     _proofCode = oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof);
     if (_proofCode != 0) {
         _isProofValid = false;
-
-        //# EMIT THE _proofCode value
     }
     else {
         _isProofValid = true;
@@ -234,17 +246,15 @@ function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _or
     results[oraclizeLength-1] = bytes(_result);
     oraclizeProofs[oraclizeLength-1] = _oraclizeProof;
     isProofsValid[oraclizeLength-1] = _isProofValid;
+    multiprizer.calculateWinnerByOracle(_oraclizeID, results[oraclizeLength-1], _oraclizeProof, _isProofValid);
 }
-
-
 
 // fallback function 
 function () external payable {
-    if(msg.sender != owner() && msg.sender != timekeeper() && msg.sender != multiprizerAddress)
-        revert(" only admins can send funds to this contract ");
+    /* if(msg.sender != owner() && msg.sender != timekeeper() && msg.sender != multiprizerAddress)
+        revert(" only admins can send funds to this contract "); */
     
 }
-
 
 // self destruct contract after reverting all pending games of players and sending back funds
 function ownerKill() external 
@@ -252,7 +262,6 @@ function ownerKill() external
         selfdestruct(owner());
         
 }
-
 
 }
 

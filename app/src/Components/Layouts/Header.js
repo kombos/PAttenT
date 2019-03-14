@@ -17,6 +17,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
+import { withRouter } from "react-router";
+import ButtonBase from '@material-ui/core/ButtonBase';
 
 const styles = {
     root: {
@@ -65,11 +67,11 @@ class Header extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         console.log("this props: ", this.props.playerAddress, " next props: ", nextProps.playerAddress);
-        if(!this.withdrawAmount){
+        if (!this.withdrawAmount) {
             console.log("no withdraw amount yet");
             return true;
         }
-        
+
         if (this.props.playerAddress != nextProps.playerAddress ||
             this.state.isDrawerOpen != nextState.isDrawerOpen ||
             this.state.dataKey != nextState.dataKey)
@@ -79,7 +81,7 @@ class Header extends React.Component {
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, history } = this.props;
         const toggleDrawer = (isDrawerOpen) => () => {
             this.setState({ isDrawerOpen: isDrawerOpen });
         };
@@ -90,6 +92,10 @@ class Header extends React.Component {
         console.log("withdraw amt : ", this.withdrawAmount && parseInt(this.withdrawAmount.value));
         isWithdrawDisabled = this.withdrawAmount && (parseInt(this.withdrawAmount.value) > 0) ? false : true;
         console.log("isWithdrawDisabled: ", isWithdrawDisabled);
+
+        const renderLink = () => {
+            history.push(`/`);
+        };
 
         const sideList = (
             <div className={classes.list}>
@@ -120,9 +126,13 @@ class Header extends React.Component {
                         <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={toggleDrawer(true)}>
                             <MenuIcon />
                         </IconButton>
-                        <Typography variant="h6" color="inherit" className={classes.grow}>
-                            Multiprizer
-                    </Typography>
+                        <div className={classes.grow}>
+                            <ButtonBase onClick={renderLink} >
+                                <Typography variant="h6" color="inherit" >
+                                    Multiprizer
+                                </Typography>
+                            </ButtonBase>
+                        </div>
                         <Tooltip title={isWithdrawDisabled == true ? "Withdraw Tokens (disabled)" : "Withdraw Tokens"}>
                             <div>
                                 <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled}>
@@ -155,4 +165,4 @@ Header.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Header);
+export default withRouter(withStyles(styles)(Header));

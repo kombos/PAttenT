@@ -32,6 +32,8 @@ export default () => (
             console.log("value of initialized: ", initialized);
             console.log("drizzleState: ", drizzleState);
             console.log("drizzle: ", drizzle);
+            const logEvents = drizzleState.contracts.Multiprizer.events;
+
 
             return (
                 <Router>
@@ -44,7 +46,7 @@ export default () => (
                             <Route path="/gameDetails/:gameID"
                                 render={({ match }) => <GameDetails gameID={match.params.gameID} drizzleState={drizzleState} />} />
                             <Route path="/notifications" render={
-                                () => <Notifications drizzleState={drizzleState} />} />
+                                () => <Notifications drizzleState={drizzleState} events={logEvents}/>} />
                             <Route render={() => <div><p> Error </p></div>} />
                         </Switch>
 

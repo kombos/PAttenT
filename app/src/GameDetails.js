@@ -64,7 +64,7 @@ class GameDetails extends React.Component {
         console.log("inside componentDidUpdate :: ");
         console.log("gameKey: ", this.state.gameKey, " gameID: ", this.gameID, " currentRound: ", this.currentRound);
         console.log("expression: ", this.currentRound && this.state.gameKey && this.gameID && !this.state.roundKey && this.currentRound != 0);
-        if (this.currentRound && this.state.gameKey && this.gameID && !this.state.roundKey && this.currentRound != 0) {
+        if (this.currentRound && this.state.gameKey && this.gameID && (!this.state.roundKey || this.currentRound != this.prevRound) && this.currentRound != 0) {
             console.log("inside if loop");
             const multiprizer = this.context.drizzle.contracts.Multiprizer;
             // get and save the key for the variable we are interested in
@@ -113,15 +113,32 @@ class GameDetails extends React.Component {
 
         if (gameData) {
             let myEvents = null;
+            let gameLogEvents = [];
+            this.prevRound = this.currentRound;
             this.currentRound = gameData.value["currentRound"];
             isGameLocked = (gameData.value["isGameLocked"] ? "true" : "false");
             console.log("is game locked? : ", isGameLocked);
             console.log("current round is :::::: ", this.currentRound);
             console.log("expression value: ", isGameLocked != true && this.currentRound != 0);
 
+            //PROBLEM WITH SORTING OF TIMESTAMP
             if (isGameLocked != true && this.currentRound != 0) {
                 if (roundData) {
                     console.log("rounddata: ", roundData);
+
+                    logEvents.forEach((logEvent, index) => {
+
+                        if ((logEvent.event == "logPlayGame" ||
+                            logEvent.event == "logRevertGame") &&
+                            logEvent.returnValues.gameID == this.gameID &&
+                            logEvent.returnValues.roundNumber == this.currentRound) {
+                            if (!(logEvents.findIndex(i => i.id === logEvent.id) < index)) {
+                                gameLogEvents.push(logEvent);
+                            }
+                        }
+                    });
+
+/* 
                     const gameLogEvents = logEvents.filter((eventLog, index, arr) => {
                         console.log("INSIDE EVENT FILTER _____________________");
                         if (index > 0 && eventLog.id == arr[index - 1].id) {
@@ -134,8 +151,10 @@ class GameDetails extends React.Component {
                             return true;
                         else
                             return false
-                
+
                     });
+ */
+
 
                     gameStats = <GameStats roundData={roundData} roundNumber={this.currentRound} />;
                     gameLogs = <GameLogs events={gameLogEvents} />;

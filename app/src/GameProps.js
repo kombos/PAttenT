@@ -39,7 +39,7 @@ const styles = theme => ({
         fontSize: "0.7rem",
     },
     largeText: {
-        fontSize: "1.1rem",
+        fontSize: "1.0rem",
     },
     mediumText: {
         fontSize: "0.8rem",
