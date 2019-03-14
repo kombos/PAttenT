@@ -10,8 +10,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { withRouter } from "react-router";
 import InfoIcon from '@material-ui/icons/Info';
 
-
-
 const styles = theme => ({
     container: {
         //padding: theme.spacing.unit * 0.5,
