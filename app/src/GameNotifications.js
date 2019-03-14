@@ -304,7 +304,7 @@ class GameNotifications extends React.Component {
             gameEvent.logID = value.id;
             gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
             switch (value.event) {
-                case "logPauseGames":
+                /* case "logPauseGames":
                     gameEvent.notification =
                         `All games are paused by Admin, until resumed. You can still revert your played tokens`;
                     break;
@@ -316,7 +316,7 @@ class GameNotifications extends React.Component {
 
                 case "logRevertFunds":
                     gameEvent.notification = `All played tokens have been reverted. Please click on withdraw button on top right corner to withdraw your funds.`;
-                    break;
+                    break; */
 
                 case "logCompleteRound":
                     gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;

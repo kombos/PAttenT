@@ -127,9 +127,10 @@ class NotificationBar extends React.Component {
 
         logEvents.forEach((logEvent, index) => {
 
-            if (logEvent.event == "logPauseGames" ||
+            if (
+                /* logEvent.event == "logPauseGames" ||
                 logEvent.event == "logResumeGames" ||
-                logEvent.event == "logRevertFunds" ||
+                logEvent.event == "logRevertFunds" || */
                 logEvent.event == "logCompleteRound" ||
                 logEvent.event == "logGameLocked" ||
                 logEvent.event == "logWinner" ||
@@ -146,7 +147,7 @@ class NotificationBar extends React.Component {
         // prune the events and reformat
         let serial = 0;
         let notificationJSX = [];
-        let defaultNotification = "Welcome! Input number of tokens to purchase and click 'Pay' to play!"
+        let defaultNotification = "  Welcome! Input number of tokens to purchase and click 'Pay' to play!"
         let gameEvent = null;
         let gameEvents = [];
         for (let i = gameNotificationsLogs.length - 1; i >= 0; i--) {
@@ -157,7 +158,7 @@ class NotificationBar extends React.Component {
                 gameEvent.logID = gameNotificationsLogs[i].id;
                 gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
                 switch (gameNotificationsLogs[i].event) {
-                    case "logPauseGames":
+                   /*  case "logPauseGames":
                         gameEvent.notification =
                             `All games are temporarily paused by Admin. You can still revert your played tokens.`;
                         break;
@@ -169,7 +170,7 @@ class NotificationBar extends React.Component {
 
                     case "logRevertFunds":
                         gameEvent.notification = `All played tokens have been reverted. Please click on withdraw button on top right corner to withdraw your funds.`;
-                        break;
+                        break; */
 
                     case "logCompleteRound":
                         gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;

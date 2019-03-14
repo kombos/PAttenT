@@ -329,7 +329,7 @@ event logPlayGame(uint256 indexed gameID, uint256 indexed roundNumber, address p
 event logRevertGame(uint256 indexed gameID, uint256 indexed roundNumber, address playerAddress, uint256 playerTokens, uint256 timeSecs, uint256 timeBlock);
 //event logPauseGames(bool isGamesPaused, uint256 timeSecs, uint256 timeBlock);
 //event logResumeGames(bool isGamesPaused, uint256 timeSecs, uint256 timeBlock);
-event logRevertFunds(uint256 timeSecs, uint256 timeBlock);
+//event logRevertFunds(uint256 timeSecs, uint256 timeBlock);
 event logCompleteRound(uint256 gameID, uint256 roundNumber, uint256 timeSecs, uint256 timeBlock);
 event logGameLocked(uint256 gameID, uint256 roundNumber, uint256 timeSecs, uint256 timeBlock);
 event logWinner(uint256 gameID, uint256 roundNumber, address winnerAddress, uint256 winnerAmount, uint256 timeSecs, uint256 timeBlock);
@@ -667,11 +667,11 @@ function playGame(uint256 _gameID, uint256 _numberOfTokens ) public
         // consider for megaPrize
         if(isMegaPrizeEnabled) {
 
-            if(megaPrizeIndexes[msg.sender] > (megaPrizePlayersKeys.length-1) || 
+            if(megaPrizeIndexes[msg.sender] >= megaPrizePlayersKeys.length || 
                 megaPrizePlayersKeys[megaPrizeIndexes[msg.sender]] != msg.sender) {
                     megaPrizePlayersKeys.push(msg.sender);
                     megaPrizeIndexes[msg.sender] = (megaPrizePlayersKeys.length).sub(1);
-                    megaPrizePlayers[megaPrizeIndexes[msg.sender]] = 0;
+                    megaPrizePlayers.push(0);
             }
 
             /* if(megaPrizePlayers[msg.sender] == 0) {

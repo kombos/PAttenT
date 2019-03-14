@@ -225,7 +225,7 @@ contract("Multiprizer", accounts => {
 
     });
 
-    it("should Pause all games : Positive Scenario   : pauseAllGamesByAdmin() ", async () => {
+   /*  it("should Pause all games : Positive Scenario   : pauseAllGamesByAdmin() ", async () => {
 
         let gasEstimate = await multiprizer.methods.pauseAllGamesByAdmin().estimateGas({ from: accounts[0] });
         console.log(" pauseAllGamesByAdmin() Invocation Gas : ", gasEstimate);
@@ -267,7 +267,7 @@ contract("Multiprizer", accounts => {
 
             })
 
-    });
+    }); */
 
     it("should update the directPlay variables : Positive Scenario   : updateDirectPlayByAdmin() ", async () => {
 
@@ -290,31 +290,23 @@ contract("Multiprizer", accounts => {
 
     it("should update the megaPrize variables : Positive Scenario   : updateMegaPrizeByAdmin() ", async () => {
 
-        let _megaPrizeID = 900;
+        //let _megaPrizeID = 900;
         let _megaPrizeAmount = 0;
-        let _isMegaPrizeEnabled = false;
-        let _isMegaPrizeLateLocked = true;
-        let _isMegaPrizeMatured = false;
+        //let _isMegaPrizeEnabled = false;
+        //let _isMegaPrizeLateLocked = true;
+        //let _isMegaPrizeMatured = false;
         let _megaPrizeDurationInEpoch = 1234567;
         let _megaPrizeDurationInBlocks = 80000;
 
         let gasEstimate = await multiprizer.methods.updateMegaPrizeByAdmin(
-            _megaPrizeID,
             _megaPrizeAmount,
-            _isMegaPrizeEnabled,
-            _isMegaPrizeLateLocked,
-            _isMegaPrizeMatured,
             _megaPrizeDurationInEpoch,
             _megaPrizeDurationInBlocks
         ).estimateGas({ from: accounts[0] });
 
         console.log(" updateMegaPrizeByAdmin() Invocation Gas : ", gasEstimate);
         await instance.updateMegaPrizeByAdmin(
-            _megaPrizeID,
             _megaPrizeAmount,
-            _isMegaPrizeEnabled,
-            _isMegaPrizeLateLocked,
-            _isMegaPrizeMatured,
             _megaPrizeDurationInEpoch,
             _megaPrizeDurationInBlocks
             , { from: accounts[0] })
@@ -322,11 +314,7 @@ contract("Multiprizer", accounts => {
                 console.log("Transaction Receipt : " + receipt);
                 let gameData = await instance.getMegaPrizeByAdmin({ from: accounts[0] });
                 if (
-                    gameData._megaPrizeID == _megaPrizeID &&
                     gameData._megaPrizeAmount == _megaPrizeAmount &&
-                    gameData._isMegaPrizeEnabled == _isMegaPrizeEnabled &&
-                    gameData._isMegaPrizeLateLocked == _isMegaPrizeLateLocked &&
-                    gameData._isMegaPrizeMatured == _isMegaPrizeMatured &&
                     gameData._megaPrizeDurationInEpoch == _megaPrizeDurationInEpoch &&
                     gameData._megaPrizeDurationInBlocks == _megaPrizeDurationInBlocks
                 ) {
@@ -378,13 +366,17 @@ contract("Multiprizer", accounts => {
     it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundsByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
         let _gameID = 102;
+        let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
+        let _currentRound = gameData.currentRound;
+        console.log("current round BEFORE completeRound: ", _currentRound.toNumber());
         let gasEstimate = await multiprizer.methods.completeRoundsByAdmin([_gameID]).estimateGas({ from: accounts[0] });
         console.log(" completeRoundsByAdmin() Invocation Gas : ", gasEstimate);
         await instance.completeRoundsByAdmin([_gameID], { from: accounts[0] })
             .then(async function (receipt) {
                 console.log("Transaction Receipt : " + receipt);
-                let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-                let _currentRound = gameData.currentRound;
+                gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
+                _currentRound = gameData.currentRound;
+                console.log("current round after completeRound: ", _currentRound.toNumber());
                 if (gameData.currentRound != 0) {
                     assert.ok(true);
                 }
@@ -407,6 +399,9 @@ contract("Multiprizer", accounts => {
 
         let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
         let _currentRound = gameData.currentRound;
+
+        console.log(" current round: ", _currentRound.toString());
+        console.log(" current round: ", _currentRound.toNumber());
 
         let gasEstimate = await multiprizer.methods.playGame(_gameID, _numberofTokens)
             .estimateGas({ from: accounts[0], value: (gameData.tokenValue * _numberofTokens) });

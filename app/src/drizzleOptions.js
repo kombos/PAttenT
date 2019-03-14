@@ -26,8 +26,8 @@ const drizzleOptions = {
                     fromBlock: 0
                 }
             },
-            {
-                eventName:'logPauseGames',
+            /* {
+                eventName:'',
                 eventOptions:{
                     fromBlock: 0
                 }
@@ -37,13 +37,13 @@ const drizzleOptions = {
                 eventOptions:{
                     fromBlock: 0
                 }
-            },
+            }, 
             {
                 eventName:'logRevertFunds',
                 eventOptions:{
                     fromBlock: 0
                 }
-            },
+            }, */
             {
                 eventName:'logCompleteRound',
                 eventOptions:{

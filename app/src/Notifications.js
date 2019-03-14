@@ -91,9 +91,10 @@ class Notifications extends React.Component {
                 if (logEvents.findIndex(i => i.id === logEvent.id) < index) {
                     return false;
                 }
-                if (logEvent.event == "logPauseGames" ||
+                if (
+                    /* logEvent.event == "logPauseGames" ||
                     logEvent.event == "logResumeGames" ||
-                    logEvent.event == "logRevertFunds" ||
+                    logEvent.event == "logRevertFunds" || */
                     logEvent.event == "logCompleteRound" ||
                     logEvent.event == "logGameLocked") {
                     gameNotificationsLogs.push(logEvent);
