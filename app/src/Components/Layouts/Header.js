@@ -50,43 +50,73 @@ class Header extends React.Component {
         this.context = context;
         this.state = {
             dataKey: null,
-            isDrawerOpen: false
+            isDrawerOpen: false,
+            stackID: null
         };
     }
 
-    componentDidMount() {
-        console.log("# Header: $$$$$ INSIDE COMPONENT DID MOUNT $$$$$");
-        const Multiprizer = this.context.drizzle.contracts.Multiprizer;
+    getWithdrawals(playerAddress) {
+        console.log("# Header: $$$$$ INSIDE getWithdrawals $$$$$");
+        const Multiprizer = this.props.drizzle.contracts.Multiprizer;
         // get and save the key for the variable we are interested in
-        const dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(this.props.playerAddress);
+        console.log("player : ", playerAddress);
+        let dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(playerAddress);
         console.log("# Header datakey value is:" + dataKey);
         this.setState({
             dataKey: dataKey
         });
     }
 
+    withdrawTokens = () => {
+        console.log("inside withdrawTokens() ");
+        let playerAddress = this.props.playerAddress;
+        console.log("playeraddr: ", playerAddress);
+        const multiprizer = this.context.drizzle.contracts.Multiprizer;
+        const stackID = multiprizer.methods.withdraw.cacheSend({
+            from: playerAddress
+        });
+        console.log("stackID: ", stackID);
+        this.setState({ stackID: stackID });
+    }
+
+    componentDidMount() {
+        this.getWithdrawals(this.props.playerAddress);
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         console.log("this props: ", this.props.playerAddress, " next props: ", nextProps.playerAddress);
-        if (!this.withdrawAmount) {
+        /* if (!this.withdrawAmount) {
             console.log("no withdraw amount yet");
             return true;
-        }
+        } */
 
-        if (this.props.playerAddress != nextProps.playerAddress ||
-            this.state.isDrawerOpen != nextState.isDrawerOpen ||
-            this.state.dataKey != nextState.dataKey)
-            return true;
-        else
-            return false;
+        /*  if (
+             this.props.playerAddress != nextProps.playerAddress ||
+             this.state.isDrawerOpen != nextState.isDrawerOpen ||
+             this.state.dataKey != nextState.dataKey ||
+             this.state.stackID != nextState.stackID
+         ) {
+             this.getWithdrawals(nextProps.playerAddress);
+             return true;
+         }
+         else
+             return false; */
+
+        if (this.props.playerAddress != nextProps.playerAddress) {
+            this.getWithdrawals(nextProps.playerAddress);
+        }
+        return true;
     }
 
     render() {
+        console.log("# inside render ");
         const { classes, history } = this.props;
         const toggleDrawer = (isDrawerOpen) => () => {
             this.setState({ isDrawerOpen: isDrawerOpen });
         };
         const dataKey = this.state.dataKey;
-        const multiprizer = this.context.drizzleState.contracts.Multiprizer;
+        const multiprizer = this.props.drizzleState.contracts.Multiprizer;
+        console.log("datakey: ", dataKey);
         this.withdrawAmount = multiprizer.viewWithdrawalInfo[dataKey];
         let isWithdrawDisabled = true;
         console.log("withdraw amt : ", this.withdrawAmount && parseInt(this.withdrawAmount.value));
@@ -133,9 +163,9 @@ class Header extends React.Component {
                                 </Typography>
                             </ButtonBase>
                         </div>
-                        <Tooltip title={isWithdrawDisabled == true ? "Withdraw Tokens (disabled)" : "Withdraw Tokens"}>
+                        <Tooltip title={isWithdrawDisabled == true ? "Withdraw Winnings (disabled)" : "Withdraw Winnings"}>
                             <div>
-                                <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled}>
+                                <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled} onClick={this.withdrawTokens}>
                                     <SaveAltIcon />
                                 </IconButton>
                             </div>

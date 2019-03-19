@@ -19,7 +19,7 @@ module.exports = function(deployer, network, accounts) {
         _gameProperties[11] : uint256 directPlayTokenGas
 */
 
-    var _gameProperties = [
+    var _gameProperties4 = [
         102,
         500,
         web3.utils.toHex(1e16),
@@ -33,7 +33,7 @@ module.exports = function(deployer, network, accounts) {
         0,
         web3.utils.toHex(1e16)
     ];
-    var _gameProperties2 = [
+    var _gameProperties3 = [
         103,
         300,
         web3.utils.toHex(5e16),
@@ -47,7 +47,7 @@ module.exports = function(deployer, network, accounts) {
         0,
         web3.utils.toHex(1e16)
     ];
-    var _gameProperties3 = [
+    var _gameProperties2 = [
         104,
         40,
         web3.utils.toHex(1e17),
@@ -61,7 +61,7 @@ module.exports = function(deployer, network, accounts) {
         0,
         web3.utils.toHex(1e16)
     ];
-    var _gameProperties4 = [
+    var _gameProperties = [
         105,
         100,
         web3.utils.toHex(1e18),
@@ -122,7 +122,7 @@ module.exports = function(deployer, network, accounts) {
             // update multiprizer_oraclize props
             .then(function(oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
-                let _gasLimitOraclize = 900000;
+                let _gasLimitOraclize = 1000000;
                 let _gasPriceOraclize = 2e10;
                 let _numBytesOraclize = 7;
                 let _delayOraclize = 0;
@@ -150,8 +150,6 @@ module.exports = function(deployer, network, accounts) {
             .catch(function(e){
                 console.log(e);
             });
-
-
     }
 
 
@@ -193,7 +191,7 @@ module.exports = function(deployer, network, accounts) {
             // update multiprizer_oraclize props
             .then(function(oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
-                let _gasLimitOraclize = 400000;
+                let _gasLimitOraclize = 1000000;
                 let _gasPriceOraclize = 2e10;
                 let _numBytesOraclize = 7;
                 let _delayOraclize = 0;
@@ -217,6 +215,9 @@ module.exports = function(deployer, network, accounts) {
             .then(function(receipt) {
                 console.log("complete round for current game ..... ");
                 return multiprizerInstance.completeRoundsByAdmin([102,103,104,105],{from:accounts[0]});
+            })
+            .then(function(receipt) {
+                console.log(" ALL DONE!  ..... ");
             })
             .catch(function(e){
                 console.log(e);

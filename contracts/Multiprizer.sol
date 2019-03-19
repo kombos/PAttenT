@@ -289,7 +289,7 @@ mapping (uint256 => Game) public gameStrategies;
 uint256[] public gameStrategiesKeys;
 mapping (address => uint256) private playerWithdrawals;
 address payable[] private playerWithdrawalsKeys;
-mapping (uint256 => address payable[]) gameSlabs;
+mapping (uint256 => address payable[]) public gameSlabs;
 
 /** 
 *  Oraclize Variables 
@@ -782,12 +782,14 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
         uint256 _nextRoundNumber;
         uint256 _roundID;
         uint256 _nextRoundID;
-        uint256 _totalValueForRound;
+        //uint256 _totalValueForRound;
         address payable _playerAddress;
-        bool _needsOraclize = false;
+        bytes32 _oraclizeID;
+
+        //bool _needsOraclize = false;
 
         // find out if oraclize is required (only required when number of players is more than 1)
-        for(uint256 j=0; j<_gameIDs.length; j++) {
+       /*  for(uint256 j=0; j<_gameIDs.length; j++) {
             _roundNumber = gameStrategies[_gameIDs[j]].currentRound;
             _roundID = (_roundNumber == 0) ? 0 : cantorPairing(_gameIDs[j], _roundNumber);
 
@@ -797,18 +799,18 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
             // set the _needsOraclize flag if in at least one of the games, the number of players is more than 1
             _needsOraclize = ((rounds[_roundID].playerList.length > 1) ? true : false) ;
             if(_needsOraclize) break;
-        }
+        } */
 
         // create an Oraclize query for RNG
-        bytes32 _oraclizeID;
-        if(_needsOraclize) {
-            _oraclizeID = multiprizer_oraclize.newRandomDSQuery();
+        /* if(_needsOraclize) {
+            //_oraclizeID = multiprizer_oraclize.newRandomDSQuery();
+            _oraclizeID = "abc";
             // if _oraclizeID is still in default value, pause all games until fresh funds have been infused 
             // in Mulprizer_oraclize to execute Provable Random Number Generation
-            if(_oraclizeID.length == 0) {
+            if(_oraclizeID == bytes32(0)) {
                 revert("revert_funds");
             }
-        }
+        } */
 
         // save current round info for each game and create new round for relevant games
         for(uint256 i=0; i < _gameIDs.length; i++) {
@@ -826,10 +828,18 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 // set oraclizeID only if the number of players is more than 1
                 if(rounds[_roundID].playerList.length > 1) {
 
-                     // update the total value of tokens placed for the game
+                    // generate oraclizeID
+                    _oraclizeID = multiprizer_oraclize.newRandomDSQuery();
+                    //_oraclizeID = "abc";
+                    // if _oraclizeID is still 0, revert
+                    if(_oraclizeID == bytes32(0)) {
+                        revert("oraclize_zero");
+                    }
+
+                    /*  // update the total value of tokens placed for the game
                     _totalValueForRound = (gameStrategies[_gameIDs[i]].tokenValue).mul(rounds[_roundID].totalTokensPurchased);
                     gameStrategies[_gameIDs[i]].totalValueForGame = 
-                        (gameStrategies[_gameIDs[i]].totalValueForGame).add(_totalValueForRound);
+                        (gameStrategies[_gameIDs[i]].totalValueForGame).add(_totalValueForRound); */
             
                     // store the oraclizeID for the relevant game (GameID)
                     rounds[_roundID].oraclizeID = _oraclizeID;
@@ -881,25 +891,26 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
         }
 }
 
-
 function calculateWinnerByOracle(
     bytes32 _oraclizeID, 
     bytes calldata _result, 
     bytes calldata _oraclizeProof, 
     bool _isProofValid) external 
     {
-        require(msg.sender != oraclizeAddress, "addr_err");
+        require(msg.sender == oraclizeAddress, "addr_err");
         // if the oraclize ID is meant for game rounds
         if(roundOfOraclizeID[_oraclizeID] != 0) {
-            if (!_isProofValid) {
-                bytes32 newOraclizeID;
-                newOraclizeID = multiprizer_oraclize.newRandomDSQuery();
-                rounds[roundOfOraclizeID[_oraclizeID]].oraclizeID = newOraclizeID;
-                return;
-            }
             if(rounds[roundOfOraclizeID[_oraclizeID]].oraclizeProof.length != 0) {
                 return;
             }
+            if (!_isProofValid) {
+                bytes32 newOraclizeID = multiprizer_oraclize.newRandomDSQuery();
+                rounds[roundOfOraclizeID[_oraclizeID]].oraclizeID = newOraclizeID;
+                roundOfOraclizeID[newOraclizeID] = roundOfOraclizeID[_oraclizeID];
+                delete roundOfOraclizeID[_oraclizeID];
+                return;
+            }
+            
             // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased (or _tokenSlab)
             uint256 _oraclizeRandomNumber = uint256(keccak256(_result));
             rounds[roundOfOraclizeID[_oraclizeID]].winner = gameSlabs[roundOfOraclizeID[_oraclizeID]][_oraclizeRandomNumber
@@ -981,7 +992,7 @@ function compensateWinner(bytes32 _oraclizeID) private {
     gameStrategies[_gameID].totalWinnings = (gameStrategies[_gameID].totalWinnings).add(_winnerAmount);
     // transfer the house edge to the house account
     if(playerWithdrawals[owner()] == 0) {
-                playerWithdrawalsKeys.push(owner());
+        playerWithdrawalsKeys.push(owner());
     }
     playerWithdrawals[owner()] = playerWithdrawals[owner()].add(_houseEdgeAmount);
     megaPrizeAmount = megaPrizeAmount.add(_megaPrizeEdgeAmount);
@@ -991,7 +1002,6 @@ function compensateWinner(bytes32 _oraclizeID) private {
     emit logWinner(_gameID, rounds[_roundID].roundNumber, _winnerAddress, _winnerAmount, now, block.number);
 
 }
-
 
 function viewDirectPlayInfo() external view  
     returns(
@@ -1004,7 +1014,6 @@ function viewDirectPlayInfo() external view
             isDirectPlayEnabled
         );
 }
-
 
 function viewWithdrawalInfo(address payable _playerAddress) external view  
     returns(uint256 _amount) {
@@ -1067,7 +1076,6 @@ function viewRoundInfo(uint256 _gameID, uint256 _roundNumber ) external view
         _isRoundOpen = rounds[roundID].isRoundOpen;
 }
 
-
 function viewGameIDs() external view  
     returns(
         uint256[] memory _gameIDs,
@@ -1080,7 +1088,6 @@ function viewGameIDs() external view
             _gameIDs[i] = gameStrategies[gameStrategiesKeys[i]].gameID;
         }
 }
-
 
 function getMegaPrizeByAdmin() external view  
     onlyOwners returns(
@@ -1107,7 +1114,6 @@ function getMegaPrizeByAdmin() external view
         _isMegaPrizeMatured = isMegaPrizeMatured;
 }
 
-
 function getWithdrawalsByAdmin() external view 
     onlyOwners returns(uint256[] memory _playerWithdrawalsAmounts, address payable[] memory _playerWithdrawalsKeys) {
 
@@ -1123,7 +1129,6 @@ function getWithdrawalsByAdmin() external view
         return(_playerWithdrawalsAmounts, _playerWithdrawalsKeys);
 }
 
-
 function getOraclizeRoundsByAdmin(bytes32 _oraclizeID) external view onlyOwners returns(uint256  _oraclizeRound) {
     _oraclizeRound = roundOfOraclizeID[_oraclizeID];
 }
@@ -1138,20 +1143,14 @@ function safeSend(address payable _toAddress, uint256 _amount) private
         require(address(this).balance >= _amount, 
             "no_funds");
 
-        
-
         if(!_toAddress.send(_amount)) {
             if(playerWithdrawals[_toAddress] == 0) {
                 playerWithdrawalsKeys.push(_toAddress);
             }
             playerWithdrawals[_toAddress] = (playerWithdrawals[_toAddress]).add(_amount);
-            //# EMIT LOG
         }
-        else {
-            //# EMIT LOG
-        }
+        
 }
-
 
 /**
     * @dev function for players to manually withdraw their amounts in case of send invocation error

@@ -1,9 +1,16 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { DrizzleContext } from "drizzle-react";
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Button from '@material-ui/core/Button';
+import withMobileDialog from '@material-ui/core/withMobileDialog';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 
 const styles = theme => ({
 
@@ -42,7 +49,7 @@ const styles = theme => ({
     textFieldStyles: {
         padding: theme.spacing.unit * 1,
         fontSize: "0.9rem",
-        backgroundColor: "rgba(255,255,255,0.49)",
+        backgroundColor: "rgba(255,255,255,0.69)",
     },
     textLabelStyles: {
         //padding: theme.spacing.unit * 0.8,
@@ -65,12 +72,16 @@ class GameInput extends React.Component {
     constructor(props, context) {
         super(props);
 
-        this.state = { stackID: null, numTokens: "" };
+        this.state = {
+            stackID: null,
+            numTokens: "",
+            isDialogOpen: false
+        };
         this.context = context;
         //this.valueRef = React.createRef();
         this.MINTOKENS = 1;
 
-        this.getTxStatus = this.getTxStatus.bind();
+        //this.getTxStatus = this.getTxStatus.bind();
         this.handleSubmit = this.handleSubmit.bind();
         this.handleChange = this.handleChange.bind();
         this.handleFocus = this.handleFocus.bind();
@@ -142,6 +153,7 @@ class GameInput extends React.Component {
         console.log("state value: ", this.state.numTokens);
         //console.log(" ref: ", this.valueRef.current.value, "  numTokens: ", numTokens);
         this.setValue(numTokens);
+        this.handleClickOpen();
 
         // if submitted, set the value with the string
         e.preventDefault();
@@ -165,10 +177,13 @@ class GameInput extends React.Component {
             value: tokenAmount
         });
 
-        this.setState({ stackID: stackID, numTokens: "" });
+        this.setState({
+            stackID: stackID,
+            numTokens: ""
+        });
     };
 
-    getTxStatus = () => {
+    /* getTxStatus = () => {
         // get the transaction states from the drizzle state
         const { transactions, transactionStack } = this.context.drizzleState;
 
@@ -186,13 +201,21 @@ class GameInput extends React.Component {
         else {
             return null;
         }
-    };
+    }; */
+
+    handleClickOpen = () => {
+        this.setState({ isDialogOpen: true });
+    }
+
+    handleClose = () => {
+        this.setState({ isDialogOpen: false });
+    }
 
     render() {
         const { classes } = this.props;
         const gameData = this.props.gameData;
         const web3 = this.context.drizzle.web3;
-        const isGameLocked = (gameData.value.isGameLocked ? "true" : "false");
+        const isGameLocked = (gameData.value.isGameLocked ? true : false);
         const currentRound = gameData.value.currentRound;
         const tokenValue = gameData.value.tokenValue;
         this.maxTokensPerPlayer = gameData.value.maxTokensPerPlayer;
@@ -206,53 +229,76 @@ class GameInput extends React.Component {
             this.remainingTokens == 0
         ) ? true : false;
 
+        const { fullScreen } = this.props;
+
         return (
-            <form onSubmit={this.handleSubmit} className={classes.flexContainer}>
-                <TextField
-                    id="standard-number"
-                    label="Buy Tokens"
-                    value={this.state.numTokens}
-                    onChange={this.handleChange}
-                    onFocus={this.handleFocus}
-                    type="number"
-                    InputProps={{
-                        classes: {
-                            input: classes.textFieldStyles,
-                        },
-                    }}
-                    inputProps={{
-                        min: this.MINTOKENS,
-                        max: this.remainingTokens,
-                        step: "1",
-                    }}
-                    InputLabelProps={{
-                        shrink: true,
-                        classes: {
-                            root: classes.textLabelStyles,
-                        }
-                    }}
-                    placeholder={"(max: " + this.remainingTokens + ")"}
-                    margin="normal"
-                    className={classes.textField}
-                    //inputRef={this.valueRef}
-                    margin="normal"
-                    variant="outlined"
-                    className={classes.textField}
-                    disabled={isDisabled}
-                />
-                <Button
-                    type="submit"
-                    variant="contained"
-                    size="small"
-                    color="primary"
-                    className={classes.button}
-                    disabled={isDisabled}
+            <Fragment>
+                <form onSubmit={this.handleSubmit} className={classes.flexContainer}>
+                    <TextField
+                        id="standard-number"
+                        label="Buy Tokens"
+                        value={this.state.numTokens}
+                        onChange={this.handleChange}
+                        onFocus={this.handleFocus}
+                        type="number"
+                        InputProps={{
+                            classes: {
+                                input: classes.textFieldStyles,
+                            },
+                        }}
+                        inputProps={{
+                            min: this.MINTOKENS,
+                            max: this.remainingTokens,
+                            step: "1",
+                        }}
+                        InputLabelProps={{
+                            shrink: true,
+                            classes: {
+                                root: classes.textLabelStyles,
+                            }
+                        }}
+                        placeholder={"(max: " + this.remainingTokens + ")"}
+                        margin="normal"
+                        className={classes.textField}
+                        //inputRef={this.valueRef}
+                        margin="normal"
+                        variant="outlined"
+                        className={classes.textField}
+                        disabled={isDisabled}
+                    />
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        size="small"
+                        color="primary"
+                        className={classes.button}
+                        disabled={isDisabled}
+                    >
+                        Pay {this.state.numTokens == "" ?
+                            "(" + (web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + " eth per token") + ")" :
+                            (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + " ethers")}
+                    </Button>
+                </form>
+                <Dialog
+                    fullScreen={fullScreen}
+                    open={this.state.isDialogOpen}
+                    onClose={this.handleClose}
+                    aria-labelledby="responsive-dialog-title"
                 >
-                    Pay {this.state.numTokens == "" ?
-                        "(" + (web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + " eth per token") + ")" :
-                        (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + " ethers")}
-                </Button>
-            </form>
+                    <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Let Google help apps determine location. This means sending anonymous location data to
+                            Google, even when no apps are running.
+                    </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="primary" autoFocus>
+                            OK
+                    </Button>
+                    </DialogActions>
+                </Dialog>
+            </Fragment>
         );
     }
 }
@@ -262,4 +308,4 @@ GameInput.propTypes = {
     classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(GameInput); 
+export default withMobileDialog()(withStyles(styles)(GameInput)); 

@@ -17,7 +17,7 @@ export default () => (
             if (drizzleState) {
                 const playerAddress = drizzleState.accounts[0];
                 console.log("playeraddress: ", playerAddress);
-                header = <Header playerAddress={playerAddress} />;
+                header = <Header playerAddress={playerAddress} drizzle={drizzle} drizzleState={drizzleState}/>;
             }
 
 

@@ -11,12 +11,13 @@ import TokensData from './TokensData';
 import PurchasedTokens from './PurchasedTokens';
 import GameProps from './GameProps';
 import MastHead from './MastHead';
-import bg from './img/bg1.png';
+//import bg from './img/gameBG3.jpg';
 
 
 const styles = theme => ({
     root: {
-        backgroundImage: `url("https://i.pinimg.com/originals/31/61/6c/31616c298eb3e33eeb461bdb857e515e.jpg")`,
+        //backgroundImage: `url("https://i.pinimg.com/originals/31/61/6c/31616c298eb3e33eeb461bdb857e515e.jpg")`,
+        backgroundSize: 'cover',
         display: 'flex',
         flexDirection: "column",
         padding: theme.spacing.unit * 0.5,
@@ -202,7 +203,10 @@ class GameContainer extends React.Component {
         }
 
         return (
-            <div className={classes.root}>
+            <div className={classes.root} style={{
+                backgroundImage: `url(${require(`./img/bg${this.gameID}.jpg`)})`,
+                //backgroundImage: 'url("./img/gameBG3.jpg")',
+            }}>
                 <div className={classes.components}>
                     {mastHead}
                 </div>

@@ -132,12 +132,12 @@ string constant dataSourceOraclize = "random";
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
-mapping(bytes32 => uint256) private oraclizeIDIndexes;
+/* mapping(bytes32 => uint256) private oraclizeIDIndexes;
 bytes32[] public oraclizeIDs;
 mapping(uint256 => bytes) private oraclizeProofs;
 mapping(uint256 => bytes) private results;
 mapping(uint256 => bool) private isProofsValid;
-uint256 public oraclizeLength;
+uint256 public oraclizeLength; */
 
 
 /** 
@@ -146,6 +146,13 @@ uint256 public oraclizeLength;
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
 address payable public multiprizerAddress;
+
+/** 
+*  Event Logs 
+*  @dev DirectPlay enables a player to place a single token for any of the strategy games   
+*  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
+  */
+event oraclizeValues(bytes32 _oraclizeID, bytes _result, bytes _oraclizeProof, bool _isProofValid);
 
 /** 
 *  Constructor call 
@@ -159,7 +166,14 @@ constructor (address payable _contractAddress) public {
     // set proof type as 'ledger'. this needn't be changed further
     oraclize_setProof(proofType_Ledger);
     // push a zero-init value to the oraclizeIDs array to help it prevent malicious oraclize executions
-    oraclizeIDs.push("");
+    /* oraclizeIDs.push("");
+    oraclizeLength = oraclizeIDs.length; */
+}
+
+function setContractAddrByAdmin(address payable _contractAddress) external 
+    onlyOwners {
+        multiprizerAddress = _contractAddress;
+        multiprizer = Multiprizer_abstract(multiprizerAddress);
 }
 
 function updateOraclizePropsByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize, 
@@ -197,6 +211,7 @@ function getOraclizePropsByAdmin() external view
         _priceOraclize = priceOraclize;
 }
 
+/* 
 function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
     onlyOwners returns (
         bytes memory _result, 
@@ -213,9 +228,10 @@ function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
     _oraclizeProof = oraclizeProofs[resultIndex];
     _isProofValid = isProofsValid[resultIndex];
 }
+ */
 
 function newRandomDSQuery() external returns (bytes32 _queryId) {
-    if (msg.sender != multiprizerAddress) revert("caller_err");
+    require(msg.sender == multiprizerAddress, "caller_err");
         //check if contract has enough funds to invoke oraclize
         if(priceOraclize > address(this).balance) {
             // pause all games until contract funds have been replenished
@@ -226,27 +242,32 @@ function newRandomDSQuery() external returns (bytes32 _queryId) {
 
 function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _oraclizeProof) public {
     // check if the callback was invoked by oraclize
-    if (msg.sender != oraclize_cbAddress()) revert("caller_err");
-    bool _isProofValid;
-    uint256 _proofCode;
-    // if a round has been already decided by Oraclize callback, then continue with next round. 
-    // This will also help to prevent any possible malicious execution by Oraclize itself
-    if(oraclizeIDIndexes[_oraclizeID] != 0) return;
-    _proofCode = oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof);
-    if (_proofCode != 0) {
-        _isProofValid = false;
-    }
-    else {
-        _isProofValid = true;
-    }
-    // store the oraclize results in the Oraclize Result State Variables
+    require(msg.sender == oraclize_cbAddress(), "caller_err");
+
+    uint8 _proofCode = oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof);
+    bool _isProofValid = (_proofCode == 0) ? true : false;
+    
+    /* // store the oraclize results in the Oraclize Result State Variables
     oraclizeIDs.push(_oraclizeID);
     oraclizeLength = oraclizeIDs.length;
     oraclizeIDIndexes[_oraclizeID] = oraclizeLength-1;
     results[oraclizeLength-1] = bytes(_result);
     oraclizeProofs[oraclizeLength-1] = _oraclizeProof;
-    isProofsValid[oraclizeLength-1] = _isProofValid;
-    multiprizer.calculateWinnerByOracle(_oraclizeID, results[oraclizeLength-1], _oraclizeProof, _isProofValid);
+    isProofsValid[oraclizeLength-1] = _isProofValid; */
+
+    emit oraclizeValues(_oraclizeID, bytes(_result), _oraclizeProof, _isProofValid);
+    multiprizer.calculateWinnerByOracle(_oraclizeID, bytes(_result), _oraclizeProof, _isProofValid);
+}
+
+// transfer amount to address (admin)
+function safeSend(address payable _toAddress, uint256 _amount) external onlyOwners 
+    {
+        require(_amount > 0, "amt_zero");
+        require(address(this).balance >= _amount, 
+            "no_funds");
+
+        _toAddress.transfer(_amount);
+        
 }
 
 // fallback function 
