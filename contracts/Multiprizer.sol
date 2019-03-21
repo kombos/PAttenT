@@ -911,7 +911,7 @@ function calculateWinnerByOracle(
                 return;
             }
             
-            // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased (or _tokenSlab)
+            // get the Provable Oraclize Random Number and mod it to the length of totalTokensPurchased  (or gameSlab)
             uint256 _oraclizeRandomNumber = uint256(keccak256(_result));
             rounds[roundOfOraclizeID[_oraclizeID]].winner = gameSlabs[roundOfOraclizeID[_oraclizeID]][_oraclizeRandomNumber
                 .mod((gameSlabs[roundOfOraclizeID[_oraclizeID]]).length)];
@@ -1019,7 +1019,6 @@ function viewWithdrawalInfo(address payable _playerAddress) external view
     returns(uint256 _amount) {
         _amount = playerWithdrawals[_playerAddress];
         return(_amount);
-        //SOME ERROR IN PLAYERWITHDRAWAL KEYS, THEY WAY THEY DEDUCT WHEN WITHDRAWN. FIX IT.
 }
 
 /* 

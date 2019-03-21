@@ -191,8 +191,8 @@ module.exports = function(deployer, network, accounts) {
             // update multiprizer_oraclize props
             .then(function(oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
-                let _gasLimitOraclize = 1000000;
-                let _gasPriceOraclize = 2e10;
+                let _gasLimitOraclize = 550000;
+                let _gasPriceOraclize = 5e19;
                 let _numBytesOraclize = 7;
                 let _delayOraclize = 0;
                 console.log("Update Oraclize props .... ");

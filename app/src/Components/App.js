@@ -2,10 +2,9 @@ import React, { Fragment } from "react";
 import { DrizzleContext } from "drizzle-react";
 import GameStrategies from "../GameStrategies";
 import { Header, Footer } from './Layouts';
-import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import GameDetails from '../GameDetails';
 import Notifications from '../Notifications';
-import backgroundImage from '../img/bg.jpg';
 import './App.css';
 
 export default () => (
@@ -17,9 +16,8 @@ export default () => (
             if (drizzleState) {
                 const playerAddress = drizzleState.accounts[0];
                 console.log("playeraddress: ", playerAddress);
-                header = <Header playerAddress={playerAddress} drizzle={drizzle} drizzleState={drizzleState}/>;
+                header = <Header playerAddress={playerAddress} />;
             }
-
 
             console.log("initialized: ", initialized);
             console.log("drizzleState: ", drizzleState);
@@ -46,7 +44,7 @@ export default () => (
                             <Route path="/gameDetails/:gameID"
                                 render={({ match }) => <GameDetails gameID={match.params.gameID} drizzleState={drizzleState} />} />
                             <Route path="/notifications" render={
-                                () => <Notifications drizzleState={drizzleState} events={logEvents}/>} />
+                                () => <Notifications drizzleState={drizzleState} events={logEvents} />} />
                             <Route render={() => <div><p> Error </p></div>} />
                         </Switch>
 

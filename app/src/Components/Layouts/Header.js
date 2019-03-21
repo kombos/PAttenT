@@ -41,9 +41,8 @@ const styles = {
 
 
 class Header extends React.Component {
-
     static contextType = DrizzleContext.Consumer;
-
+    
     constructor(props, context) {
         console.log("#___ inside constructor___");
         super(props);
@@ -57,7 +56,7 @@ class Header extends React.Component {
 
     getWithdrawals(playerAddress) {
         console.log("# Header: $$$$$ INSIDE getWithdrawals $$$$$");
-        const Multiprizer = this.props.drizzle.contracts.Multiprizer;
+        const Multiprizer = this.context.drizzle.contracts.Multiprizer;
         // get and save the key for the variable we are interested in
         console.log("player : ", playerAddress);
         let dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(playerAddress);
@@ -85,22 +84,6 @@ class Header extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         console.log("this props: ", this.props.playerAddress, " next props: ", nextProps.playerAddress);
-        /* if (!this.withdrawAmount) {
-            console.log("no withdraw amount yet");
-            return true;
-        } */
-
-        /*  if (
-             this.props.playerAddress != nextProps.playerAddress ||
-             this.state.isDrawerOpen != nextState.isDrawerOpen ||
-             this.state.dataKey != nextState.dataKey ||
-             this.state.stackID != nextState.stackID
-         ) {
-             this.getWithdrawals(nextProps.playerAddress);
-             return true;
-         }
-         else
-             return false; */
 
         if (this.props.playerAddress != nextProps.playerAddress) {
             this.getWithdrawals(nextProps.playerAddress);
@@ -115,12 +98,11 @@ class Header extends React.Component {
             this.setState({ isDrawerOpen: isDrawerOpen });
         };
         const dataKey = this.state.dataKey;
-        const multiprizer = this.props.drizzleState.contracts.Multiprizer;
+        const multiprizer = this.context.drizzleState.contracts.Multiprizer;
         console.log("datakey: ", dataKey);
-        this.withdrawAmount = multiprizer.viewWithdrawalInfo[dataKey];
-        let isWithdrawDisabled = true;
-        console.log("withdraw amt : ", this.withdrawAmount && parseInt(this.withdrawAmount.value));
-        isWithdrawDisabled = this.withdrawAmount && (parseInt(this.withdrawAmount.value) > 0) ? false : true;
+        const withdrawAmount = multiprizer.viewWithdrawalInfo[dataKey];
+        console.log("withdraw amt : ", withdrawAmount && parseInt(withdrawAmount.value));
+        const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value) > 0) ? false : true;
         console.log("isWithdrawDisabled: ", isWithdrawDisabled);
 
         const renderLink = () => {
@@ -185,10 +167,7 @@ class Header extends React.Component {
                 </Drawer>
             </div>
         );
-
     }
-
-
 }
 
 Header.propTypes = {
