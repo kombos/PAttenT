@@ -35,7 +35,7 @@ export default () => (
 
             return (
                 <Router>
-                    <div className="App">
+                    <div className="App" >
                         {header}
 
                         <Switch>
