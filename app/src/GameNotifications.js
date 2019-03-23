@@ -57,6 +57,7 @@ const styles = theme => ({
         textAlign: 'left',
         //margin: 'auto 1em auto auto',
         paddingLeft: '1em',
+        paddingRight: '1em',
         borderBottom: '1px solid #e0e0e0',
         //wordBreak: 'break-all',
         //backgroundColor: theme.palette.grey[200],

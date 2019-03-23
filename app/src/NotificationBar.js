@@ -31,7 +31,8 @@ const styles = theme => ({
         //color: theme.palette.text.secondary,
     },
     child: {
-        //padding: theme.spacing.unit * 0.7,
+        paddingLeft: theme.spacing.unit * 0.7,
+        paddingRight: theme.spacing.unit * 0.7,
         //display: 'inline-block',
         flexGrow: 1,
         //lineHeight: '1.2em',
@@ -41,7 +42,7 @@ const styles = theme => ({
         boxSizing: 'border-box',
         //minHeight:"50px",
         backgroundColor: "rgba(17,210,254,0.9)",
-        textOverflow: 'ellipsis',
+        //textOverflow: 'ellipsis',
         //whiteSpace: 'nowrap',
         //overflowWrap:'break-word',
         wordBreak: 'break-all',

@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
-import { TX_HASH_URL_ROPSTEN } from "./Constants"
+import { TX_HASH_URL_ROPSTEN as HASH_URL } from "./Constants"
 
 const styles = theme => ({
     root: {
@@ -45,7 +45,7 @@ const styles = theme => ({
     },
     table: {
         fontFamily: theme.typography.fontFamily,
-        fontSize: theme.typography.fontSize,
+        fontSize: theme.typography.fontSize * 0.95,
         //fontWeight: theme.typography.fontWeightMedium,
     },
     flexContainer: {
@@ -56,9 +56,10 @@ const styles = theme => ({
     },
     tableRow: {
         cursor: 'pointer',
-        textAlign: 'left',
+        textAlign: 'center',
         //margin: 'auto 1em auto auto',
         paddingLeft: '1em',
+        paddingRight: '1em',
         borderBottom: '1px solid #e0e0e0',
         //wordBreak: 'break-all',
         //backgroundColor: theme.palette.grey[200],
@@ -109,8 +110,8 @@ class GameWinners extends React.Component {
         let sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
-        this.getEvents();
-        this.sortList({ sortBy, sortDirection });
+        //this.getEvents();
+        //this.sortList({ sortBy, sortDirection });
     }
 
     getRowClassName = ({ index }) => {
@@ -168,9 +169,8 @@ class GameWinners extends React.Component {
         console.log("inside addressRenderer()");
         console.log("rowdata: ", rowData);
         return(
-            <a href={TX_HASH_URL_ROPSTEN+rowData.transactionHash}>{rowData.winnerAddress}</a>
+            <a href={HASH_URL+rowData.transactionHash}>{rowData.winnerAddress}</a>
         );
-        //return(rowData.winnerAddress);
     }
 
     getEvents() {
@@ -181,9 +181,6 @@ class GameWinners extends React.Component {
             let gameEvent = value.returnValues;
             gameEvent.transactionHash = value.transactionHash;
             gameEvent.logID = value.id;
-            //gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
-            //gameEvent.playerAddressAbbr = value.returnValues.winnerAddress.toString().substr(0, 12) + "..";
-            //gameEvent.prize = (web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether') + " eth");
             // gameEvent.winnerAddress
             // gameEvent.roundNumber
             gameEvent.round = parseInt(value.returnValues.roundNumber);
@@ -255,7 +252,7 @@ class GameWinners extends React.Component {
 
         return (
             <div className={classes.root}>
-                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}</div>
+                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Winners</p> : <p>Game Winners (empty)</p>}</div>
                 <div className={classes.tableContainer}>
                     <AutoSizer>
                         {({ height, width }) => (

@@ -112,7 +112,6 @@ class GameDetails extends React.Component {
         }
 
         if (gameData) {
-            let myEvents = null;
             let gameLogEvents = [];
             this.prevRound = this.currentRound;
             this.currentRound = gameData.value["currentRound"];
@@ -121,7 +120,6 @@ class GameDetails extends React.Component {
             console.log("current round is :::::: ", this.currentRound);
             console.log("expression value: ", isGameLocked != true && this.currentRound != 0);
 
-            //PROBLEM WITH SORTING OF TIMESTAMP
             if (isGameLocked != true && this.currentRound != 0) {
                 if (roundData) {
                     console.log("rounddata: ", roundData);
@@ -138,27 +136,26 @@ class GameDetails extends React.Component {
                         }
                     });
 
-/* 
-                    const gameLogEvents = logEvents.filter((eventLog, index, arr) => {
-                        console.log("INSIDE EVENT FILTER _____________________");
-                        if (index > 0 && eventLog.id == arr[index - 1].id) {
-                            return false;
-                        }
-                        if ((eventLog.event == "logPlayGame" ||
-                            eventLog.event == "logRevertGame") &&
-                            eventLog.returnValues.gameID == this.gameID &&
-                            eventLog.returnValues.roundNumber == this.currentRound)
-                            return true;
-                        else
-                            return false
-
-                    });
- */
+                    /* 
+                                        const gameLogEvents = logEvents.filter((eventLog, index, arr) => {
+                                            console.log("INSIDE EVENT FILTER _____________________");
+                                            if (index > 0 && eventLog.id == arr[index - 1].id) {
+                                                return false;
+                                            }
+                                            if ((eventLog.event == "logPlayGame" ||
+                                                eventLog.event == "logRevertGame") &&
+                                                eventLog.returnValues.gameID == this.gameID &&
+                                                eventLog.returnValues.roundNumber == this.currentRound)
+                                                return true;
+                                            else
+                                                return false
+                    
+                                        });
+                     */
 
 
                     gameStats = <GameStats roundData={roundData} roundNumber={this.currentRound} />;
                     gameLogs = <GameLogs events={gameLogEvents} />;
-                    console.log("gamelogs: ", gameLogs, " myevents: ", logEvents);
                 }
             }
         }
