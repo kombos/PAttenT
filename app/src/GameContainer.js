@@ -19,20 +19,14 @@ const styles = theme => ({
         //backgroundImage: `url("https://i.pinimg.com/originals/31/61/6c/31616c298eb3e33eeb461bdb857e515e.jpg")`,
         backgroundSize: 'cover',
         display: 'flex',
+        flexGrow:1,
+        //minHeight:'70%',
+        boxSizing: 'border-box',
         flexDirection: "column",
         padding: theme.spacing.unit * 0.5,
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         borderRadius: `${theme.shape.borderRadius * 3}px`,
-    },
-    paper: {
-        flexGrow: 1,
-        // padding: theme.spacing.unit * 2,
-        textAlign: "center",
-        color: theme.palette.text.primary
-    },
-    picture: {
-        //backgroundImage: `url("https://www.justpushstart.com/wp-content/uploads/2011/10/Batman_arkham_city_logo.jpg")`,
-        flexGrow: 1
+        //filter: 'brightness(105%)',
     },
     components: {
         flexGrow: 1,

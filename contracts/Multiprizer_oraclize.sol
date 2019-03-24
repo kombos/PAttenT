@@ -120,11 +120,11 @@ Multiprizer_abstract private multiprizer;
 *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
 *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
   */
-uint256 gasLimitOraclize;
-uint256 gasPriceOraclize;
-uint256 numBytesOraclize;
-uint256 delayOraclize;
-uint256 priceOraclize;
+uint256 private gasLimitOraclize;
+uint256 private gasPriceOraclize;
+uint256 private numBytesOraclize;
+uint256 private delayOraclize;
+uint256 public priceOraclize;
 string constant dataSourceOraclize = "random";
 
 /** 
@@ -230,7 +230,7 @@ function getOraclizeResultByAdmin(bytes32 _oraclizeID) external view
 }
  */
 
-function newRandomDSQuery() external returns (bytes32 _queryId) {
+function newRandomDSQuery() external payable returns (bytes32 _queryId) {
     require(msg.sender == multiprizerAddress, "caller_err");
         //check if contract has enough funds to invoke oraclize
         if(priceOraclize > address(this).balance) {

@@ -11,6 +11,12 @@ import { withRouter } from "react-router";
 import InfoIcon from '@material-ui/icons/Info';
 
 const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        width: '100%',
+        boxSizing: 'border-box',
+        backgroundColor: "rgba(1,5,16,0.7)"
+    },
     container: {
         //padding: theme.spacing.unit * 0.5,
         display: 'flex',
@@ -74,12 +80,12 @@ class NotificationBar extends React.Component {
         console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
         console.log("expression: ", (this.props.events.length != nextProps.events.length));
         console.log("flag: ", this.flag);
-        if (this.props.events.length != nextProps.events.length){
+        if (this.props.events.length != nextProps.events.length) {
             this.flag = true;
             return true;
         }
         else {
-            if(this.flag){
+            if (this.flag) {
                 console.log("inside if");
                 this.flag = false;
                 this.getLatestNotifications();
@@ -219,15 +225,15 @@ class NotificationBar extends React.Component {
         };
 
         return (
-            <ButtonBase onClick={renderLink}>
-                <Tooltip title="Notification Bar" placement="top">
-                    <div id="container" className={classes.container}>
-                        <div id="notificationDiv" className={classes.child}>
-                            {(this.notificationsJSX && this.notificationsJSX.length != 0) ? this.notificationsJSX : defaultNotification}
-                        </div>
-                    </div >
-                </Tooltip>
-            </ButtonBase >
+                <ButtonBase onClick={renderLink}>
+                    <Tooltip title="Notification Bar" placement="top">
+                        <div id="container" className={classes.container}>
+                            <div id="notificationDiv" className={classes.child}>
+                                {(this.notificationsJSX && this.notificationsJSX.length != 0) ? this.notificationsJSX : defaultNotification}
+                            </div>
+                        </div >
+                    </Tooltip>
+                </ButtonBase >
         );
     }
 }

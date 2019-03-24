@@ -212,7 +212,8 @@ library SafeMath {
 
 
 contract Multiprizer_oraclizeAbstract {
-    function newRandomDSQuery() external returns (bytes32 _queryId);
+    function newRandomDSQuery() external payable returns (bytes32 _queryId);
+    function priceOraclize() public returns (uint256 _priceOraclize);
 }
 
 
@@ -782,35 +783,9 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
         uint256 _nextRoundNumber;
         uint256 _roundID;
         uint256 _nextRoundID;
-        //uint256 _totalValueForRound;
+        uint256 _priceOraclize;
         address payable _playerAddress;
         bytes32 _oraclizeID;
-
-        //bool _needsOraclize = false;
-
-        // find out if oraclize is required (only required when number of players is more than 1)
-       /*  for(uint256 j=0; j<_gameIDs.length; j++) {
-            _roundNumber = gameStrategies[_gameIDs[j]].currentRound;
-            _roundID = (_roundNumber == 0) ? 0 : cantorPairing(_gameIDs[j], _roundNumber);
-
-            if(gameStrategies[_gameIDs[j]].isGameLocked || gameStrategies[_gameIDs[j]].currentRound==0 || !rounds[_roundID].isRoundOpen) {
-                continue;
-            }
-            // set the _needsOraclize flag if in at least one of the games, the number of players is more than 1
-            _needsOraclize = ((rounds[_roundID].playerList.length > 1) ? true : false) ;
-            if(_needsOraclize) break;
-        } */
-
-        // create an Oraclize query for RNG
-        /* if(_needsOraclize) {
-            //_oraclizeID = multiprizer_oraclize.newRandomDSQuery();
-            _oraclizeID = "abc";
-            // if _oraclizeID is still in default value, pause all games until fresh funds have been infused 
-            // in Mulprizer_oraclize to execute Provable Random Number Generation
-            if(_oraclizeID == bytes32(0)) {
-                revert("revert_funds");
-            }
-        } */
 
         // save current round info for each game and create new round for relevant games
         for(uint256 i=0; i < _gameIDs.length; i++) {
@@ -829,7 +804,8 @@ function completeRoundsByAdmin(uint256[] calldata _gameIDs) external
                 if(rounds[_roundID].playerList.length > 1) {
 
                     // generate oraclizeID
-                    _oraclizeID = multiprizer_oraclize.newRandomDSQuery();
+                    _priceOraclize = multiprizer_oraclize.priceOraclize();
+                    _oraclizeID = multiprizer_oraclize.newRandomDSQuery.value(_priceOraclize)();
                     //_oraclizeID = "abc";
                     // if _oraclizeID is still 0, revert
                     if(_oraclizeID == bytes32(0)) {

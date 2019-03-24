@@ -16,6 +16,9 @@ const styles = theme => ({
         height: 'auto',
         //maxWidth: '85%',
         margin: 'auto',
+        // slate color
+        //backgroundColor: "rgba(82,84,118,0.90)",
+        boxSizing: 'border-box',
         //backgroundColor: "rgba(62,54,76,0.7)",
 
     },
@@ -33,8 +36,17 @@ const styles = theme => ({
             1720 : 75%
             1920 : 60% (xl)
 */
-    flexChild: {
+    gridItem: {
         flexGrow: 1,
+        backgroundColor: "rgba(42,44,74,0.90)",
+    },
+    flexChild: {
+        // light green
+        //backgroundColor: "rgba(112,154,76,0.90)",
+        boxSizing: 'border-box',
+        height: 'auto',
+        flexGrow: 1,
+        alignItems: 'center',
         [theme.breakpoints.down(425)]: {
             width: '100%',
         },
@@ -63,19 +75,11 @@ const styles = theme => ({
             width: '75%',
         },
         [theme.breakpoints.up(theme.breakpoints.keys[4])]: {
-            width: '60%',
+            width: '50%',
         },
-
         margin: '1.5rem auto 1.5rem auto',
         //padding: theme.spacing.unit * 1,
         //backgroundColor: "rgba(32,14,76,0.7)",
-    },
-    notification: {
-        flexBasis: "150px",
-        //padding: theme.spacing.unit * 1,
-        //flexGrow: 1,
-        //textAlign: 'center',
-        //color: theme.palette.text.secondary,
     },
 });
 

@@ -20,9 +20,13 @@ import MailIcon from '@material-ui/icons/Mail';
 import { withRouter } from "react-router";
 import ButtonBase from '@material-ui/core/ButtonBase';
 
-const styles = {
+const styles = theme => ({
     root: {
-        flexGrow: 1,
+        //flexGrow: 1,
+        //height:'20vh',
+        height:theme.mixins.toolbar.minHeight,
+        //backgroundColor: "rgba(62,5,76,0.90)",
+
     },
     grow: {
         flexGrow: 1,
@@ -37,7 +41,10 @@ const styles = {
     fullList: {
         width: 'auto',
     },
-};
+    toolbar: {
+        minHeight:theme.mixins.toolbar.minHeight,
+    },
+});
 
 
 class Header extends React.Component {
@@ -134,7 +141,7 @@ class Header extends React.Component {
         return (
             <div className={classes.root}>
                 <AppBar position="static">
-                    <Toolbar>
+                    <Toolbar className={classes.toolbar}>
                         <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={toggleDrawer(true)}>
                             <MenuIcon />
                         </IconButton>

@@ -19,6 +19,8 @@ const styles = theme => ({
         //maxWidth: '85%',
         margin: 'auto',
         //backgroundColor: "rgba(162,54,176,0.7)",
+        boxSizing: 'border-box',
+
     },
     flexChild: {
         flexGrow: 1,
@@ -27,12 +29,39 @@ const styles = theme => ({
         margin: '1.5rem auto 1.5rem auto',
         //padding: theme.spacing.unit * 1,
         //backgroundColor: "rgba(32,114,76,0.7)",
-    },
-    gridItem: {
-        flex: '1 1 auto',
-        //padding: theme.spacing.unit * 2,
-        //textAlign: 'center',
-        //color: theme.palette.text.secondary,
+        boxSizing: 'border-box',
+        alignItems: 'center',
+        [theme.breakpoints.down(425)]: {
+            width: '100%',
+        },
+        [theme.breakpoints.up(425)]: {
+            width: '90%',
+        },
+        [theme.breakpoints.up(525)]: {
+            width: '75%',
+        },
+        [theme.breakpoints.up(theme.breakpoints.keys[1])]: {
+            width: '75%',
+        },
+        [theme.breakpoints.up(700)]: {
+            width: '60%',
+        },
+        [theme.breakpoints.up(800)]: {
+            width: '60%',
+        },
+        [theme.breakpoints.up(theme.breakpoints.keys[2])]: {
+            width: '100%',
+        },
+        [theme.breakpoints.up(1440)]: {
+            width: '90%',
+        },
+        [theme.breakpoints.up(1720)]: {
+            width: '75%',
+        },
+        [theme.breakpoints.up(theme.breakpoints.keys[4])]: {
+            width: '50%',
+        },
+
     },
 });
 

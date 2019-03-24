@@ -1,40 +1,52 @@
-import React, { Fragment } from 'react';
-import { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { DrizzleContext } from 'drizzle-react';
-import NotificationBar from './NotificationBar';
 import GameWinners from './GameWinners';
 import GameMegaPrizeWinners from './GameMegaPrizeWinners';
 import GameNotifications from './GameNotifications';
-import Paper from '@material-ui/core/Paper';
 
 const styles = theme => ({
-    root: {
-        flexGrow: 1,
-        padding: theme.spacing.unit * 1,
-        textAlign: 'center',
-        color: theme.palette.text.secondary
-    },
     flexChild: {
         flexGrow: 1,
         width: '100%',
         height: 'auto',
+        boxSizing: 'border-box',
+        alignItems: 'center',
+        [theme.breakpoints.down(425)]: {
+            width: '100%',
+        },
+        [theme.breakpoints.up(425)]: {
+            width: '100%',
+        },
+        [theme.breakpoints.up(525)]: {
+            width: '100%',
+        },
+        [theme.breakpoints.up(theme.breakpoints.keys[1])]: {
+            width: '90%',
+        },
+        [theme.breakpoints.up(700)]: {
+            width: '80%',
+        },
+        [theme.breakpoints.up(800)]: {
+            width: '80%',
+        },
+        [theme.breakpoints.up(theme.breakpoints.keys[2])]: {
+            width: '100%',
+        },
+        [theme.breakpoints.up(1440)]: {
+            width: '90%',
+        },
+        [theme.breakpoints.up(1720)]: {
+            width: '75%',
+        },
+        [theme.breakpoints.up(theme.breakpoints.keys[4])]: {
+            width: '65%',
+        },
         margin: '1.5rem auto 1.5rem auto',
         //padding: theme.spacing.unit * 1,
         //backgroundColor: "rgba(32,114,76,0.7)",
-    },
-    paper: {
-        padding: theme.spacing.unit * 2,
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-    },
-    notification: {
-        //padding: theme.spacing.unit * 1,
-        flexGrow: 1,
-        //textAlign: 'center',
-        //color: theme.palette.text.secondary,
     },
 });
 
