@@ -1,30 +1,28 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import GameContainer from './GameContainer';
 import { DrizzleContext } from 'drizzle-react';
+import GameContainer from './GameContainer';
 import NotificationBar from './NotificationBar';
 
 const styles = theme => ({
     flexContainer: {
         display: 'flex',
-        flexDirection: "column",
+        flexDirection: 'column',
         flexGrow: 1,
         width: '100%',
         height: 'auto',
-        //maxWidth: '85%',
+        // maxWidth: '85%',
         margin: 'auto',
         // slate color
-        //backgroundColor: "rgba(82,84,118,0.90)",
+        // backgroundColor: "rgba(82,84,118,0.90)",
         boxSizing: 'border-box',
-        //backgroundColor: "rgba(62,54,76,0.7)",
+        // backgroundColor: "rgba(62,54,76,0.7)",
 
     },
     /* Screen size : width ratio =>
             0   : 100% (xs)
-            320 : 100% 
+            320 : 100%
             425 : 90%
             525 : 75%
             600 : 100% (sm)
@@ -38,11 +36,11 @@ const styles = theme => ({
 */
     gridItem: {
         flexGrow: 1,
-        backgroundColor: "rgba(42,44,74,0.90)",
+        backgroundColor: 'rgba(42,44,74,0.90)',
     },
     flexChild: {
         // light green
-        //backgroundColor: "rgba(112,154,76,0.90)",
+        // backgroundColor: "rgba(112,154,76,0.90)",
         boxSizing: 'border-box',
         height: 'auto',
         flexGrow: 1,
@@ -78,78 +76,76 @@ const styles = theme => ({
             width: '50%',
         },
         margin: '1.5rem auto 1.5rem auto',
-        //padding: theme.spacing.unit * 1,
-        //backgroundColor: "rgba(32,14,76,0.7)",
+        // padding: theme.spacing.unit * 1,
+        // backgroundColor: "rgba(32,14,76,0.7)",
     },
 });
 
 
 class GameStrategies extends React.Component {
-
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
-        console.log("#___ inside constructor___");
+        console.log('#___ inside constructor___');
         super(props);
         this.context = context;
         this.state = { dataKey: null };
     }
 
     componentDidMount() {
-        console.log("# GameStrategy: $$$$$ INSIDE COMPONENT DID MOUNT $$$$$");
+        console.log('# GameStrategy: $$$$$ INSIDE COMPONENT DID MOUNT $$$$$');
         const Multiprizer = this.context.drizzle.contracts.Multiprizer;
         // get and save the key for the variable we are interested in
         const dataKey = Multiprizer.methods.viewGameIDs.cacheCall();
-        console.log("# GameStrategy datakey value is:" + dataKey);
+        console.log('# GameStrategy datakey value is:' + dataKey);
         this.setState({ dataKey: dataKey });
     }
 
     render() {
-        console.log("# GameStrategy: INSIDE RENDER : ");
+        console.log('# GameStrategy: INSIDE RENDER : ');
         const { classes, initialized } = this.props;
-        console.log("# initialized value: ", initialized);
+        console.log('# initialized value: ', initialized);
 
         if (!initialized) {
-            return "Loading...";
+            return 'Loading...';
         }
         const dataKey = this.state.dataKey;
         const drizzleState = this.props.drizzleState;
         const multiprizer = this.props.drizzleState.contracts.Multiprizer;
         const logEvents = this.props.drizzleState.contracts.Multiprizer.events;
-        console.log("multiprizer:  ", multiprizer);
-        console.log("# datakey inside GameStrategy is  : ", dataKey);
+        console.log('multiprizer:  ', multiprizer);
+        console.log('# datakey inside GameStrategy is  : ', dataKey);
 
         let gameIDsJSX = null;
         const gameIDs = multiprizer.viewGameIDs[dataKey];
-        console.log("gameIDS: ", gameIDs);
+        console.log('gameIDS: ', gameIDs);
 
         if (gameIDs && gameIDs.value && gameIDs.value != null) {
-            const _gameIDsArray = gameIDs.value["_gameIDs"];
-            const _gameIDsLength = gameIDs.value["_gameIDsLength"];
-            console.log(" array: ", _gameIDsArray);
+            const _gameIDsArray = gameIDs.value._gameIDs;
+            console.log(' array: ', _gameIDsArray);
             const _gameIDsRevArray = _gameIDsArray.slice().reverse();
-            console.log("reverse array: ", _gameIDsRevArray);
-            console.log("# ____ gameObj value ______");
+            console.log('reverse array: ', _gameIDsRevArray);
+            console.log('# ____ gameObj value ______');
             console.log(gameIDs);
 
             gameIDsJSX = (_gameIDsRevArray
                 .map(
-                    (gameID, index) => {
-                        console.log("GameID from GameStrategy : ", gameID);
+                    (gameID) => {
+                        console.log('GameID from GameStrategy : ', gameID);
                         return (
-                            <Grid key={gameID} item xs={12} sm={6} md={3} lg={3} >
+                            <Grid key={gameID} item xs={12} sm={6} md={3} lg={3}>
                                 <GameContainer gameID={gameID} drizzleState={drizzleState} />
                             </Grid>
                         );
-                    }
+                    },
                 )
-            )
+            );
         }
 
         return (
             <div className={classes.flexContainer}>
                 <NotificationBar events={logEvents} />
-                <Grid container spacing={0} className={classes.flexChild} direction='row'>
+                <Grid container spacing={0} className={classes.flexChild} direction="row">
                     {gameIDsJSX}
                 </Grid>
             </div>

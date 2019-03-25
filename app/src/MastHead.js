@@ -1,7 +1,5 @@
-import React, { Fragment } from 'react';
-import { DrizzleContext } from "drizzle-react";
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import React from 'react';
+import { DrizzleContext } from 'drizzle-react';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
@@ -12,7 +10,7 @@ const styles = theme => ({
         width: '75%',
         margin: 'auto',
         fontFamily: theme.typography.fontFamily,
-        //backgroundColor: "rgba(11,54,7,0.99)",
+        // backgroundColor: "rgba(11,54,7,0.99)",
         paddingTop: (theme.spacing.unit * 1.5),
         paddingBottom: (theme.spacing.unit * 1),
         paddingLeft: (theme.spacing.unit * 1),
@@ -39,15 +37,13 @@ class MastHead extends React.PureComponent {
     }
 
     render() {
-
-        console.log("inside gameProps");
-        const web3 = this.context.drizzle.web3;
+        console.log('inside gameProps');
 
         const { gameID, classes } = this.props;
 
         return (
             <div className={classes.flexContainer}>
-                <img src={require(`./img/${gameID}.png`)} alt="MastHead Img" className={classes.mastHeadImg}/>
+                <img src={require(`./img/${gameID}.png`)} alt="MastHead Img" className={classes.mastHeadImg} />
             </div>
         );
     }

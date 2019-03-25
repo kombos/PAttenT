@@ -1,19 +1,18 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 
 const styles = theme => ({
     root: {
-        //padding: theme.spacing.unit * 0.5,
+        // padding: theme.spacing.unit * 0.5,
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: "column",
+        flexDirection: 'column',
         flex: '1 1 auto',
         height: 'auto',
-        backgroundColor: "rgba(0,0,0,0.69)",
+        backgroundColor: 'rgba(0,0,0,0.69)',
         justifyContent: 'center',
     },
     transPanel: {
@@ -21,30 +20,30 @@ const styles = theme => ({
         fontWeight: 'bold',
         flex: '1 1 auto',
         justifyContent: 'center',
-        //backgroundColor: "rgba(100,0,0,0.69)",
+        // backgroundColor: "rgba(100,0,0,0.69)",
         boxSizing: 'border-box',
         maxHeight: '2.5em',
         width: '100%',
         margin: 'auto',
-        //margin: '0.5rem auto 0.5rem auto',
-        //borderRadius: theme.shape.borderRadius * 2,
-        //paddingTop: theme.spacing.unit * 0.05,
-        //paddingBottom: theme.spacing.unit * 0.05,
-        //paddingBottom: '0.02rem',
+        // margin: '0.5rem auto 0.5rem auto',
+        // borderRadius: theme.shape.borderRadius * 2,
+        // paddingTop: theme.spacing.unit * 0.05,
+        // paddingBottom: theme.spacing.unit * 0.05,
+        // paddingBottom: '0.02rem',
     },
     tableContainer: {
-        //backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
-        //filter: 'opacity(30%)',
-        //backgroundSize: 'cover',
+        // backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
+        // filter: 'opacity(30%)',
+        // backgroundSize: 'cover',
         backgroundColor: theme.palette.grey[50],
-        //margin: '0rem auto auto auto',
+        // margin: '0rem auto auto auto',
         flex: '1 1 auto',
         height: 400,
     },
     table: {
         fontFamily: theme.typography.fontFamily,
         fontSize: theme.typography.fontSize,
-        //fontWeight: theme.typography.fontWeightMedium,
+        // fontWeight: theme.typography.fontWeightMedium,
     },
     flexContainer: {
         display: 'flex',
@@ -55,12 +54,12 @@ const styles = theme => ({
     tableRow: {
         cursor: 'pointer',
         textAlign: 'left',
-        //margin: 'auto 1em auto auto',
+        // margin: 'auto 1em auto auto',
         paddingLeft: '1em',
         paddingRight: '1em',
         borderBottom: '1px solid #e0e0e0',
-        //wordBreak: 'break-all',
-        //backgroundColor: theme.palette.grey[200],
+        // wordBreak: 'break-all',
+        // backgroundColor: theme.palette.grey[200],
     },
     tableRowHover: {
         '&:hover': {
@@ -92,13 +91,11 @@ const styles = theme => ({
 });
 
 
-
 class GameNotifications extends React.Component {
-
     constructor(props) {
         super(props);
-        let sortBy = 'timeSecs';
-        let sortDirection = SortDirection.DESC;
+        const sortBy = 'timeSecs';
+        const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
         this.getEvents();
@@ -109,7 +106,7 @@ class GameNotifications extends React.Component {
         const { classes } = this.props;
 
         return classNames(classes.tableRow, classes.flexContainer,
-            { [classes.tableRowHover]: index !== -1, });
+            { [classes.tableRowHover]: index !== -1 });
     };
 
     noRowsRenderer = () => {
@@ -118,21 +115,20 @@ class GameNotifications extends React.Component {
     }
 
     sort = ({ sortBy, sortDirection }) => {
-        console.log("inside sort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
+        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
         this.sortList({ sortBy, sortDirection });
         this.setState({
             sortDirection: sortDirection,
-            sortBy: sortBy
+            sortBy: sortBy,
         });
-
     }
 
     sortList = ({ sortBy, sortDirection }) => {
-        console.log("inside sort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
+        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
         const sortedData = this.stableSort(this.gameEvents, cmp);
-        console.log("sortedData: ", sortedData);
+        console.log('sortedData: ', sortedData);
         this.gameEvents = sortedData;
     }
 
@@ -160,20 +156,23 @@ class GameNotifications extends React.Component {
         const { events } = this.props;
         // prune the events and reformat
         this.gameEvents = events.map((value) => {
-            let gameEvent = value.returnValues;
+            const gameEvent = value.returnValues;
             gameEvent.transactionHash = value.transactionHash;
-            //gameEvent.serial = ++serial;
+            // gameEvent.serial = ++serial;
             gameEvent.logID = value.id;
-            //gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+            // gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
             switch (value.event) {
+            case 'LogCompleteRound':
+                gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
+                break;
 
-                case "logCompleteRound":
-                    gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
-                    break;
+            case 'LogGameLocked':
+                gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
+                break;
 
-                case "logGameLocked":
-                    gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
-                    break;
+            default:
+                gameEvent.notification = '';
+                break;
             }
 
             return gameEvent;
@@ -181,8 +180,7 @@ class GameNotifications extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log("inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ");
-
+        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
     /* shouldComponentUpdate(nextProps, nextState) {
@@ -211,33 +209,33 @@ class GameNotifications extends React.Component {
 
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
-        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
-        console.log("expression: ", (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection));
+        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
+        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
+        console.log('expression: ',
+            (this.props.events.length !== nextProps.events.length
+                || this.state.sortBy !== nextState.sortBy
+                || this.state.sortDirection !== nextState.sortDirection));
 
-        if (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection) {
+        if (this.props.events.length !== nextProps.events.length
+            || this.state.sortBy !== nextState.sortBy
+            || this.state.sortDirection !== nextState.sortDirection) {
             return true;
         }
-        else {
-            return false;
-        }
+
+        return false;
     }
 
     render() {
-        console.log("inside gamenotifications");
-        let sortBy = this.state.sortBy;
-        let sortDirection = this.state.sortDirection;
+        console.log('inside gamenotifications');
+        const sortBy = this.state.sortBy;
+        const sortDirection = this.state.sortDirection;
         const { classes } = this.props;
         this.getEvents();
         this.sortList({ sortBy, sortDirection });
 
-        console.log("gameevents: ", this.gameEvents);
-        console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-        console.log("fn;;;;;;;;s  sortby: ", this.state.sortBy, " sort Direction: ", this.state.sortDirection);
+        console.log('gameevents: ', this.gameEvents);
+        console.log('fn;;;;;;;;s  sortby: ', sortBy, ' sort Direction: ', sortDirection);
+        console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
             <div className={classes.root}>
@@ -269,9 +267,9 @@ class GameNotifications extends React.Component {
                                     label="Time"
                                     dataKey="timeSecs"
                                     cellDataGetter={({ rowData }) => {
-                                        let timestamp = new Date(parseInt(rowData.timeSecs) * 1000).toLocaleString();
-                                        //let timestamp = ;
-                                        console.log("rowdata: ", timestamp);
+                                        const timestamp = new Date(parseInt(rowData.timeSecs, 10) * 1000).toLocaleString();
+                                        // let timestamp = ;
+                                        console.log('rowdata: ', timestamp);
                                         return (timestamp);
                                     }}
                                 />
@@ -288,8 +286,6 @@ class GameNotifications extends React.Component {
             </div>
         );
     }
-
-
 }
 
 export default withStyles(styles)(GameNotifications);

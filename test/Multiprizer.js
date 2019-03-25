@@ -1,30 +1,30 @@
 
 
 var Multiprizer = artifacts.require("Multiprizer");
-var Multiprizer_oraclize = artifacts.require("Multiprizer_oraclize");
+var MultiprizerOraclize = artifacts.require("MultiprizerOraclize");
 
-var multiprizer_oraclize, oraclize_instance;
+var multiprizerOraclize, oraclizeInstance;
 var multiprizer, instance;
 
 
 
-contract("Multiprizer_oraclize", accounts => {
+contract("MultiprizerOraclize", accounts => {
 
 
     it("should be successfully deployed", async () => {
-        let contract = await Multiprizer_oraclize.deployed();
+        let contract = await MultiprizerOraclize.deployed();
         
         console.log("oraclize address: ",contract.address);
         let mAddress = await contract.multiprizerAddress({from:accounts[0]});
         console.log("multiprizer address in oraclize: ", mAddress);
 
-        oraclize_instance = contract;
-        let owner = await oraclize_instance.owner();
-        console.log("owner of multiprizer_oraclize: ", owner);
-        multiprizer_oraclize = await new web3.eth.Contract(contract.abi, contract.address);
+        oraclizeInstance = contract;
+        let owner = await oraclizeInstance.owner();
+        console.log("owner of multiprizerOraclize: ", owner);
+        multiprizerOraclize = await new web3.eth.Contract(contract.abi, contract.address);
         let balance = await web3.eth.getBalance(accounts[0]);
-        multiprizer_oraclize.options.gas = 1000000;
-        if (multiprizer_oraclize) {
+        multiprizerOraclize.options.gas = 1000000;
+        if (multiprizerOraclize) {
             console.log("Account Number: ", accounts[0], "|  Account[0] Balance : ", balance);
             assert.ok(true);
         }
@@ -38,7 +38,7 @@ contract("Multiprizer_oraclize", accounts => {
     it("should view  oraclize props by admin : positive scenario   : updateOraclizePropsByAdmin() ", async () => {
 
         console.log("view oraclize props : ");
-        let updateData = await oraclize_instance.getOraclizePropsByAdmin({ from: accounts[0] });
+        let updateData = await oraclizeInstance.getOraclizePropsByAdmin({ from: accounts[0] });
         console.log("updateData._gasLimitOraclize", updateData._gasLimitOraclize.toString());
         console.log("updateData._numBytesOraclize", updateData._numBytesOraclize.toString());
         console.log("updateData._gasPriceOraclize", updateData._gasPriceOraclize.toString());
@@ -85,7 +85,7 @@ contract("Multiprizer", accounts => {
         console.log("multiprizer address: ", contract.address);
         instance = contract;
         let owner = await instance.owner();
-        console.log("owner of multiprizer_oraclize: ", owner);
+        console.log("owner of multiprizerOraclize: ", owner);
         multiprizer = await new web3.eth.Contract(contract.abi, contract.address);
         let balance = await web3.eth.getBalance(accounts[0]);
         multiprizer.options.gas = 1000000;
@@ -476,9 +476,9 @@ contract("Multiprizer", accounts => {
         //console.log(" completeRoundsByAdmin() Invocation Gas : ", gasEstimate);
         
         //await instance.send(10, {from:accounts[0]});
-        await oraclize_instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
-        web3.eth.getBalance(oraclize_instance.address).then((balance) => (console.log("oraclize balance: ", balance)));
-        //console.log("oraclize instance balance: ", web3.eth.getBalance(oraclize_instance.address));
+        await oraclizeInstance.send(web3.utils.toHex(1e19), {from:accounts[0]});
+        web3.eth.getBalance(oraclizeInstance.address).then((balance) => (console.log("oraclize balance: ", balance)));
+        //console.log("oraclize instance balance: ", web3.eth.getBalance(oraclizeInstance.address));
         await instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
         console.log("last?");
         await instance.completeRoundsByAdmin(_gameID, { from: accounts[0], gas:10000000 })
@@ -502,9 +502,9 @@ contract("Multiprizer", accounts => {
     it("should get oraclize result by admin   : getOraclizeResultByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
         let _gameID = 102;
-        let _oraclizeID = await oraclize_instance.oraclizeIDs(0, { from: accounts[0] });
+        let _oraclizeID = await oraclizeInstance.oraclizeIDs(0, { from: accounts[0] });
         console.log("Oraclize ID: ", _oraclizeID);
-        let oraclizeResult = await oraclize_instance.getOraclizeResultByAdmin(_oraclizeID, { from: accounts[0] });
+        let oraclizeResult = await oraclizeInstance.getOraclizeResultByAdmin(_oraclizeID, { from: accounts[0] });
         let gasEstimate = await multiprizer.methods.calculateWinnersByAdmin(_oraclizeID, oraclizeResult._result,
             oraclizeResult._oraclizeProof, oraclizeResult._isProofValid).estimateGas({ from: accounts[0] });
         console.log(" getOraclizeResultByAdmin() Invocation Gas : ", gasEstimate);

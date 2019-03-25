@@ -1,22 +1,22 @@
-import React, { Fragment } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import PropTypes from "prop-types";
+import React from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 
 const styles = theme => ({
     smallText: {
-        fontSize: "0.7rem",
+        fontSize: '0.7rem',
     },
     largeText: {
-        fontSize: "0.9rem",
+        fontSize: '0.9rem',
     },
     mediumText: {
-        fontSize: "0.8rem",
+        fontSize: '0.8rem',
     },
     progressBar: {
         position: 'relative',
-        //display: 'flex',
+        // display: 'flex',
         alignItems: 'center',
-        backgroundColor: "rgba(12,54,76,0.90)",
+        backgroundColor: 'rgba(12,54,76,0.90)',
         boxSizing: 'border-box',
         width: '95%',
         margin: '0.5rem auto 0.5rem auto',
@@ -24,15 +24,15 @@ const styles = theme => ({
         padding: theme.spacing.unit * 0.5,
     },
     progressFill: {
-        //position:'relative',
-        //flexGrow: 1,
-        //backgroundColor: "rgba(62,94,76,0.99)",
+        // position:'relative',
+        // flexGrow: 1,
+        // backgroundColor: "rgba(62,94,76,0.99)",
         backgroundColor: theme.palette.primary.dark,
         boxSizing: 'border-box',
-        //width: '80%',
+        // width: '80%',
         height: '100%',
-        //margin: 'auto',
-        //minHeight:'50px',
+        // margin: 'auto',
+        // minHeight:'50px',
         minHeight: '40px',
         borderRadius: '20px',
     },
@@ -41,13 +41,13 @@ const styles = theme => ({
         top: '50%',
         left: '50%',
         transform: 'translate(-50%,-50%)',
-        //alignItems: 'center',
-        //backgroundColor: "rgba(0,0,0,0.29)",
+        // alignItems: 'center',
+        // backgroundColor: "rgba(0,0,0,0.29)",
         boxSizing: 'border-box',
         height: 'auto',
         width: '75%',
-        //margin: 'auto',
-        //margin: '0.5rem auto 0.5rem auto',
+        // margin: 'auto',
+        // margin: '0.5rem auto 0.5rem auto',
         borderRadius: '16px',
         padding: theme.spacing.unit * 0.5,
     },
@@ -55,7 +55,7 @@ const styles = theme => ({
         display: 'flex',
         alignItems: 'center',
         textAlign: 'center',
-        //backgroundColor: "rgba(12,54,76,0.99)",
+        // backgroundColor: "rgba(12,54,76,0.99)",
         boxSizing: 'border-box',
         width: '90%',
         margin: 'auto',
@@ -63,34 +63,44 @@ const styles = theme => ({
     flexChild: {
         flexGrow: 1,
         fontFamily: theme.typography.fontFamily,
-        //fontWeight: 'bold',
-        color: "rgba(255,255,255,0.89)",
-        //backgroundColor: "rgba(12,54,76,0.99)",
+        // fontWeight: 'bold',
+        color: 'rgba(255,255,255,0.89)',
+        // backgroundColor: "rgba(12,54,76,0.99)",
     },
 
 });
 
 class TokensData extends React.PureComponent {
-
     render() {
         const { classes } = this.props;
         const { tokensLeft, maxTokens } = this.props;
-        console.log("tokens left: ", tokensLeft, " max tokens: ", maxTokens);
+        console.log('tokens left: ', tokensLeft, ' max tokens: ', maxTokens);
 
         return (
-            <div className={classes.progressBar} >
+            <div className={classes.progressBar}>
                 <div className={classes.transPanel}>
                     <div className={classes.flexContainer}>
                         <div className={classes.flexChild}>
                             <div className={classes.mediumText}>
-                                {"total tokens left: "}&nbsp;<span className={classes.largeText}>{tokensLeft}</span>&nbsp;{" of "}&nbsp;<span className={classes.largeText}>{maxTokens}</span>
+                                {'total tokens left: '}
+                                &nbsp;
+                                <span className={classes.largeText}>
+                                    {tokensLeft}
+                                </span>
+                                &nbsp;
+                                {' of '}
+                                &nbsp;
+                                <span className={classes.largeText}>{maxTokens}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className={classes.progressFill} style={{
-                    width: `${(tokensLeft * 100) / maxTokens}%`,
-                }}>
+                <div
+                    className={classes.progressFill}
+                    style={{
+                        width: `${(tokensLeft * 100) / maxTokens}%`,
+                    }}
+                >
                     &nbsp;
                 </div>
 
@@ -100,7 +110,7 @@ class TokensData extends React.PureComponent {
 }
 
 TokensData.propTypes = {
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(TokensData);

@@ -1,0 +1,16 @@
+{
+    "extends": "solhint:default",
+    "plugins": [],
+    "rules": {
+        "avoid-throw": "error",
+        "avoid-suicide": "error",
+        "avoid-sha3": "warn",
+        "two-lines-top-level-separator": false,
+        "max-states-count": false,
+        "max-line-length" : false,
+        "function-max-lines" : false,
+        "func-order" : false,
+        "multiple-sends" : false,
+        "code-complexity" : false
+    }
+}

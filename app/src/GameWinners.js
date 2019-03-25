@@ -1,21 +1,20 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
-import { TX_HASH_URL_ROPSTEN as HASH_URL } from "./Constants"
+import { TX_HASH_URL_ROPSTEN as HASH_URL } from './Constants';
 
 const styles = theme => ({
     root: {
-        //padding: theme.spacing.unit * 0.5,
+        // padding: theme.spacing.unit * 0.5,
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: "column",
+        flexDirection: 'column',
         flex: '1 1 auto',
         height: 'auto',
-        backgroundColor: "rgba(0,0,0,0.69)",
+        backgroundColor: 'rgba(0,0,0,0.69)',
         justifyContent: 'center',
     },
     transPanel: {
@@ -23,30 +22,30 @@ const styles = theme => ({
         fontWeight: 'bold',
         flex: '1 1 auto',
         justifyContent: 'center',
-        //backgroundColor: "rgba(100,0,0,0.69)",
+        // backgroundColor: "rgba(100,0,0,0.69)",
         boxSizing: 'border-box',
         maxHeight: '2.5em',
         width: '100%',
         margin: 'auto',
-        //margin: '0.5rem auto 0.5rem auto',
-        //borderRadius: theme.shape.borderRadius * 2,
-        //paddingTop: theme.spacing.unit * 0.05,
-        //paddingBottom: theme.spacing.unit * 0.05,
-        //paddingBottom: '0.02rem',
+        // margin: '0.5rem auto 0.5rem auto',
+        // borderRadius: theme.shape.borderRadius * 2,
+        // paddingTop: theme.spacing.unit * 0.05,
+        // paddingBottom: theme.spacing.unit * 0.05,
+        // paddingBottom: '0.02rem',
     },
     tableContainer: {
-        //backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
-        //filter: 'opacity(30%)',
-        //backgroundSize: 'cover',
+        // backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
+        // filter: 'opacity(30%)',
+        // backgroundSize: 'cover',
         backgroundColor: theme.palette.grey[50],
-        //margin: '0rem auto auto auto',
+        // margin: '0rem auto auto auto',
         flex: '1 1 auto',
         height: 400,
     },
     table: {
         fontFamily: theme.typography.fontFamily,
         fontSize: theme.typography.fontSize * 0.95,
-        //fontWeight: theme.typography.fontWeightMedium,
+        // fontWeight: theme.typography.fontWeightMedium,
     },
     flexContainer: {
         display: 'flex',
@@ -57,12 +56,12 @@ const styles = theme => ({
     tableRow: {
         cursor: 'pointer',
         textAlign: 'center',
-        //margin: 'auto 1em auto auto',
+        // margin: 'auto 1em auto auto',
         paddingLeft: '1em',
         paddingRight: '1em',
         borderBottom: '1px solid #e0e0e0',
-        //wordBreak: 'break-all',
-        //backgroundColor: theme.palette.grey[200],
+        // wordBreak: 'break-all',
+        // backgroundColor: theme.palette.grey[200],
     },
     tableRowHover: {
         '&:hover': {
@@ -99,26 +98,25 @@ const styles = theme => ({
 });
 
 
-
 class GameWinners extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
         super(props);
         this.context = context;
-        let sortBy = 'round';
-        let sortDirection = SortDirection.DESC;
+        const sortBy = 'round';
+        const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
-        //this.getEvents();
-        //this.sortList({ sortBy, sortDirection });
+        // this.getEvents();
+        // this.sortList({ sortBy, sortDirection });
     }
 
     getRowClassName = ({ index }) => {
         const { classes } = this.props;
 
         return classNames(classes.tableRow, classes.flexContainer,
-            { [classes.tableRowHover]: index !== -1, });
+            { [classes.tableRowHover]: index !== -1 });
     };
 
     noRowsRenderer = () => {
@@ -127,21 +125,20 @@ class GameWinners extends React.Component {
     }
 
     sort = ({ sortBy, sortDirection }) => {
-        console.log("inside sort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
+        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
         this.sortList({ sortBy, sortDirection });
         this.setState({
             sortDirection: sortDirection,
-            sortBy: sortBy
+            sortBy: sortBy,
         });
-
     }
 
     sortList = ({ sortBy, sortDirection }) => {
-        console.log("inside sort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
+        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
         const sortedData = this.stableSort(this.gameEvents, cmp);
-        console.log("sortedData: ", sortedData);
+        console.log('sortedData: ', sortedData);
         this.gameEvents = sortedData;
     }
 
@@ -165,11 +162,11 @@ class GameWinners extends React.Component {
         return stabilizedThis.map(el => el[0]);
     }
 
-    addressRenderer = ({rowData}) => {
-        console.log("inside addressRenderer()");
-        console.log("rowdata: ", rowData);
-        return(
-            <a href={HASH_URL+rowData.transactionHash}>{rowData.winnerAddress}</a>
+    addressRenderer = ({ rowData }) => {
+        console.log('inside addressRenderer()');
+        console.log('rowdata: ', rowData);
+        return (
+            <a href={HASH_URL + rowData.transactionHash}>{rowData.winnerAddress}</a>
         );
     }
 
@@ -178,22 +175,21 @@ class GameWinners extends React.Component {
         const web3 = this.context.drizzle.web3;
         // prune the events and reformat
         this.gameEvents = events.map((value) => {
-            let gameEvent = value.returnValues;
+            const gameEvent = value.returnValues;
             gameEvent.transactionHash = value.transactionHash;
             gameEvent.logID = value.id;
             // gameEvent.winnerAddress
             // gameEvent.roundNumber
-            gameEvent.round = parseInt(value.returnValues.roundNumber);
+            gameEvent.round = parseInt(value.returnValues.roundNumber, 10);
             gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
-            gameEvent.gameID = parseInt(value.returnValues.gameID);
+            gameEvent.gameID = parseInt(value.returnValues.gameID, 10);
 
             return gameEvent;
         });
     }
 
     componentDidUpdate() {
-        console.log("inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ");
-
+        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
     /* shouldComponentUpdate(nextProps, nextState) {
@@ -222,33 +218,32 @@ class GameWinners extends React.Component {
 
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
-        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
-        console.log("expression: ", (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection));
+        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
+        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
+        console.log('expression: ',
+            (this.props.events.length !== nextProps.events.length
+                || this.state.sortBy !== nextState.sortBy
+                || this.state.sortDirection !== nextState.sortDirection));
 
-        if (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection) {
+        if (this.props.events.length !== nextProps.events.length
+            || this.state.sortBy !== nextState.sortBy
+            || this.state.sortDirection !== nextState.sortDirection) {
             return true;
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     render() {
-        console.log("inside gamenotifications");
-        let sortBy = this.state.sortBy;
-        let sortDirection = this.state.sortDirection;
+        console.log('inside gamenotifications');
+        const sortBy = this.state.sortBy;
+        const sortDirection = this.state.sortDirection;
         const { classes } = this.props;
         this.getEvents();
         this.sortList({ sortBy, sortDirection });
 
-        console.log("gameevents: ", this.gameEvents);
-        console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-        console.log("fn;;;;;;;;s  sortby: ", this.state.sortBy, " sort Direction: ", this.state.sortDirection);
+        console.log('gameevents: ', this.gameEvents);
+        console.log('fn;;;;;;;;s  sortby: ', sortBy, ' sort Direction: ', sortDirection);
+        console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
             <div className={classes.root}>
@@ -307,10 +302,6 @@ class GameWinners extends React.Component {
             </div>
         );
     }
-
-
 }
 
 export default withStyles(styles)(GameWinners);
-
-

@@ -1,27 +1,26 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
-import { ADDRESS_HASH_URL_ROPSTEN as HASH_URL } from "./Constants"
+import { ADDRESS_HASH_URL_ROPSTEN as HASH_URL } from './Constants';
 
 const styles = theme => ({
     tableContainer: {
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         boxSizing: 'border-box',
-        //backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
-        //filter: 'opacity(30%)',
-        //backgroundSize: 'cover',
+        // backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
+        // filter: 'opacity(30%)',
+        // backgroundSize: 'cover',
         backgroundColor: theme.palette.grey[50],
-        //margin: '0rem auto auto auto',
+        // margin: '0rem auto auto auto',
         flex: '1 1 auto',
         height: 400,
     },
     table: {
         fontFamily: theme.typography.fontFamily,
         fontSize: theme.typography.fontSize * 0.95,
-        //fontWeight: theme.typography.fontWeightMedium,
+        // fontWeight: theme.typography.fontWeightMedium,
     },
     flexContainer: {
         display: 'flex',
@@ -32,12 +31,12 @@ const styles = theme => ({
     tableRow: {
         cursor: 'pointer',
         textAlign: 'center',
-        //margin: 'auto 1em auto auto',
+        // margin: 'auto 1em auto auto',
         paddingLeft: '1em',
         paddingRight: '1em',
         borderBottom: '1px solid #e0e0e0',
-        //wordBreak: 'break-all',
-        //backgroundColor: theme.palette.grey[200],
+        // wordBreak: 'break-all',
+        // backgroundColor: theme.palette.grey[200],
     },
     tableRowHover: {
         '&:hover': {
@@ -80,19 +79,19 @@ class GameStats extends React.Component {
     constructor(props, context) {
         super(props);
         this.context = context;
-        let sortBy = 'serial';
-        let sortDirection = SortDirection.ASC;
+        const sortBy = 'serial';
+        const sortDirection = SortDirection.ASC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
-        //this.getData();
-        //this.sortList({ sortBy, sortDirection });
+        // this.getData();
+        // this.sortList({ sortBy, sortDirection });
     }
 
     getRowClassName = ({ index }) => {
         const { classes } = this.props;
 
         return classNames(classes.tableRow, classes.flexContainer,
-            { [classes.tableRowHover]: index !== -1, });
+            { [classes.tableRowHover]: index !== -1 });
     };
 
     noRowsRenderer = () => {
@@ -101,21 +100,20 @@ class GameStats extends React.Component {
     }
 
     sort = ({ sortBy, sortDirection }) => {
-        console.log("inside sort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
+        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
         this.sortList({ sortBy, sortDirection });
         this.setState({
             sortDirection: sortDirection,
-            sortBy: sortBy
+            sortBy: sortBy,
         });
-
     }
 
     sortList = ({ sortBy, sortDirection }) => {
-        console.log("inside sort() :: sortby: ", sortBy, " sortdirection: ", sortDirection);
+        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
         const sortedData = this.stableSort(this.playersData, cmp);
-        console.log("sortedData: ", sortedData);
+        console.log('sortedData: ', sortedData);
         this.playersData = sortedData;
     }
 
@@ -140,33 +138,32 @@ class GameStats extends React.Component {
     }
 
     addressRenderer = ({ rowData }) => {
-        console.log("inside addressRenderer()");
-        console.log("rowdata: ", rowData);
+        console.log('inside addressRenderer()');
+        console.log('rowdata: ', rowData);
         return (
             <a href={HASH_URL + rowData.player}>{rowData.player}</a>
         );
     }
 
     getData() {
-        console.log("inside getData  ");
+        console.log('inside getData  ');
 
         const { roundData } = this.props;
-        console.log("roundata inside gamestats: ", roundData);
-        const playerList = roundData.value["_playerList"];
-        const playerTokensList = roundData.value["_playerTokensList"];
+        console.log('roundata inside gamestats: ', roundData);
+        const playerList = roundData.value._playerList;
+        const playerTokensList = roundData.value._playerTokensList;
         this.playersData = [];
         for (let i = 0; i < playerList.length; i += 1) {
             this.playersData.push({
                 serial: i + 1,
                 player: playerList[i],
-                tokens: parseInt(playerTokensList[i])   
+                tokens: parseInt(playerTokensList[i], 10),
             });
         }
     }
 
     componentDidUpdate() {
-        console.log("inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ");
-
+        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
     /* shouldComponentUpdate(nextthis.Props, nextState) {
@@ -195,16 +192,16 @@ class GameStats extends React.Component {
 
 
     render() {
-        console.log("inside gamenotifications");
-        let sortBy = this.state.sortBy;
-        let sortDirection = this.state.sortDirection;
+        console.log('inside gamenotifications');
+        const sortBy = this.state.sortBy;
+        const sortDirection = this.state.sortDirection;
         const { classes } = this.props;
         this.getData();
         this.sortList({ sortBy, sortDirection });
 
-        console.log("playersData: ", this.playersData);
-        console.log("fn;;;;;;;;s  sortby: ", sortBy, " sort Direction: ", sortDirection);
-        console.log("fn;;;;;;;;s  sortby: ", this.state.sortBy, " sort Direction: ", this.state.sortDirection);
+        console.log('playersData: ', this.playersData);
+        console.log('fn;;;;;;;;s  sortby: ', sortBy, ' sort Direction: ', sortDirection);
+        console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
             <div className={classes.tableContainer}>
@@ -254,8 +251,6 @@ class GameStats extends React.Component {
             </div>
         );
     }
-
-
 }
 
 export default withStyles(styles)(GameStats);

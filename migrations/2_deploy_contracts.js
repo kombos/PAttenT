@@ -1,5 +1,5 @@
 var Multiprizer = artifacts.require("Multiprizer");
-var MultiprizerOraclize = artifacts.require("Multiprizer_oraclize");
+var MultiprizerOraclize = artifacts.require("MultiprizerOraclize");
 
 module.exports = function(deployer, network, accounts) {
 
@@ -114,12 +114,12 @@ module.exports = function(deployer, network, accounts) {
                 console.log("Add Game by admin ......  ");
                 return multiprizerInstance.addGameByAdmin(_gameProperties4, {from:accounts[0]});
             })
-            // deploy Multiprizer_oraclize
+            // deploy MultiprizerOraclize
             .then(function(receipt) {
                 console.log("deploy MultiprizerOraclize ....... ");
                 return deployer.deploy(MultiprizerOraclize, Multiprizer.address, {from:accounts[0], gas:10000000});
             })
-            // update multiprizer_oraclize props
+            // update MultiprizerOraclize props
             .then(function(oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
                 let _gasLimitOraclize = 1000000;
@@ -130,7 +130,7 @@ module.exports = function(deployer, network, accounts) {
                 return multiprizerOraclizeInstance.updateOraclizePropsByAdmin(_gasLimitOraclize, _gasPriceOraclize,
                     _numBytesOraclize, _delayOraclize, {from:accounts[0]});
             })
-            // set deployed address of Multiprizer_oraclize in Multiprizer
+            // set deployed address of MultiprizerOraclize in Multiprizer
             .then(function(receipt) {
                 console.log("Set Oraclize by admin .... ");
                 console.log("Multiprizer.address", multiprizerInstance.address);
@@ -183,12 +183,12 @@ module.exports = function(deployer, network, accounts) {
                 console.log("Add Game by admin ......  ");
                 return multiprizerInstance.addGameByAdmin(_gameProperties4, {from:accounts[0]});
             })
-            // deploy Multiprizer_oraclize
+            // deploy MultiprizerOraclize
             .then(function(receipt) {
                 console.log("deploy MultiprizerOraclize ....... ");
                 return deployer.deploy(MultiprizerOraclize, Multiprizer.address, {from:accounts[0]});
             })
-            // update multiprizer_oraclize props
+            // update MultiprizerOraclize props
             .then(function(oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
                 let _gasLimitOraclize = 550000;
@@ -199,7 +199,7 @@ module.exports = function(deployer, network, accounts) {
                 return multiprizerOraclizeInstance.updateOraclizePropsByAdmin(_gasLimitOraclize, _gasPriceOraclize,
                     _numBytesOraclize, _delayOraclize, {from:accounts[0]});
             })
-            // set deployed address of Multiprizer_oraclize in Multiprizer
+            // set deployed address of MultiprizerOraclize in Multiprizer
             .then(function(receipt) {
                 console.log("Set Oraclize by admin .... ");
                 console.log("Multiprizer.address", multiprizerInstance.address);

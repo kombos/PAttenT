@@ -1,13 +1,12 @@
-import Multiprizer_oraclize from './contracts/Multiprizer_oraclize.json'
-import Multiprizer from './contracts/Multiprizer.json'
+import Multiprizer from './contracts/Multiprizer.json';
 
 const drizzleOptions = {
     web3: {
         block: false,
         fallback: {
             type: 'ws',
-            url: 'ws://127.0.0.1:7545'
-        }
+            url: 'ws://127.0.0.1:7545',
+        },
     },
     contracts: [Multiprizer],
 
@@ -15,66 +14,48 @@ const drizzleOptions = {
         Multiprizer: [
 
             {
-                eventName:'logPlayGame',
-                eventOptions:{
-                    fromBlock: 0
-                }
+                eventName: 'LogPlayGame',
+                eventOptions: {
+                    fromBlock: 0,
+                },
             },
             {
-                eventName:'logRevertGame',
-                eventOptions:{
-                    fromBlock: 0
-                }
-            },
-            /* {
-                eventName:'',
-                eventOptions:{
-                    fromBlock: 0
-                }
+                eventName: 'LogRevertGame',
+                eventOptions: {
+                    fromBlock: 0,
+                },
             },
             {
-                eventName:'logResumeGames',
-                eventOptions:{
-                    fromBlock: 0
-                }
-            }, 
-            {
-                eventName:'logRevertFunds',
-                eventOptions:{
-                    fromBlock: 0
-                }
-            }, */
-            {
-                eventName:'logCompleteRound',
-                eventOptions:{
-                    fromBlock: 0
-                }
+                eventName: 'LogCompleteRound',
+                eventOptions: {
+                    fromBlock: 0,
+                },
             },
             {
-                eventName:'logGameLocked',
-                eventOptions:{
-                    fromBlock: 0
-                }
+                eventName: 'LogGameLocked',
+                eventOptions: {
+                    fromBlock: 0,
+                },
             },
             {
-                eventName:'logWinner',
-                eventOptions:{
-                    fromBlock: 0
-                }
+                eventName: 'LogWinner',
+                eventOptions: {
+                    fromBlock: 0,
+                },
             },
             {
-                eventName:'logMegaPrizeWinner',
-                eventOptions:{
-                    fromBlock: 0
-                }
+                eventName: 'LogMegaPrizeWinner',
+                eventOptions: {
+                    fromBlock: 0,
+                },
             },
-        ]
+        ],
 
     },
-    
+
     polls: {
-        accounts: 3000
-    }
+        accounts: 3000,
+    },
 };
 
 export default drizzleOptions;
