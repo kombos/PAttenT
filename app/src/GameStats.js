@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
+import { Tooltip } from '@material-ui/core';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
 import { ADDRESS_HASH_URL_ROPSTEN as HASH_URL } from './Constants';
@@ -204,51 +205,54 @@ class GameStats extends React.Component {
         console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
-            <div className={classes.tableContainer}>
-                <AutoSizer>
-                    {({ height, width }) => (
-                        <Table
-                            className={classes.table}
-                            height={height}
-                            width={width}
-                            headerHeight={50}
-                            rowHeight={50}
-                            rowClassName={this.getRowClassName}
-                            headerClassName={classes.headerColumn}
-                            noRowsRenderer={this.noRowsRenderer}
-                            overscanRowCount={10}
-                            rowCount={this.playersData.length}
-                            rowGetter={({ index }) => this.playersData[index]}
-                            onRowClick={event => console.log(event)}
-                            onRequestSort={this.handleRequestSort}
-                            sortBy={sortBy}
-                            sortDirection={sortDirection}
-                            sort={this.sort}
-                        >
-                            <Column
-                                width={60}
-                                label="Serial"
-                                dataKey="serial"
-                                flexGrow={1}
-                            />
-                            <Column
-                                width={150}
-                                flexGrow={1}
-                                label="Player"
-                                dataKey="player"
-                                cellRenderer={this.addressRenderer}
-                                className={classes.trimmable}
-                            />
-                            <Column
-                                width={70}
-                                flexGrow={2}
-                                label="Total Tokens"
-                                dataKey="tokens"
-                            />
-                        </Table>
-                    )}
-                </AutoSizer>
-            </div>
+            <Tooltip title="Token Purchase Stats">
+                <div className={classes.tableContainer}>
+                    <AutoSizer>
+                        {({ height, width }) => (
+                            <Table
+                                className={classes.table}
+                                height={height}
+                                width={width}
+                                headerHeight={50}
+                                rowHeight={50}
+                                rowClassName={this.getRowClassName}
+                                headerClassName={classes.headerColumn}
+                                noRowsRenderer={this.noRowsRenderer}
+                                overscanRowCount={10}
+                                rowCount={this.playersData.length}
+                                rowGetter={({ index }) => this.playersData[index]}
+                                onRowClick={event => console.log(event)}
+                                onRequestSort={this.handleRequestSort}
+                                sortBy={sortBy}
+                                sortDirection={sortDirection}
+                                sort={this.sort}
+                            >
+                                <Column
+                                    width={60}
+                                    label="Serial"
+                                    dataKey="serial"
+                                    flexGrow={1}
+                                />
+                                <Column
+                                    width={150}
+                                    flexGrow={1}
+                                    label="Player"
+                                    dataKey="player"
+                                    cellRenderer={this.addressRenderer}
+                                    className={classes.trimmable}
+                                />
+                                <Column
+                                    width={70}
+                                    flexGrow={2}
+                                    label="Total Tokens"
+                                    dataKey="tokens"
+                                />
+                            </Table>
+                        )}
+                    </AutoSizer>
+                </div>
+            </Tooltip>
+
         );
     }
 }

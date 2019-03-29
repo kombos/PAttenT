@@ -36,7 +36,7 @@ module.exports = function(deployer, network, accounts) {
     var _gameProperties3 = [
         103,
         300,
-        web3.utils.toHex(5e16),
+        web3.utils.toHex(5e13),
         (60*60*36),
         (4*60*36),
         30,
@@ -191,7 +191,7 @@ module.exports = function(deployer, network, accounts) {
             // update MultiprizerOraclize props
             .then(function(oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
-                let _gasLimitOraclize = 550000;
+                let _gasLimitOraclize = 600000;
                 let _gasPriceOraclize = 5e9;
                 let _numBytesOraclize = 7;
                 let _delayOraclize = 0;

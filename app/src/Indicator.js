@@ -110,13 +110,14 @@ class Indicator extends React.PureComponent {
             console.log('durationinsecs: ', duration);
             console.log('bountysize: ', bountySize);
             console.log('winningchance: ', winningChance);
+            console.log("path:: ", `./img/indicator${winningChance}.png`);
 
             indicatorJSX = (
                 <div className={classes.flexContainer}>
                     <div className={classes.flexChild}>
                         <Tooltip title="Winning Chance">
                             <img
-                                src={require(`./img/indicator${winningChance}.png`)}
+                                src={require(`./img/Indicator${winningChance}.png`)}
                                 alt="Winning Chance"
                                 className={classes.winningChance}
                             />
@@ -137,7 +138,7 @@ class Indicator extends React.PureComponent {
                     <div className={classes.flexChild}>
                         <Tooltip title="Bounty Size">
                             <img
-                                src={require(`./img/indicator${bountySize}.png`)}
+                                src={require(`./img/Indicator${bountySize}.png`)}
                                 alt="Bounty Size"
                                 className={classes.bountySize}
                             />

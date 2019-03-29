@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { DrizzleContext } from "drizzle-react";
 import GameStrategies from "../GameStrategies";
 import { Header, Footer } from './Layouts';

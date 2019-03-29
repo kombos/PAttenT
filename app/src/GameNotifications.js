@@ -162,17 +162,27 @@ class GameNotifications extends React.Component {
             gameEvent.logID = value.id;
             // gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
             switch (value.event) {
-            case 'LogCompleteRound':
-                gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
-                break;
+                case 'LogCompleteRound':
+                    if (gameEvent.numPlayers > 1) {
+                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
+                        break;
+                    } else {
+                        if (gameEvent.numPlayers === 1) {
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors.`;
+                            break;
+                        } else {
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated.`;
+                            break;
+                        }
+                    }
 
-            case 'LogGameLocked':
-                gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
-                break;
+                case 'LogGameLocked':
+                    gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
+                    break;
 
-            default:
-                gameEvent.notification = '';
-                break;
+                default:
+                    gameEvent.notification = '';
+                    break;
             }
 
             return gameEvent;

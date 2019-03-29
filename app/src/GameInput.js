@@ -78,93 +78,47 @@ class GameInput extends React.Component {
             isDialogOpen: false,
         };
         this.context = context;
+        this.prevStackID = this.state.stackID;
+        this.txHash = null;
         // this.valueRef = React.createRef();
         this.MINTOKENS = 1;
 
-        // this.getTxStatus = this.getTxStatus.bind();
         this.handleSubmit = this.handleSubmit.bind();
         this.handleChange = this.handleChange.bind();
-        this.handleFocus = this.handleFocus.bind();
+        this.handleClose = this.handleClose.bind();
+        //this.getTxStatus = this.getTxStatus.bind();
+        //this.handleFocus = this.handleFocus.bind();
     }
 
-    /*
-        handleFocus = e => {
-            console.log('handle focus called');
-        }
-
-        handleChange = e => {
-            console.log("target value: ", e.target.value);
-            if (parseInt(e.target.value) > this.maxTokensPerPlayer) {
-                this.setState({ numTokens: this.maxTokensPerPlayer });
-                return;
-            }
-
-            if (e.target.value < 0) {
-                this.setState({ numTokens: 1 });
-                return;
-            }
-
-            this.setState({ numTokens: Math.floor(e.target.value) });
-            //console.log("value variable in handleChange(): ", (this.value));
-            console.log("target variable in handleChange(): ", (this.state.numTokens));
-            console.log("target variable in handleChange(): ", (this.state.numTokens));
-            console.log("max tokens value", this.maxTokensPerPlayer);
-
-        }
-     */
-
     handleChange = (e) => {
-        /*
-        const playerTokens = this.props.playerTokens;
-        const remainingTokens = this.maxTokensPerPlayer - playerTokens;
-        console.log("player tokens: ", playerTokens);
- */
         console.log('target value: ', e.target.value);
-        /*
-                if (parseInt(e.target.value) > remainingTokens) {
-                    this.setState({ numTokens: remainingTokens });
-                    return;
-                }
-
-                if (e.target.value < 0) {
-                    this.setState({ numTokens: 1 });
-                    return;
-                }
-         */
         this.setState({ numTokens: Math.floor(e.target.value) });
-        // console.log("value variable in handleChange(): ", (this.value));
         console.log('target variable in handleChange(): ', (this.state.numTokens));
     }
 
-
     handleSubmit = (e) => {
         // only works with the input value provided via form
-        console.log('inside handle submit: : : ');
+        console.log('inside handle submit: ');
 
-        if (this.state.numTokens == '' || isNaN(this.state.numTokens)) {
+        if (this.state.numTokens === '' || isNaN(this.state.numTokens)) {
             console.log('is NAN ', this.state.numTokens);
             return;
         }
 
         // let numTokens = Math.floor(parseInt(this.valueRef.current.value));
         const numTokens = Math.floor(parseInt(this.state.numTokens, 10));
-        console.log('-----------------------numtokens:------------------------------- ', numTokens);
+        console.log('numtokens: ', numTokens);
         console.log('state value: ', this.state.numTokens);
-        // console.log(" ref: ", this.valueRef.current.value, "  numTokens: ", numTokens);
         this.setValue(numTokens);
-        this.handleClickOpen();
-
         // if submitted, set the value with the string
         e.preventDefault();
     };
 
     setValue = (numTokens) => {
         console.log('inside setvalue() ');
-        const gameData = this.props.gameData;
-        const tokenValue = gameData.value.tokenValue;
-        const gameID = gameData.value.gameID;
-
+        const { gameData } = this.props;
         const { drizzle, drizzleState } = this.context;
+        const {tokenValue, gameID} = gameData.value;
         const multiprizer = drizzle.contracts.Multiprizer;
         const tokenAmount = numTokens * tokenValue;
 
@@ -182,25 +136,27 @@ class GameInput extends React.Component {
         });
     };
 
-    /* getTxStatus = () => {
+    shouldComponentUpdate = () => {
+        console.log("inside getTxStatus()");
+        console.log("this.prevStackID: ", this.prevStackID, " and state stackID: ", this.state.stackID);
         // get the transaction states from the drizzle state
-        const { transactions, transactionStack } = this.context.drizzleState;
 
-        // get the transaction hash using our saved `stackID`
-        const txHash = transactionStack[this.state.stackID];
-        console.log("inside gameinput gettxstatus() value of stackID is : ", this.state.stackID);
-        // if transaction hash does not exist, don't display anything
-        if (!txHash) return null;
-
-        if (transactions[txHash]) {
-            // otherwise, return the transaction status
-            console.log("value of txHash status: ", transactions[txHash].status);
-            return `Transaction status: ${transactions[txHash].status}`;
+        if (this.prevStackID !== this.state.stackID) {
+            // get the transaction hash using our saved `stackID`
+            const { transactions, transactionStack } = this.context.drizzleState;
+            const txHash = transactionStack[this.state.stackID];
+            console.log("txHash: ", txHash);
+            console.log("txns txhash: ", transactions[txHash]);
+            // if transaction hash does not exist, don't display anything
+            if (txHash && transactions[txHash] && (transactions[txHash].status === "pending"
+                || transactions[txHash].status === "success")) {
+                this.handleClickOpen();
+                this.prevStackID = this.state.stackID;
+                return true;
+            }
         }
-        else {
-            return null;
-        }
-    }; */
+        return true;
+    };
 
     handleClickOpen = () => {
         this.setState({ isDialogOpen: true });
@@ -210,25 +166,22 @@ class GameInput extends React.Component {
         this.setState({ isDialogOpen: false });
     }
 
-    render() {
-        const { classes } = this.props;
-        const gameData = this.props.gameData;
-        const web3 = this.context.drizzle.web3;
-        const isGameLocked = gameData.value.isGameLocked;
-        const currentRound = gameData.value.currentRound;
-        const tokenValue = gameData.value.tokenValue;
-        this.maxTokensPerPlayer = gameData.value.maxTokensPerPlayer;
-        this.playerTokens = this.props.playerTokens;
-        this.remainingTokens = (this.maxTokensPerPlayer - this.playerTokens);
-        console.log('tokenvalue: ', tokenValue);
+    /* handleClose = () => {
+        this.prevStackID = this.state.stackID;
+    } */
 
+    render() {
+        const { drizzle } = this.context;
+        const web3 = drizzle.web3;
+        const { gameData, playerTokens, classes, fullScreen } = this.props;
+        const { isGameLocked, currentRound, tokenValue, maxTokensPerPlayer } = gameData.value;
+        const remainingTokens = (maxTokensPerPlayer - playerTokens);
+        //console.log('tokenvalue: ', remainingTokens);
         const isDisabled = (
             isGameLocked === true
             || currentRound === 0
-            || this.remainingTokens === 0
+            || remainingTokens === 0
         );
-
-        const { fullScreen } = this.props;
 
         return (
             <Fragment>
@@ -245,9 +198,10 @@ class GameInput extends React.Component {
                                 input: classes.textFieldStyles,
                             },
                         }}
+                        // eslint-disable-next-line
                         inputProps={{
                             min: this.MINTOKENS,
-                            max: this.remainingTokens,
+                            max: remainingTokens,
                             step: '1',
                         }}
                         InputLabelProps={{
@@ -256,7 +210,7 @@ class GameInput extends React.Component {
                                 root: classes.textLabelStyles,
                             },
                         }}
-                        placeholder={`(max: ${this.remainingTokens})`}
+                        placeholder={`(max: ${remainingTokens})`}
                         margin="normal"
                         className={classes.textField}
                         // inputRef={this.valueRef}
@@ -271,7 +225,7 @@ class GameInput extends React.Component {
                         className={classes.button}
                         disabled={isDisabled}
                     >
-                        Pay {this.state.numTokens == '' ?
+                        Pay {this.state.numTokens === '' ?
                             '(' + (web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token') + ')' :
                             (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers')}
                     </Button>
@@ -285,8 +239,7 @@ class GameInput extends React.Component {
                     <DialogTitle id="responsive-dialog-title">Purchase Request Received</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Let Google help apps determine location. This means sending anonymous location data to
-                            Google, even when no apps are running.
+                            'Purchase' action has been recorded. Please wait till your transaction is confirmed.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

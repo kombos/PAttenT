@@ -3,8 +3,14 @@ import { DrizzleContext } from 'drizzle-react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import RestoreIcon from '@material-ui/icons/Restore';
 import Tooltip from '@material-ui/core/Tooltip';
+import withMobileDialog from '@material-ui/core/withMobileDialog';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 
 const styles = theme => ({
     purchasedTokens: {
@@ -68,60 +74,75 @@ const styles = theme => ({
     },
 });
 
-class PurchasedTokens extends React.PureComponent {
+class PurchasedTokens extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
         super(props);
         console.log('inside PurchasedTokens');
-        this.state = { stackID: null };
+        this.state = {
+            stackID: null,
+            isDialogOpen: false,
+        };
         this.context = context;
         this.revertTokens = this.revertTokens.bind();
+        this.prevStackID = this.state.stackID;
+    }
+
+    shouldComponentUpdate = () => {
+        console.log("inside getTxStatus()");
+        console.log("this.prevStackID: ", this.prevStackID, " and state stackID: ", this.state.stackID);
+        // get the transaction states from the drizzle state
+
+        if (this.prevStackID !== this.state.stackID) {
+            // get the transaction hash using our saved `stackID`
+            const { transactions, transactionStack } = this.context.drizzleState;
+            const txHash = transactionStack[this.state.stackID];
+            console.log("txHash: ", txHash);
+            console.log("txns txhash: ", transactions[txHash]);
+            // if transaction hash does not exist, don't display anything
+            if (txHash && transactions[txHash] && (transactions[txHash].status === "pending"
+                || transactions[txHash].status === "success")) {
+                this.handleClickOpen();
+                this.prevStackID = this.state.stackID;
+                return true;
+            }
+        }
+
+        return true;
+    };
+
+    handleClickOpen = () => {
+        this.setState({ isDialogOpen: true });
+    }
+
+    handleClose = () => {
+        this.setState({ isDialogOpen: false });
     }
 
     revertTokens = () => {
         console.log('inside revertTokens() ');
-        const gameID = this.props.gameID;
-        const playerAddress = this.context.drizzleState.accounts[0];
+        const { gameID } = this.props;
+        const { drizzle, drizzleState } = this.context;
+        const playerAddress = drizzleState.accounts[0];
+        const { Multiprizer } = drizzle.contracts;
 
         console.log('playeraddr: ', playerAddress, ' and gameID: ', gameID);
-
-        const { drizzle, drizzleState } = this.context;
-        const multiprizer = drizzle.contracts.Multiprizer;
-
-        const stackID = multiprizer.methods.revertGame.cacheSend(gameID, playerAddress, {
+        const stackID = Multiprizer.methods.revertGame.cacheSend(gameID, playerAddress, {
             from: drizzleState.accounts[0]
         });
-        console.log('stackID: ', stackID);
-
+        console.log('stackID: ', stackID, "this.state.stackID: ", this.state.stackID);
         this.setState({ stackID: stackID });
     }
 
     render() {
-        const { playerTokens, maxTokensPerPlayer, roundNumber, classes } = this.props;
+        const { playerTokens, maxTokensPerPlayer, roundNumber, classes, fullScreen } = this.props;
         console.log('roundnumber: ', roundNumber);
         console.log('playerTokens: ', playerTokens);
         console.log('maxTokensPerPlayer: ', maxTokensPerPlayer);
-        let revertConfirm = null;
-        if (this.state.stackID != null) {
-            const { transactions, transactionStack } = this.context.drizzleState;
-            const txHash = transactionStack[this.state.stackID];
-            console.log('inside gameinput gettxstatus() value of stackID is : ', this.state.stackID);
-            // if transaction hash does not exist, don't display anything
-            if (txHash && transactions[txHash] && transactions[txHash].status === 'success') {
-                revertConfirm = <div className={classes.button}><RestoreIcon /></div>;
-            } else {
-                revertConfirm = null;
-            }
-        }
+        
         return (
             <div className={classes.purchasedTokens}>
-                {/* <div style={
-                    {
-                        minHeight: '10px',
-                    }
-                }></div> */}
-
                 <div className={classes.flexContainer}>
                     <div className={classNames(classes.flexChild, classes.smallText)}>
                         {'Purchased: '}
@@ -148,15 +169,29 @@ class PurchasedTokens extends React.PureComponent {
                                 Revert
                             </Button>
                         </Tooltip>
-                        {revertConfirm}
                     </div>
-                    {
-
-                    }
                 </div>
+                <Dialog
+                    fullScreen={fullScreen}
+                    open={this.state.isDialogOpen}
+                    onClose={this.handleClose}
+                    aria-labelledby="responsive-dialog-title"
+                >
+                    <DialogTitle id="responsive-dialog-title">Revert Request Received</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            'Revert' action has been recorded. Please wait till your transaction is confirmed.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="primary" autoFocus>
+                            OK
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
 }
 
-export default withStyles(styles)(PurchasedTokens);
+export default withMobileDialog()(withStyles(styles)(PurchasedTokens));

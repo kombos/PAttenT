@@ -220,6 +220,7 @@ class GameWinners extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
         console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
+        console.log("EVENTS: ", this.props.events);
         console.log('expression: ',
             (this.props.events.length !== nextProps.events.length
                 || this.state.sortBy !== nextState.sortBy

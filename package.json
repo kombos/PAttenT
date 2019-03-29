@@ -1,0 +1,26 @@
+{
+  "name": "multiprizer",
+  "version": "1.0.0",
+  "description": "A Blockchain Ethereum dapp game which requires strategic investment to multiply your prize winnings",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "truffle-hdwallet-provider": "^1.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "truffle test --network=ganache"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kombos/mp.git"
+  },
+  "author": "Kamlesh Parikarath",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kombos/mp/issues"
+  },
+  "homepage": "https://github.com/kombos/mp#readme"
+}

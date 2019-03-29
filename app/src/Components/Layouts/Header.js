@@ -92,7 +92,7 @@ class Header extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         console.log("this props: ", this.props.playerAddress, " next props: ", nextProps.playerAddress);
 
-        if (this.props.playerAddress != nextProps.playerAddress) {
+        if (this.props.playerAddress !== nextProps.playerAddress) {
             this.getWithdrawals(nextProps.playerAddress);
         }
         return true;
@@ -152,7 +152,7 @@ class Header extends React.Component {
                                 </Typography>
                             </ButtonBase>
                         </div>
-                        <Tooltip title={isWithdrawDisabled == true ? "Withdraw Winnings (disabled)" : "Withdraw Winnings"}>
+                        <Tooltip title={isWithdrawDisabled === true ? "Withdraw Winnings (disabled)" : "Withdraw Winnings"}>
                             <div>
                                 <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled} onClick={this.withdrawTokens}>
                                     <SaveAltIcon />

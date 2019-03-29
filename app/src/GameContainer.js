@@ -66,7 +66,8 @@ class GameContainer extends React.Component {
         if (this.currentRound && this.prevRound && gameKey && gameID
             && (!roundKey || this.currentRound !== this.prevRound) && this.currentRound !== 0) {
             console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@inside if loop');
-            const drizzle = this.context;
+            const { drizzle } = this.context;
+            console.log("drizzle:: ", drizzle);
             // get and save the key for the variable we are interested in
             const roundKeyObj = drizzle.contracts.Multiprizer.methods.viewRoundInfo
                 .cacheCall(gameID, this.currentRound);

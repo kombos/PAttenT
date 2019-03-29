@@ -71,150 +71,113 @@ class NotificationBar extends React.Component {
     }
 
     componentDidMount() {
-        console.log('did mount  notificationDIV: ', document.getElementById('notificationDiv').clientHeight);
+        /* console.log('did mount  notificationDIV: ', document.getElementById('notificationDiv').clientHeight);
         console.log('notificationDIV(ext): ', document.getElementById('notificationDiv').offsetHeight);
         console.log('bounding obj:', document.getElementById('notificationDiv').getBoundingClientRect());
         console.log('did update  notificationDIV: ', document.getElementById('container').clientHeight);
         console.log('notificationDIV(ext): ', document.getElementById('container').offsetHeight);
-        console.log('bounding obj:', document.getElementById('container').getBoundingClientRect());
+        console.log('bounding obj:', document.getElementById('container').getBoundingClientRect()); */
     }
 
     shouldComponentUpdate(nextProps) {
         console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
         console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
         console.log('expression: ', (this.props.events.length !== nextProps.events.length));
-        console.log('flag: ', this.flag);
         if (this.props.events.length !== nextProps.events.length) {
-            this.flag = true;
-            return true;
-        }
-        if (this.flag) {
-            console.log('inside if');
-            this.flag = false;
-            this.getLatestNotifications();
+            //this.flag = true;
             return true;
         }
         return false;
     }
 
     componentDidUpdate() {
-        console.log('did update  notificationDIV: ', document.getElementById('notificationDiv').clientHeight);
+        /* console.log('did update  notificationDIV: ', document.getElementById('notificationDiv').clientHeight);
         console.log('notificationDIV(ext): ', document.getElementById('notificationDiv').offsetHeight);
         console.log('bounding obj:', document.getElementById('notificationDiv').getBoundingClientRect());
         console.log('did update  notificationDIV: ', document.getElementById('container').clientHeight);
         console.log('notificationDIV(ext): ', document.getElementById('container').offsetHeight);
-        console.log('bounding obj:', document.getElementById('container').getBoundingClientRect());
+        console.log('bounding obj:', document.getElementById('container').getBoundingClientRect()); */
     }
 
     getLatestNotifications() {
-        let serial = 0;
         this.notificationsJSX = [];
-        let gameEvent = null;
+        let gameEvent, backEvent = null;
         const gameEvents = [];
+        //const idArray = [];
         const web3 = this.context.drizzle.web3;
-        const { classes } = this.props;
+        const { events, classes } = this.props;
+        console.log("events:: ", events);
+        if (events.length == 0) return;
         // filter only relevant events first
-        this.logEvents.forEach((logEvent, index) => {
-            if (
-                logEvent.event === 'LogCompleteRound'
-                || logEvent.event === 'LogGameLocked'
-                || logEvent.event === 'LogWinner'
-                || logEvent.event === 'LogMegaPrizeWinner') {
-                if (!(this.logEvents.findIndex(i => i.id === logEvent.id) < index)) {
-                    this.gameNotificationLogs.push(logEvent);
-                }
-            }
-        });
-        // prune the events and reformat
+        for (var i = (events.length - 1); i >= 0; i--) {
+            backEvent = events[i];
+            if (!(backEvent.event === 'LogCompleteRound'
+                || backEvent.event === 'LogGameLocked'
+                || backEvent.event === 'LogWinner'
+                || backEvent.event === 'LogMegaPrizeWinner')) {
+                continue;
+            } else break;
+        }
 
-        for (let i = this.gameNotificationLogs.length - 1; i >= 0; i--) {
-            gameEvent = this.gameNotificationLogs[i].returnValues;
-            gameEvent.transactionHash = this.gameNotificationLogs[i].transactionHash;
-            console.log('transaction hashes: ', gameEvent.transactionHash);
-            serial += 1;
-            gameEvent.serial = serial;
-            gameEvent.logID = this.gameNotificationLogs[i].id;
-            gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs, 10) * 1000).toLocaleString();
-            switch (this.gameNotificationLogs[i].event) {
+        console.log("txhash:: ", backEvent.transactionHash);
+        console.log("events.length-1 : ", (events.length - 1));
+        //if (idArray.findIndex(i => i === backEvent.id) !== -1) continue;
+        //if (i < (events.length - 1) && gameEvents && backEvent.transactionHash !== gameEvents[0].transactionHash) break;
+        //idArray.push(backEvent.id);
+        gameEvent = backEvent.returnValues;
+        gameEvent.transactionHash = backEvent.transactionHash;
+        console.log('transaction hashes: ', gameEvent.transactionHash);
+        gameEvent.logID = backEvent.id;
+        switch (backEvent.event) {
             case 'LogCompleteRound':
-                gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
-                break;
+                if (gameEvent.numPlayers > 1) {
+                    gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon. Click to know more.`;
+                    break;
+                } else {
+                    if (gameEvent.numPlayers === 1) {
+                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors. Click to know more.`;
+                        break;
+                    } else {
+                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated. Click to know more.`;
+                        break;
+                    }
+                }
 
             case 'LogGameLocked':
-                gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
+                gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe. Click to know more.`;
                 break;
 
             case 'LogWinner':
-                gameEvent.notification = `Game: ${gameEvent.gameID}, Round: ${gameEvent.roundNumber} winner is ${gameEvent.winnerAddress}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.winnerAmount, 10)).toString(), 'ether') + ' eth')}.`;
+                gameEvent.notification = `Game: ${gameEvent.gameID}, Round: ${gameEvent.roundNumber} winner is ${gameEvent.winnerAddress}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.winnerAmount, 10)).toString(), 'ether') + ' eth')}. Click to know more.`;
 
                 break;
 
             case 'LogMegaPrizeWinner':
-                gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} winner is ${gameEvent.megaPrizeWinner}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}.`;
-                break;
-
-            case 'LogPlayGame':
-                gameEvent.notification = `Game: ${gameEvent.gameID}, Round: ${gameEvent.roundNumber} player is ${gameEvent.playerAddress}. Prize: ${gameEvent.playerTokens}`;
+                gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} winner is ${gameEvent.megaPrizeWinner}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Click to know more.`;
                 break;
 
             default:
                 gameEvent.notification = '';
                 break;
-            }
-            gameEvents.push(gameEvent);
-            this.notificationsJSX.push(
-                <span key={gameEvent.logID}>
-                    <InfoIcon className={classes.infoIcon} />
-                    &nbsp;
-                    {gameEvent.notification}
-                    &nbsp;&nbsp;
-                </span>
-            );
-            console.log('gameevents:: ', gameEvents);
-            console.log('$$$$$$$$$$$$$$$$$$$$$$ condition: ', (i > 0 && this.gameNotificationLogs[i].transactionHash === this.gameNotificationLogs[i - 1].transactionHash));
-            // this.notificationsJSX.push(<InfoIcon className={classes.infoIcon} />&nbsp;{gameEvent.notification}&nbsp;&nbsp;)
-            // this.notificationsJSX.push(<span>&#9432;&nbsp;{gameEvent.notification}&nbsp;&nbsp;</span>);
-            // notification = notification.concat(String.fromCharCode(8505)+". "+gameEvent.notification+"  ");
-            if (!(i > 0 && this.gameNotificationLogs[i].transactionHash === this.gameNotificationLogs[i - 1].transactionHash)) {
-                break;
-            }
         }
+        gameEvents.push(gameEvent);
+        this.notificationsJSX.push(
+            <span key={gameEvent.logID}>
+                <InfoIcon className={classes.infoIcon} />
+                &nbsp;
+                {gameEvent.notification}
+                &nbsp;&nbsp;
+            </span>
+        );
+        console.log('gameevents:: ', gameEvents);
+        // prune the events and reformat
     }
 
     render() {
         const { classes, history } = this.props;
-        this.logEvents = this.props.events;
-        this.gameNotificationLogs = [];
         const defaultNotification = "  Welcome! Input number of tokens to purchase and click 'Pay' to play!";
-
-        console.log('logss: ', this.logEvents);
-
-        /*  const this.gameNotificationLogs = this.logEvents.filter((eventLog, index, arr) => {
-             console.log("INSIDE gameNotif EVENT FILTER _____________________");
-             if (index > 0 && eventLog.id == arr[index - 1].id) {
-                 return false;
-             }
-             if (eventLog.event == "logPauseGames" ||
-                 eventLog.event == "logResumeGames" ||
-                 eventLog.event == "logRevertFunds" ||
-                 eventLog.event == "LogCompleteRound" ||
-                 eventLog.event == "LogGameLocked" ||
-                 eventLog.event == "LogWinner" ||
-                 eventLog.event == "LogPlayGame" ||
-                 eventLog.event == "LogMegaPrizeWinner")
-                 return true;
-             else
-                 return false
-
-         }); */
-
-
-        console.log('this.logEvents: ', this.gameNotificationLogs);
-
-
+        this.getLatestNotifications();
         console.log('this.notificationsJSX: ', this.notificationsJSX);
-        console.log('notification: : ', this.notificationsJSX);
-
         const renderLink = () => {
             history.push('/notifications');
         };

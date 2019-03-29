@@ -1,5 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
+import { Tooltip } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
@@ -137,7 +138,7 @@ class GameLogs extends React.Component {
     getRowClassName = ({ index }) => {
         console.log('gameevents::::: ', this.gameEvents, ' index: ', index);
         const { classes } = this.props;
-        const flag = index >= 0 && this.gameEvents[index].action === '[-]' ? 1 : 0;
+        const flag = index >= 0 && !(this.gameEvents[index].action) ? 1 : 0;
 
         return classNames(classes.tableRow, classes.flexContainer,
             { [classes.tableRowHover]: index !== -1 },
@@ -195,6 +196,16 @@ class GameLogs extends React.Component {
         );
     }
 
+    actionRenderer = ({ rowData }) => {
+        console.log('inside addressRenderer()');
+        console.log('rowdata: ', rowData);
+        return (
+            <Tooltip title={rowData.action ? "Tokens Bought" : "Tokens Reverted"}>
+                <span>{rowData.action ? "[+]" : "[-]"}</span>
+            </Tooltip>
+        );
+    }
+
     getEvents() {
         const { events } = this.props;
         console.log('events::: ', events);
@@ -207,7 +218,7 @@ class GameLogs extends React.Component {
             gameEvent.logID = value.id;
             serial += 1;
             gameEvent.serial = serial;
-            gameEvent.action = value.event === 'LogPlayGame' ? '[+]' : '[-]';
+            gameEvent.action = (value.event === 'LogPlayGame');
             // gameEvent.timeSecs
             // gameEvent.playerAddress
             gameEvent.playerTokens = parseInt(value.returnValues.playerTokens, 10);
@@ -228,73 +239,66 @@ class GameLogs extends React.Component {
         console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
-            <div className={classes.tableContainer}>
-                <AutoSizer>
-                    {({ height, width }) => (
-                        <Table
-                            className={classes.table}
-                            height={height}
-                            width={width}
-                            headerHeight={50}
-                            rowHeight={50}
-                            rowClassName={this.getRowClassName}
-                            headerClassName={classes.headerColumn}
-                            noRowsRenderer={this.noRowsRenderer}
-                            overscanRowCount={10}
-                            rowCount={this.gameEvents.length}
-                            rowGetter={({ index }) => this.gameEvents[index]}
-                            onRowClick={event => console.log(event)}
-                            onRequestSort={this.handleRequestSort}
-                            sortBy={sortBy}
-                            sortDirection={sortDirection}
-                            sort={this.sort}
-                        >
-                            {/* <Column
-                                width={60}
-                                label="Serial"
-                                cellRenderer={({ rowIndex }) => {
-                                    console.log("rowIndex: ", rowIndex);
-                                    return (parseInt(rowIndex+1));
-                                }}
-
-                                dataKey="index"
-                            /> */}
-                            <Column
-                                width={60}
-                                label="Action"
-                                dataKey="action"
-                                flexGrow={1}
-                            />
-                            <Column
-                                width={180}
-                                flexGrow={1}
-                                label="Player"
-                                dataKey="playerAddress"
-                                cellRenderer={this.addressRenderer}
-                                className={classes.trimmable}
-                            />
-                            <Column
-                                width={90}
-                                flexGrow={2}
-                                label="Tokens"
-                                dataKey="playerTokens"
-                            />
-                            <Column
-                                width={150}
-                                flexGrow={1}
-                                label="Log Time"
-                                dataKey="timeSecs"
-                                cellDataGetter={({ rowData }) => {
-                                    const timestamp = new Date(parseInt(rowData.timeSecs, 10) * 1000).toLocaleString();
-                                    // let timestamp = ;
-                                    console.log('rowdata: ', timestamp);
-                                    return (timestamp);
-                                }}
-                            />
-                        </Table>
-                    )}
-                </AutoSizer>
-            </div>
+            <Tooltip title="Game Log">
+                <div className={classes.tableContainer}>
+                    <AutoSizer>
+                        {({ height, width }) => (
+                            <Table
+                                className={classes.table}
+                                height={height}
+                                width={width}
+                                headerHeight={50}
+                                rowHeight={50}
+                                rowClassName={this.getRowClassName}
+                                headerClassName={classes.headerColumn}
+                                noRowsRenderer={this.noRowsRenderer}
+                                overscanRowCount={10}
+                                rowCount={this.gameEvents.length}
+                                rowGetter={({ index }) => this.gameEvents[index]}
+                                onRowClick={event => console.log(event)}
+                                onRequestSort={this.handleRequestSort}
+                                sortBy={sortBy}
+                                sortDirection={sortDirection}
+                                sort={this.sort}
+                            >
+                                <Column
+                                    width={60}
+                                    label="Action"
+                                    dataKey="action"
+                                    cellRenderer={this.actionRenderer}
+                                    flexGrow={1}
+                                />
+                                <Column
+                                    width={180}
+                                    flexGrow={1}
+                                    label="Player"
+                                    dataKey="playerAddress"
+                                    cellRenderer={this.addressRenderer}
+                                    className={classes.trimmable}
+                                />
+                                <Column
+                                    width={90}
+                                    flexGrow={2}
+                                    label="Tokens"
+                                    dataKey="playerTokens"
+                                />
+                                <Column
+                                    width={150}
+                                    flexGrow={1}
+                                    label="Purchase Time"
+                                    dataKey="timeSecs"
+                                    cellDataGetter={({ rowData }) => {
+                                        const timestamp = new Date(parseInt(rowData.timeSecs, 10) * 1000).toLocaleString();
+                                        // let timestamp = ;
+                                        console.log('rowdata: ', timestamp);
+                                        return (timestamp);
+                                    }}
+                                />
+                            </Table>
+                        )}
+                    </AutoSizer>
+                </div>
+            </Tooltip>
         );
     }
 }

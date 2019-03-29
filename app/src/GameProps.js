@@ -106,9 +106,9 @@ class GameProps extends React.PureComponent {
                         textAlign: 'right',
                     }}
                 >
-                    {`Total Plays : ${web3.utils.fromWei((parseInt(totalValueForGame, 10)).toString(), 'ether')} eth`}
+                    {`Total Plays : ${(web3.utils.fromWei((parseInt(totalValueForGame, 10)).toString(), 'ether') * 1).toFixed(3)} eth`}
                     <br />
-                    {`Total Wins : ${web3.utils.fromWei((parseInt(totalWinnings, 10)).toString(), 'ether')} eth`}
+                    {`Total Wins : ${(web3.utils.fromWei((parseInt(totalWinnings, 10)).toString(), 'ether') * 1).toFixed(3)} eth`}
                 </div>
             </div>
         );

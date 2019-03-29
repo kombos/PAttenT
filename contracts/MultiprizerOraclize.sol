@@ -96,7 +96,7 @@ contract MultiprizerAbstract {
     function calculateWinnerByOracle(
         bytes32 _oraclizeID,
         bytes calldata _result,
-        bytes calldata _oraclizeProof,
+        //bytes calldata _oraclizeProof,
         bool _isProofValid) external;
 }
 
@@ -152,7 +152,7 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
     *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
       */
-    event OraclizeValues(bytes32 _oraclizeID, bytes _result, bytes _oraclizeProof, bool _isProofValid);
+    event OraclizeValues(bytes32 _oraclizeID, bool _isProofValid, bytes _oraclizeProof, bytes _result);
 
     /** 
     *  Constructor call 
@@ -224,20 +224,10 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _oraclizeProof) public {
         // check if the callback was invoked by oraclize
         require(msg.sender == oraclize_cbAddress(), "caller_err");
-
         uint8 _proofCode = oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof);
         bool _isProofValid = (_proofCode == 0) ? true : false;
-
-        /* // store the oraclize results in the Oraclize Result State Variables
-        oraclizeIDs.push(_oraclizeID);
-        oraclizeLength = oraclizeIDs.length;
-        oraclizeIDIndexes[_oraclizeID] = oraclizeLength-1;
-        results[oraclizeLength-1] = bytes(_result);
-        oraclizeProofs[oraclizeLength-1] = _oraclizeProof;
-        isProofsValid[oraclizeLength-1] = _isProofValid; */
-
-        emit OraclizeValues(_oraclizeID, bytes(_result), _oraclizeProof, _isProofValid);
-        multiprizer.calculateWinnerByOracle(_oraclizeID, bytes(_result), _oraclizeProof, _isProofValid);
+        multiprizer.calculateWinnerByOracle(_oraclizeID, bytes(_result), _isProofValid);
+        emit OraclizeValues(_oraclizeID, _isProofValid, _oraclizeProof, bytes(_result));
     }
 
     // transfer amount to address (admin)
@@ -248,7 +238,6 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
             "no_funds");
 
         _toAddress.transfer(_amount);
-
     }
 
     // fallback function (payable)
