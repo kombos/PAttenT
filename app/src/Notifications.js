@@ -106,6 +106,8 @@ class Notifications extends React.Component {
                 if (!(logEvents.findIndex(i => i.id === logEvent.id) < index)) {
                     if (
                         logEvent.event === 'LogCompleteRound'
+                        || logEvent.event === 'LogCompleteMPRound'
+                        || logEvent.event === 'LogGameUnlocked'
                         || logEvent.event === 'LogGameLocked') {
                         gameNotificationsLogs.push(logEvent);
                     }

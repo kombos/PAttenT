@@ -246,7 +246,7 @@ class GameMegaPrizeWinners extends React.Component {
             gameEvent.transactionHash = value.transactionHash;
             gameEvent.logID = value.id;
             // gameEvent.megaPrizeWinner
-            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
+            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether'));
             gameEvent.megaPrizeNumber = parseInt(value.returnValues.megaPrizeNumber, 10);
 
             return gameEvent;

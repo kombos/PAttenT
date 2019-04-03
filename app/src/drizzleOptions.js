@@ -38,6 +38,12 @@ const drizzleOptions = {
                 },
             },
             {
+                eventName: 'LogGameUnlocked',
+                eventOptions: {
+                    fromBlock: 0,
+                },
+            },
+            {
                 eventName: 'LogWinner',
                 eventOptions: {
                     fromBlock: 0,

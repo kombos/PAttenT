@@ -50,8 +50,13 @@ class Timer extends React.PureComponent {
             remainingTime = duration - spentTime;
         }
 
-        this.state = { remainingTime: remainingTime };
         this.MINTIME = 61;
+        remainingTime = remainingTime < this.MINTIME ? this.MINTIME : remainingTime;
+
+        this.state = {
+            remainingTime: remainingTime,
+            timeOver: false
+        };
 
         console.log("# time is : ", this.state.remainingTime);
     }
@@ -79,26 +84,33 @@ class Timer extends React.PureComponent {
         return window.setInterval(function () {
             if (_this.state.remainingTime > _this.MINTIME) {
                 const _remainingTime = _this.state.remainingTime - 1;
+                //console.log("timer time: ", _remainingTime);
                 _this.setState({
                     remainingTime: _remainingTime
                 });
             } else {
-                console.log("time over called");
+                console.log("time over called!!!");
+                //_this.timeOver = true;
+                _this.setState({
+                    remainingTime: _this.MINTIME,
+                    timeOver: true
+                });
+                //console.log("this.timeOver: ", _this.timeOver);
             }
         }, 1000);
     }
 
-
-
     componentDidUpdate(prevProps, prevState) {
-        if (this.timeOver) {
+        console.log("component did update: ");
+        if (this.state.timeOver) {
             window.clearInterval(this.timer);
+            console.log("interval cleared!!");
             this.timer = null;
         }
     }
 
     componentDidMount() {
-        this.timeOver = false;
+        //this.timeOver = false;
         this.timer = this.startTimer();
     }
 
@@ -108,18 +120,12 @@ class Timer extends React.PureComponent {
     }
 
     render() {
-        const { classes } = this.props;
-        const durationStr = this.secToString(this.props.duration);
+        const { classes, duration } = this.props;
+        const {remainingTime} = this.state;
+        const durationStr = this.secToString(duration);
         const durationArr = durationStr.split(" ");
-        const remTimeStr = this.secToString(this.state.remainingTime);
+        const remTimeStr = this.secToString(remainingTime);
         const remTimeArr = remTimeStr.split(" ");
-        //console.log("remaining Time: ", remTimeStr);
-
-        /*  return (
-             <div className={classes.timer}>
-                 <h4> {remTimeStr} </h4>
-             </div>
-         ); */
 
         return (
             <div className={classes.flexContainer}>

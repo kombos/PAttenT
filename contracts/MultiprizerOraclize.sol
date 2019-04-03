@@ -105,7 +105,6 @@ contract MultiprizerAbstract {
  * @title MultiprizerOraclize
  * @dev The Multiprizer contract is the core game.
  */
-
 contract MultiprizerOraclize is Ownable, usingOraclize {
 
     /** 
@@ -128,19 +127,6 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     string constant private DATASOURCE = "random";
 
     /** 
-    *  Oraclize Result Variables 
-    *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
-    *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
-      */
-    /* mapping(bytes32 => uint256) private oraclizeIDIndexes;
-    bytes32[] public oraclizeIDs;
-    mapping(uint256 => bytes) private oraclizeProofs;
-    mapping(uint256 => bytes) private results;
-    mapping(uint256 => bool) private isProofsValid;
-    uint256 public oraclizeLength; */
-
-
-    /** 
     *  Control Variables 
     *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
     *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
@@ -160,14 +146,10 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
       */
     constructor(address payable _contractAddress) public {
-        //# EMIT EVENT LOG - to be done
         multiprizerAddress = _contractAddress;
         multiprizer = MultiprizerAbstract(multiprizerAddress);
         // set proof type as 'ledger'. this needn't be changed further
         oraclize_setProof(proofType_Ledger);
-        // push a zero-init value to the oraclizeIDs array to help it prevent malicious oraclize executions
-        /* oraclizeIDs.push("");
-        oraclizeLength = oraclizeIDs.length; */
     }
 
     function setContractAddrByAdmin(address payable _contractAddress) external
@@ -177,8 +159,7 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     }
 
     function updateOraclizePropsByAdmin(uint256 _gasLimitOraclize, uint256 _gasPriceOraclize,
-        uint256 _numBytesOraclize, uint256 _delayOraclize) external
-    onlyOwners {
+    uint256 _numBytesOraclize, uint256 _delayOraclize) external onlyOwners {
 
         if (gasLimitOraclize != _gasLimitOraclize) {
             gasLimitOraclize = _gasLimitOraclize;
@@ -192,8 +173,6 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
         delayOraclize = _delayOraclize;
         // dataSource is constant to "random"
         // proof type is fixed to 'ledger' proof
-
-        //# EMIT EVENT LOG - to be done
     }
 
     function getOraclizePropsByAdmin() external view
@@ -214,18 +193,16 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     function newRandomDSQuery() external payable returns(bytes32 _queryId) {
         require(msg.sender == multiprizerAddress, "caller_err");
         //check if contract has enough funds to invoke oraclize
-        if (priceOraclize > address(this).balance) {
-            // pause all games until contract funds have been replenished
-            return (_queryId);
+        if (priceOraclize <= address(this).balance) {
+            _queryId = oraclize_newRandomDSQuery(delayOraclize, numBytesOraclize, gasLimitOraclize);
         }
-        _queryId = oraclize_newRandomDSQuery(delayOraclize, numBytesOraclize, gasLimitOraclize);
     }
 
     function __callback(bytes32 _oraclizeID, string memory _result, bytes memory _oraclizeProof) public {
         // check if the callback was invoked by oraclize
         require(msg.sender == oraclize_cbAddress(), "caller_err");
         uint8 _proofCode = oraclize_randomDS_proofVerify__returnCode(_oraclizeID, _result, _oraclizeProof);
-        bool _isProofValid = (_proofCode == 0) ? true : false;
+        bool _isProofValid = (_proofCode == 0);
         multiprizer.calculateWinnerByOracle(_oraclizeID, bytes(_result), _isProofValid);
         emit OraclizeValues(_oraclizeID, _isProofValid, _oraclizeProof, bytes(_result));
     }
@@ -248,14 +225,16 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     // self destruct contract after reverting all pending games of players and sending back funds
     function ownerKill() external
     onlyOwner {
-        selfdestruct(owner());
 
+        selfdestruct(owner());
     }
 
 }
+/**
+ * @dev End of MultiprizerOraclize
+ */
 
 
-//# IMPLEMENT TRANSFER FUNCTION FOR MANUAL TRANSFER OF FUNDS FROM CONTRACT
 
 
 

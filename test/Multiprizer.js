@@ -1,23 +1,17 @@
 
-
 var Multiprizer = artifacts.require("Multiprizer");
 var MultiprizerOraclize = artifacts.require("MultiprizerOraclize");
-
 var multiprizerOraclize, oraclizeInstance;
 var multiprizer, instance;
 
-
-
 contract("MultiprizerOraclize", accounts => {
-
 
     it("should be successfully deployed", async () => {
         let contract = await MultiprizerOraclize.deployed();
-        
-        console.log("oraclize address: ",contract.address);
-        let mAddress = await contract.multiprizerAddress({from:accounts[0]});
-        console.log("multiprizer address in oraclize: ", mAddress);
 
+        console.log("oraclize address: ", contract.address);
+        let mAddress = await contract.multiprizerAddress({ from: accounts[0] });
+        console.log("multiprizer address in oraclize: ", mAddress);
         oraclizeInstance = contract;
         let owner = await oraclizeInstance.owner();
         console.log("owner of multiprizerOraclize: ", owner);
@@ -31,10 +25,18 @@ contract("MultiprizerOraclize", accounts => {
         else {
             assert.fail("Deployment of Multiprizer contract failed !");
         }
-
     });
 
-    
+    it("gets the size of the contract", async () => {
+        var bytecode = oraclizeInstance.constructor._json.bytecode;
+        var deployed = oraclizeInstance.constructor._json.deployedBytecode;
+        var sizeOfB = bytecode.length / 2;
+        var sizeOfD = deployed.length / 2;
+        console.log("size of bytecode in bytes = ", sizeOfB);
+        console.log("size of deployed in bytes (eip 170) = ", sizeOfD);
+        console.log("initialisation and constructor code in bytes = ", sizeOfB - sizeOfD);
+    });
+
     it("should view  oraclize props by admin : positive scenario   : updateOraclizePropsByAdmin() ", async () => {
 
         console.log("view oraclize props : ");
@@ -45,11 +47,7 @@ contract("MultiprizerOraclize", accounts => {
         console.log("updateData._delayOraclize", updateData._delayOraclize.toString());
         console.log("updateData._priceOraclize", updateData._priceOraclize.toString());
         assert.ok(true);
-
     });
-
-
-
 });
 
 /**
@@ -74,10 +72,8 @@ contract("MultiprizerOraclize", accounts => {
 */
 contract("Multiprizer", accounts => {
 
-
     const cantorPairing = (a, b) => {
         return ((((a + b) * (a + b + 1)) / 2) + b);
-
     }
 
     it("should be successfully deployed", async () => {
@@ -96,7 +92,16 @@ contract("Multiprizer", accounts => {
         else {
             assert.fail("Deployment of Multiprizer contract failed !");
         }
+    });
 
+    it("gets the size of the contract", async () => {
+        var bytecode = instance.constructor._json.bytecode;
+        var deployed = instance.constructor._json.deployedBytecode;
+        var sizeOfB = bytecode.length / 2;
+        var sizeOfD = deployed.length / 2;
+        console.log("size of bytecode in bytes = ", sizeOfB);
+        console.log("size of deployed in bytes (eip 170) = ", sizeOfD);
+        console.log("initialisation and constructor code in bytes = ", sizeOfB - sizeOfD);
     });
 
     it("should add games by admin : positive scenario  : addGameByAdmin() ", async () => {
@@ -112,9 +117,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: game added but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should again add games by admin : positive scenario   : addGameByAdmin() ", async () => {
@@ -130,9 +133,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: game added but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should update games by admin : positive scenario   : updateGameByAdmin() ", async () => {
@@ -148,9 +149,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: game updated but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should again update games by admin : positive scenario   : updateGameByAdmin() ", async () => {
@@ -166,9 +165,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: gamezzz updated but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should close games by admin : positive scenario   : closeGameByAdmin() ", async () => {
@@ -184,9 +181,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: game deleted but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should resume a locked game : Positive Scenario   : unlockGamesByAdmin() ", async () => {
@@ -202,9 +197,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: game unlocked but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should lock game : Positive Scenario   : lockGamesByAdmin() ", async () => {
@@ -220,54 +213,52 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: game locked but gameData parameters dont match! ");
-
             })
-
     });
 
-   /*  it("should Pause all games : Positive Scenario   : pauseAllGamesByAdmin() ", async () => {
-
-        let gasEstimate = await multiprizer.methods.pauseAllGamesByAdmin().estimateGas({ from: accounts[0] });
-        console.log(" pauseAllGamesByAdmin() Invocation Gas : ", gasEstimate);
-        await instance.pauseAllGamesByAdmin({ from: accounts[0] })
-            .then(async function (receipt) {
-                console.log("Transaction Receipt : " + receipt);
-                let gameIDs = await instance.viewGameIDs({ from: accounts[0] });
-                let i, _gameID;
-                for (i = 0; i < gameIDs.length; i++) {
-                    _gameID = gameIDs[i];
-                    let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-                    if (!gameData.isGameLocked || !gameData.isGameLateLocked) {
-                        assert.fail("Error: game paused but gameData parameters dont match! ");
-                    }
-                }
-                assert.ok(true);
-
-            })
-
-    });
-
-    it("should resume all games : Positive Scenario   : resumeAllGamesByAdmin() ", async () => {
-
-        let gasEstimate = await multiprizer.methods.resumeAllGamesByAdmin().estimateGas({ from: accounts[0] });
-        console.log(" resumeAllGamesByAdmin() Invocation Gas : ", gasEstimate);
-        await instance.resumeAllGamesByAdmin({ from: accounts[0] })
-            .then(async function (receipt) {
-                console.log("Transaction Receipt : " + receipt);
-                let gameIDs = await instance.viewGameIDs({ from: accounts[0] });
-                let i, _gameID;
-                for (i = 0; i < gameIDs.length; i++) {
-                    _gameID = gameIDs[i];
-                    let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-                    if (gameData.isLocked || gameData.isLateLocked) {
-                        assert.fail("Error: game paused but gameData parameters dont match! ");
-                    }
-                }
-                assert.ok(true);
-
-            })
-
-    }); */
+    /*  it("should Pause all games : Positive Scenario   : pauseAllGamesByAdmin() ", async () => {
+ 
+         let gasEstimate = await multiprizer.methods.pauseAllGamesByAdmin().estimateGas({ from: accounts[0] });
+         console.log(" pauseAllGamesByAdmin() Invocation Gas : ", gasEstimate);
+         await instance.pauseAllGamesByAdmin({ from: accounts[0] })
+             .then(async function (receipt) {
+                 console.log("Transaction Receipt : " + receipt);
+                 let gameIDs = await instance.viewGameIDs({ from: accounts[0] });
+                 let i, _gameID;
+                 for (i = 0; i < gameIDs.length; i++) {
+                     _gameID = gameIDs[i];
+                     let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
+                     if (!gameData.isGameLocked || !gameData.isGameLateLocked) {
+                         assert.fail("Error: game paused but gameData parameters dont match! ");
+                     }
+                 }
+                 assert.ok(true);
+ 
+             })
+ 
+     });
+ 
+     it("should resume all games : Positive Scenario   : resumeAllGamesByAdmin() ", async () => {
+ 
+         let gasEstimate = await multiprizer.methods.resumeAllGamesByAdmin().estimateGas({ from: accounts[0] });
+         console.log(" resumeAllGamesByAdmin() Invocation Gas : ", gasEstimate);
+         await instance.resumeAllGamesByAdmin({ from: accounts[0] })
+             .then(async function (receipt) {
+                 console.log("Transaction Receipt : " + receipt);
+                 let gameIDs = await instance.viewGameIDs({ from: accounts[0] });
+                 let i, _gameID;
+                 for (i = 0; i < gameIDs.length; i++) {
+                     _gameID = gameIDs[i];
+                     let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
+                     if (gameData.isLocked || gameData.isLateLocked) {
+                         assert.fail("Error: game paused but gameData parameters dont match! ");
+                     }
+                 }
+                 assert.ok(true);
+ 
+             })
+ 
+     }); */
 
     it("should update the directPlay variables : Positive Scenario   : updateDirectPlayByAdmin() ", async () => {
 
@@ -283,12 +274,10 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: DirectPlay updated but gameData parameters dont match! ");
-
             })
-
     });
 
-    it("should update the megaPrize variables : Positive Scenario   : updateMegaPrizeByAdmin() ", async () => {
+   /*  it("should update the megaPrize variables : Positive Scenario   : updateMegaPrizeByAdmin() ", async () => {
 
         //let _megaPrizeID = 900;
         let _megaPrizeAmount = 0;
@@ -323,10 +312,8 @@ contract("Multiprizer", accounts => {
 
                 else
                     assert.fail("Error: megaPrize updated but gameData parameters dont match! ");
-
             })
-
-    });
+    }); */
 
     it("should late lock mega Prize : Positive Scenario   : lockMegaPrizeByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
@@ -341,9 +328,7 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: megaPrize locked but gameData parameters dont match! ");
-
             })
-
     });
 
     it("should unlock or resume a locked mega Prize : Positive Scenario   : unlockMegaPrizeByAdmin() ", async () => {
@@ -358,20 +343,18 @@ contract("Multiprizer", accounts => {
                     assert.ok(true);
                 else
                     assert.fail("Error: megaPrize unlocked but gameData parameters dont match! ");
-
             })
-
     });
 
-    it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundsByAdmin() ", async () => {
+    it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
         let _gameID = 102;
         let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
         let _currentRound = gameData.currentRound;
         console.log("current round BEFORE completeRound: ", _currentRound.toNumber());
-        let gasEstimate = await multiprizer.methods.completeRoundsByAdmin([_gameID]).estimateGas({ from: accounts[0] });
-        console.log(" completeRoundsByAdmin() Invocation Gas : ", gasEstimate);
-        await instance.completeRoundsByAdmin([_gameID], { from: accounts[0] })
+        let gasEstimate = await multiprizer.methods.completeRoundByAdmin(_gameID).estimateGas({ from: accounts[0] });
+        console.log(" completeRoundByAdmin() Invocation Gas : ", gasEstimate);
+        await instance.completeRoundByAdmin(_gameID, { from: accounts[0] })
             .then(async function (receipt) {
                 console.log("Transaction Receipt : " + receipt);
                 gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
@@ -383,9 +366,7 @@ contract("Multiprizer", accounts => {
                 else {
                     assert.fail("Error: round completed but gameData not set ");
                 }
-
             })
-
     });
 
 
@@ -423,13 +404,18 @@ contract("Multiprizer", accounts => {
             else {
                 assert.ok(true);
             }
-
         }
+        let gasEstimate2 = await multiprizer.methods.playGame(_gameID, _numberofTokens)
+            .estimateGas({ from: accounts[0], value: (gameData.tokenValue * _numberofTokens) });
+        console.log(" playGame() Invocation Gas : ", gasEstimate2);
 
-        let rData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
+        let gasEstimate3 = await multiprizer.methods.playGame(_gameID, _numberofTokens)
+            .estimateGas({ from: accounts[2], value: (gameData.tokenValue * _numberofTokens) });
+        console.log(" playGame() Invocation Gas : ", gasEstimate3);
+
+        /* let rData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
         let _playerList = rData._playerList;
-        console.log("Player List : ", _playerList);
-
+        console.log("Player List : ", _playerList); */
     });
 
     it("should initiate revert game : Positive Scenario   : revertGame() ", async () => {
@@ -462,26 +448,23 @@ contract("Multiprizer", accounts => {
             console.log("Error: Player data found though reverted : Player Address: ", _playerList[i], " Player tokens: ", __playerTokensList[i]);
             assert.fail("Error playGame : play game initiated but roundData parameters dont match! ");
         }
-
-
         //let rData = await instance.viewRoundInfo(_gameID, _currentRound, { from: accounts[0] });
         console.log("Player List : ", _playerList);
-
     });
 
-    it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundsByAdmin() ", async () => {
+    it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
-        let _gameID = [102];
-        //let gasEstimate = await multiprizer.methods.completeRoundsByAdmin([_gameID]).estimateGas({ from: accounts[0] });
-        //console.log(" completeRoundsByAdmin() Invocation Gas : ", gasEstimate);
-        
+        let _gameID = 102;
+        //let gasEstimate = await multiprizer.methods.completeRoundByAdmin([_gameID]).estimateGas({ from: accounts[0] });
+        //console.log(" completeRoundByAdmin() Invocation Gas : ", gasEstimate);
+
         //await instance.send(10, {from:accounts[0]});
-        await oraclizeInstance.send(web3.utils.toHex(1e19), {from:accounts[0]});
+        await oraclizeInstance.send(web3.utils.toHex(1e19), { from: accounts[0] });
         web3.eth.getBalance(oraclizeInstance.address).then((balance) => (console.log("oraclize balance: ", balance)));
         //console.log("oraclize instance balance: ", web3.eth.getBalance(oraclizeInstance.address));
-        await instance.send(web3.utils.toHex(1e19), {from:accounts[0]});
+        await instance.send(web3.utils.toHex(1e19), { from: accounts[0] });
         console.log("last?");
-        await instance.completeRoundsByAdmin(_gameID, { from: accounts[0], gas:10000000 })
+        await instance.completeRoundByAdmin(_gameID, { from: accounts[0], gas: 10000000 })
             .then(async function (receipt) {
                 console.log("Transaction Receipt : " + receipt);
                 let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
@@ -493,9 +476,7 @@ contract("Multiprizer", accounts => {
                 else {
                     assert.fail("Error: round completed but gameData not set ");
                 }
-
             })
-
     });
 
 
@@ -523,15 +504,8 @@ contract("Multiprizer", accounts => {
                 else {
                     assert.fail("Error: winner computed  but roundData or oraclizer not set ");
                 }
-
             })
-
     });
-
-
-
-
-
 
     // Integration testing:: 
     // revertFundsToPlayers

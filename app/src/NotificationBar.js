@@ -112,7 +112,9 @@ class NotificationBar extends React.Component {
         for (var i = (events.length - 1); i >= 0; i--) {
             backEvent = events[i];
             if (!(backEvent.event === 'LogCompleteRound'
+                || backEvent.event === 'LogCompleteMPRound'
                 || backEvent.event === 'LogGameLocked'
+                || backEvent.event === 'LogGameUnlocked'
                 || backEvent.event === 'LogWinner'
                 || backEvent.event === 'LogMegaPrizeWinner')) {
                 continue;
@@ -143,8 +145,21 @@ class NotificationBar extends React.Component {
                     }
                 }
 
+            case 'LogCompleteMPRound':
+                if (gameEvent.numPlayers > 1) {
+                    gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. Click to know more.`;
+                    break;
+                } else {
+                    gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. MegaPrize amount carried forward to next round due to no contenders.`;
+                    break;
+                }
+
             case 'LogGameLocked':
                 gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe. Click to know more.`;
+                break;
+
+            case 'LogGameUnlocked':
+                gameEvent.notification = `Game: ${gameEvent.gameID} has been unlocked now! Please resume your plays.`;
                 break;
 
             case 'LogWinner':

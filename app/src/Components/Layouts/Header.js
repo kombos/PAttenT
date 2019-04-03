@@ -19,14 +19,21 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import { withRouter } from "react-router";
 import ButtonBase from '@material-ui/core/ButtonBase';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
+import withMobileDialog from '@material-ui/core/withMobileDialog';
+
+
 
 const styles = theme => ({
     root: {
         //flexGrow: 1,
         //height:'20vh',
-        height:theme.mixins.toolbar.minHeight,
-        //backgroundColor: "rgba(62,5,76,0.90)",
-
+        height: theme.mixins.toolbar.minHeight,
     },
     grow: {
         flexGrow: 1,
@@ -42,14 +49,14 @@ const styles = theme => ({
         width: 'auto',
     },
     toolbar: {
-        minHeight:theme.mixins.toolbar.minHeight,
+        minHeight: theme.mixins.toolbar.minHeight,
     },
 });
 
 
 class Header extends React.Component {
     static contextType = DrizzleContext.Consumer;
-    
+
     constructor(props, context) {
         console.log("#___ inside constructor___");
         super(props);
@@ -57,13 +64,48 @@ class Header extends React.Component {
         this.state = {
             dataKey: null,
             isDrawerOpen: false,
-            stackID: null
+            stackID: null,
+            isDialogOpen: false,
         };
+        this.prevStackID = this.state.stackID;
+        this.withdrawTokens = this.withdrawTokens.bind();
+        //this.getWithdrawals = this.getWithdrawals.bind();
     }
 
-    getWithdrawals(playerAddress) {
+    componentDidMount() {
+        this.getWithdrawals(this.props.playerAddress);
+    }
+
+    shouldComponentUpdate() {
+        const { stackID } = this.state;
+        const { drizzleState } = this.context;
+        if (this.prevStackID !== stackID) {
+            // get the transaction hash using our saved `stackID`
+            const { transactions, transactionStack } = drizzleState;
+            const txHash = transactionStack[stackID];
+            console.log("txHash: ", txHash);
+            console.log("txns txhash: ", transactions[txHash]);
+            // if transaction hash does not exist, don't display anything
+            if (txHash && transactions[txHash] && (transactions[txHash].status === "pending"
+                || transactions[txHash].status === "success")) {
+                this.handleClickOpen();
+                this.prevStackID = stackID;
+            }
+        }
+        return true;
+    }
+
+    componentDidUpdate(prevProps) {
+        const { playerAddress } = this.props;
+        if (playerAddress !== prevProps.playerAddress) {
+            this.getWithdrawals(playerAddress);
+        }
+    }
+
+    getWithdrawals = (playerAddress) => {
         console.log("# Header: $$$$$ INSIDE getWithdrawals $$$$$");
-        const Multiprizer = this.context.drizzle.contracts.Multiprizer;
+        const { drizzle } = this.context;
+        const { Multiprizer } = drizzle.contracts;
         // get and save the key for the variable we are interested in
         console.log("player : ", playerAddress);
         let dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(playerAddress);
@@ -75,41 +117,40 @@ class Header extends React.Component {
 
     withdrawTokens = () => {
         console.log("inside withdrawTokens() ");
-        let playerAddress = this.props.playerAddress;
+        const { playerAddress } = this.props;
+        const { drizzle } = this.context;
         console.log("playeraddr: ", playerAddress);
-        const multiprizer = this.context.drizzle.contracts.Multiprizer;
-        const stackID = multiprizer.methods.withdraw.cacheSend({
+        const { Multiprizer } = drizzle.contracts;
+        const stackID = Multiprizer.methods.withdraw.cacheSend({
             from: playerAddress
         });
         console.log("stackID: ", stackID);
         this.setState({ stackID: stackID });
     }
 
-    componentDidMount() {
-        this.getWithdrawals(this.props.playerAddress);
+    handleClickOpen = () => {
+        this.setState({ isDialogOpen: true });
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        console.log("this props: ", this.props.playerAddress, " next props: ", nextProps.playerAddress);
-
-        if (this.props.playerAddress !== nextProps.playerAddress) {
-            this.getWithdrawals(nextProps.playerAddress);
-        }
-        return true;
+    handleClose = () => {
+        this.setState({ isDialogOpen: false });
     }
 
     render() {
         console.log("# inside render ");
-        const { classes, history } = this.props;
+        const { classes, history, fullScreen } = this.props;
+        const { dataKey } = this.state;
+        const { drizzleState } = this.context;
         const toggleDrawer = (isDrawerOpen) => () => {
             this.setState({ isDrawerOpen: isDrawerOpen });
         };
-        const dataKey = this.state.dataKey;
-        const multiprizer = this.context.drizzleState.contracts.Multiprizer;
-        console.log("datakey: ", dataKey);
-        const withdrawAmount = multiprizer.viewWithdrawalInfo[dataKey];
-        console.log("withdraw amt : ", withdrawAmount && parseInt(withdrawAmount.value));
-        const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value) > 0) ? false : true;
+        const { Multiprizer } = drizzleState.contracts;
+        console.log("this.state.dataKey : ", dataKey);
+        console.log("player: ", this.props.playerAddress);
+        const withdrawAmount = Multiprizer.viewWithdrawalInfo[dataKey];
+        console.log("withdraw amt : ", withdrawAmount && parseInt(withdrawAmount.value, 10));
+        //const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
+        const isWithdrawDisabled = !(withdrawAmount && withdrawAmount.value.toString() !== '0');
         console.log("isWithdrawDisabled: ", isWithdrawDisabled);
 
         const renderLink = () => {
@@ -172,6 +213,24 @@ class Header extends React.Component {
                         {sideList}
                     </div>
                 </Drawer>
+                <Dialog
+                    fullScreen={fullScreen}
+                    open={this.state.isDialogOpen}
+                    onClose={this.handleClose}
+                    aria-labelledby="responsive-dialog-title"
+                >
+                    <DialogTitle id="responsive-dialog-title">Withdraw Request Received</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            'Withdraw' action has been recorded. Please wait till your transaction is confirmed.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="primary" autoFocus>
+                            OK
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
@@ -181,4 +240,4 @@ Header.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withRouter(withStyles(styles)(Header));
+export default withMobileDialog()(withRouter(withStyles(styles)(Header)));  

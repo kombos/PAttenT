@@ -164,20 +164,33 @@ class GameNotifications extends React.Component {
             switch (value.event) {
                 case 'LogCompleteRound':
                     if (gameEvent.numPlayers > 1) {
-                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon.`;
+                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon. Click to know more.`;
                         break;
                     } else {
                         if (gameEvent.numPlayers === 1) {
-                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors.`;
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors. Click to know more.`;
                             break;
                         } else {
-                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated.`;
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated. Click to know more.`;
                             break;
                         }
                     }
 
+                case 'LogCompleteMPRound':
+                    if (gameEvent.numPlayers > 1) {
+                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. Click to know more.`;
+                        break;
+                    } else {
+                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. MegaPrize amount carried forward to next round due to no contenders.`;
+                        break;
+                    }
+
                 case 'LogGameLocked':
                     gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
+                    break;
+
+                case 'LogGameUnlocked':
+                    gameEvent.notification = `Game: ${gameEvent.gameID} has been unlocked now! Please resume your plays.`;
                     break;
 
                 default:
