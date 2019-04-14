@@ -6,3 +6,6 @@ data.txt
 info.docx
 ~WRL1436.tmp
 ~$info.docx
+npm-debug.log
+.DS_Store
+/*.env

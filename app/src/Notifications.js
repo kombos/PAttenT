@@ -49,7 +49,6 @@ const styles = theme => ({
     },
 });
 
-
 class Notifications extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
@@ -127,7 +126,6 @@ class Notifications extends React.Component {
             this.gameMegaPrizeWinners = <GameMegaPrizeWinners events={gameMegaPrizeWinnersLogs} />;
         }
     }
-
 
     render() {
         console.log(' inside Notifications render: ');
