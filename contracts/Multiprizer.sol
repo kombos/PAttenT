@@ -482,10 +482,12 @@ contract Multiprizer is Ownable {
         uint256 _roundID;
         for (uint256 i = 0; i < _gameIDs.length; i++) {
             require(gameStrategies[_gameIDs[i]].gameID != 0, "gameID_err");
+            if (!gameStrategies[_gameIDs[i]].isGameLocked) continue;
             gameStrategies[_gameIDs[i]].isGameLocked = false;
             gameStrategies[_gameIDs[i]].isGameLateLocked = false;
-            _roundNumber = gameStrategies[_gameIDs[i]].currentRound;
+            _roundNumber = gameStrategies[_gameIDs[i]].currentRound == 0 ? 1 : gameStrategies[_gameIDs[i]].currentRound;
             _roundID = cantorPairing(_gameIDs[i], _roundNumber);
+            rounds[_roundID].gameID = _gameIDs[i];
             rounds[_roundID].roundStartTimeSecs = now;
             rounds[_roundID].roundStartTimeBlock = block.number;
             rounds[_roundID].isRoundOpen = true;
@@ -661,6 +663,10 @@ contract Multiprizer is Ownable {
     onlyOwners {
         // gameIDs should be valid
         require(gameStrategies[_gameID].gameID != 0, "gameID_err");
+        // exit if game is already locked
+        if (gameStrategies[_gameID].isGameLocked) {
+            return;
+        }
 
         uint256 _roundNumber;
         uint256 _nextRoundNumber;
@@ -668,10 +674,6 @@ contract Multiprizer is Ownable {
         uint256 _nextRoundID;
         address payable _playerAddress;
         bytes32 _oraclizeID;
-        // exit if game is already locked
-        if (gameStrategies[_gameID].isGameLocked) {
-            return;
-        }
         // close the current round if not already closed
         _roundNumber = gameStrategies[_gameID].currentRound;
         _roundID = (_roundNumber == 0) ? 0 : cantorPairing(_gameID, _roundNumber);
@@ -703,13 +705,13 @@ contract Multiprizer is Ownable {
         _nextRoundNumber = _roundNumber + (1);
         gameStrategies[_gameID].currentRound = _nextRoundNumber;
         _nextRoundID = cantorPairing(_gameID, _nextRoundNumber);
-        rounds[_nextRoundID].gameID = gameStrategies[_gameID].gameID;
         rounds[_nextRoundID].roundNumber = _nextRoundNumber;
         //rounds[_nextRoundID].totalTokensPurchased = 0;
         if (gameStrategies[_gameID].isGameLateLocked) {
             gameStrategies[_gameID].isGameLocked = true;
             emit LogGameLocked(_gameID, _roundNumber, now, block.number);
         } else {
+            rounds[_nextRoundID].gameID = gameStrategies[_gameID].gameID;
             rounds[_nextRoundID].roundStartTimeSecs = now;
             rounds[_nextRoundID].roundStartTimeBlock = block.number;
             rounds[_nextRoundID].isRoundOpen = true;

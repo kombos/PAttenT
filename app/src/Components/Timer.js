@@ -50,8 +50,8 @@ class Timer extends React.PureComponent {
             remainingTime = duration - spentTime;
         }
 
-        this.MINTIME = 61;
-        remainingTime = remainingTime < this.MINTIME ? this.MINTIME : remainingTime;
+        this.MINTIME = 60;
+        remainingTime = remainingTime < this.MINTIME ? this.MINTIME : remainingTime + this.MINTIME;
 
         this.state = {
             remainingTime: remainingTime,
@@ -121,7 +121,7 @@ class Timer extends React.PureComponent {
 
     render() {
         const { classes, duration } = this.props;
-        const {remainingTime} = this.state;
+        const { remainingTime } = this.state;
         const durationStr = this.secToString(duration);
         const durationArr = durationStr.split(" ");
         const remTimeStr = this.secToString(remainingTime);

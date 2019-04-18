@@ -26,6 +26,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import { DRAWERITEMS as drawerItems } from '../../Constants';
+//import { DRAWERICONS as drawerIcons } from '../../Constants';
 
 
 
@@ -34,13 +37,17 @@ const styles = theme => ({
         //flexGrow: 1,
         //height:'20vh',
         height: theme.mixins.toolbar.minHeight,
+        
     },
     grow: {
         flexGrow: 1,
+        //backgroundColor: "rgba(112,154,6,0.90)",
+        textAlign: 'left',
     },
     menuButton: {
         marginLeft: -12,
-        marginRight: 20,
+        marginRight: 10,
+        //backgroundColor: "rgba(112,154,6,0.90)",
     },
     list: {
         width: 250,
@@ -50,6 +57,8 @@ const styles = theme => ({
     },
     toolbar: {
         minHeight: theme.mixins.toolbar.minHeight,
+        backgroundImage: `url(${require(`../../img/headerStrip.png`)})`,
+        backgroundSize: 'cover',
     },
 });
 
@@ -138,6 +147,7 @@ class Header extends React.Component {
 
     render() {
         console.log("# inside render ");
+        console.log("notification icon: ", NotificationsIcon);
         const { classes, history, fullScreen } = this.props;
         const { dataKey } = this.state;
         const { drizzleState } = this.context;
@@ -152,30 +162,28 @@ class Header extends React.Component {
         //const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
         const isWithdrawDisabled = !(withdrawAmount && withdrawAmount.value.toString() !== '0');
         console.log("isWithdrawDisabled: ", isWithdrawDisabled);
+        const drawerIcons = [NotificationsIcon];
 
         const renderLink = () => {
             history.push(`/`);
         };
 
+        const renderDrawerItems = (itemIndex) => {
+            switch (itemIndex) {
+                case 0:
+                    history.push('/notifications');
+            }
+        };
+
         const sideList = (
             <div className={classes.list}>
                 <List>
-                    {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                        <ListItem button key={text}>
-                            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
+                    <ListItem button key={"Notifications"} onClick={() => (renderDrawerItems(0))}>
+                        <ListItemIcon><NotificationsIcon /></ListItemIcon>
+                        <ListItemText primary={"Notifications"} />
+                    </ListItem>
                 </List>
                 <Divider />
-                <List>
-                    {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                        <ListItem button key={text}>
-                            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
-                </List>
             </div>
         );
 
