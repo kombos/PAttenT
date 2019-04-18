@@ -135,6 +135,26 @@ class GameLogs extends React.Component {
         console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
+    getEvents() {
+        const { events } = this.props;
+        console.log('events::: ', events);
+
+        let serial = 0;
+        // prune the events and reformat
+        this.gameEvents = events.map((value) => {
+            const gameEvent = value.returnValues;
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.logID = value.id;
+            serial += 1;
+            gameEvent.serial = serial;
+            gameEvent.action = (value.event === 'LogPlayGame');
+            // gameEvent.timeSecs
+            // gameEvent.playerAddress
+            gameEvent.playerTokens = parseInt(value.returnValues.playerTokens, 10);
+            return gameEvent;
+        });
+    }
+
     getRowClassName = ({ index }) => {
         console.log('gameevents::::: ', this.gameEvents, ' index: ', index);
         const { classes } = this.props;
@@ -200,30 +220,10 @@ class GameLogs extends React.Component {
         console.log('inside addressRenderer()');
         console.log('rowdata: ', rowData);
         return (
-            <Tooltip title={rowData.action ? "Tokens Bought" : "Tokens Reverted"}>
-                <span>{rowData.action ? "[+]" : "[-]"}</span>
+            <Tooltip title={rowData.action ? 'Tokens Bought' : 'Tokens Reverted'}>
+                <span>{rowData.action ? '[+]' : '[-]'}</span>
             </Tooltip>
         );
-    }
-
-    getEvents() {
-        const { events } = this.props;
-        console.log('events::: ', events);
-
-        let serial = 0;
-        // prune the events and reformat
-        this.gameEvents = events.map((value) => {
-            const gameEvent = value.returnValues;
-            gameEvent.transactionHash = value.transactionHash;
-            gameEvent.logID = value.id;
-            serial += 1;
-            gameEvent.serial = serial;
-            gameEvent.action = (value.event === 'LogPlayGame');
-            // gameEvent.timeSecs
-            // gameEvent.playerAddress
-            gameEvent.playerTokens = parseInt(value.returnValues.playerTokens, 10);
-            return gameEvent;
-        });
     }
 
     render() {

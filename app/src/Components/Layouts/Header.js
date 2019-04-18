@@ -15,9 +15,7 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
-import { withRouter } from "react-router";
+import { withRouter } from 'react-router';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -27,27 +25,25 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { DRAWERITEMS as drawerItems } from '../../Constants';
-//import { DRAWERICONS as drawerIcons } from '../../Constants';
-
+// import { DRAWERICONS as drawerIcons } from '../../Constants';
 
 
 const styles = theme => ({
     root: {
-        //flexGrow: 1,
-        //height:'20vh',
+        // flexGrow: 1,
+        // height:'20vh',
         height: theme.mixins.toolbar.minHeight,
-        
+
     },
     grow: {
         flexGrow: 1,
-        //backgroundColor: "rgba(112,154,6,0.90)",
+        // backgroundColor: "rgba(112,154,6,0.90)",
         textAlign: 'left',
     },
     menuButton: {
         marginLeft: -12,
         marginRight: 10,
-        //backgroundColor: "rgba(112,154,6,0.90)",
+        // backgroundColor: "rgba(112,154,6,0.90)",
     },
     list: {
         width: 250,
@@ -57,7 +53,8 @@ const styles = theme => ({
     },
     toolbar: {
         minHeight: theme.mixins.toolbar.minHeight,
-        backgroundImage: `url(${require(`../../img/headerStrip.png`)})`,
+        // eslint-disable-next-line global-require
+        backgroundImage: `url(${require('../../img/headerStrip.png')})`,
         backgroundSize: 'cover',
     },
 });
@@ -67,7 +64,7 @@ class Header extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
-        console.log("#___ inside constructor___");
+        console.log('#___ inside constructor___');
         super(props);
         this.context = context;
         this.state = {
@@ -78,7 +75,7 @@ class Header extends React.Component {
         };
         this.prevStackID = this.state.stackID;
         this.withdrawTokens = this.withdrawTokens.bind();
-        //this.getWithdrawals = this.getWithdrawals.bind();
+        // this.getWithdrawals = this.getWithdrawals.bind();
     }
 
     componentDidMount() {
@@ -92,11 +89,11 @@ class Header extends React.Component {
             // get the transaction hash using our saved `stackID`
             const { transactions, transactionStack } = drizzleState;
             const txHash = transactionStack[stackID];
-            console.log("txHash: ", txHash);
-            console.log("txns txhash: ", transactions[txHash]);
+            console.log('txHash: ', txHash);
+            console.log('txns txhash: ', transactions[txHash]);
             // if transaction hash does not exist, don't display anything
-            if (txHash && transactions[txHash] && (transactions[txHash].status === "pending"
-                || transactions[txHash].status === "success")) {
+            if (txHash && transactions[txHash] && (transactions[txHash].status === 'pending'
+                || transactions[txHash].status === 'success')) {
                 this.handleClickOpen();
                 this.prevStackID = stackID;
             }
@@ -112,28 +109,28 @@ class Header extends React.Component {
     }
 
     getWithdrawals = (playerAddress) => {
-        console.log("# Header: $$$$$ INSIDE getWithdrawals $$$$$");
+        console.log('# Header: $$$$$ INSIDE getWithdrawals $$$$$');
         const { drizzle } = this.context;
         const { Multiprizer } = drizzle.contracts;
         // get and save the key for the variable we are interested in
-        console.log("player : ", playerAddress);
-        let dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(playerAddress);
-        console.log("# Header datakey value is:" + dataKey);
+        console.log('player : ', playerAddress);
+        const dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(playerAddress);
+        console.log('# Header datakey value is:', dataKey);
         this.setState({
-            dataKey: dataKey
+            dataKey: dataKey,
         });
     }
 
     withdrawTokens = () => {
-        console.log("inside withdrawTokens() ");
+        console.log('inside withdrawTokens() ');
         const { playerAddress } = this.props;
         const { drizzle } = this.context;
-        console.log("playeraddr: ", playerAddress);
+        console.log('playeraddr: ', playerAddress);
         const { Multiprizer } = drizzle.contracts;
         const stackID = Multiprizer.methods.withdraw.cacheSend({
-            from: playerAddress
+            from: playerAddress,
         });
-        console.log("stackID: ", stackID);
+        console.log('stackID: ', stackID);
         this.setState({ stackID: stackID });
     }
 
@@ -146,41 +143,41 @@ class Header extends React.Component {
     }
 
     render() {
-        console.log("# inside render ");
-        console.log("notification icon: ", NotificationsIcon);
+        console.log('# inside render ');
+        console.log('notification icon: ', NotificationsIcon);
         const { classes, history, fullScreen } = this.props;
         const { dataKey } = this.state;
         const { drizzleState } = this.context;
-        const toggleDrawer = (isDrawerOpen) => () => {
+        const toggleDrawer = isDrawerOpen => () => {
             this.setState({ isDrawerOpen: isDrawerOpen });
         };
         const { Multiprizer } = drizzleState.contracts;
-        console.log("this.state.dataKey : ", dataKey);
-        console.log("player: ", this.props.playerAddress);
+        console.log('this.state.dataKey : ', dataKey);
+        console.log('player: ', this.props.playerAddress);
         const withdrawAmount = Multiprizer.viewWithdrawalInfo[dataKey];
-        console.log("withdraw amt : ", withdrawAmount && parseInt(withdrawAmount.value, 10));
-        //const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
+        console.log('withdraw amt : ', withdrawAmount && parseInt(withdrawAmount.value, 10));
+        // const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
         const isWithdrawDisabled = !(withdrawAmount && withdrawAmount.value.toString() !== '0');
-        console.log("isWithdrawDisabled: ", isWithdrawDisabled);
-        const drawerIcons = [NotificationsIcon];
+        console.log('isWithdrawDisabled: ', isWithdrawDisabled);
 
         const renderLink = () => {
-            history.push(`/`);
+            history.push('/');
         };
 
         const renderDrawerItems = (itemIndex) => {
             switch (itemIndex) {
                 case 0:
                     history.push('/notifications');
+                    break;
             }
         };
 
         const sideList = (
             <div className={classes.list}>
                 <List>
-                    <ListItem button key={"Notifications"} onClick={() => (renderDrawerItems(0))}>
+                    <ListItem button key="Notifications" onClick={() => (renderDrawerItems(0))}>
                         <ListItemIcon><NotificationsIcon /></ListItemIcon>
-                        <ListItemText primary={"Notifications"} />
+                        <ListItemText primary="Notifications" />
                     </ListItem>
                 </List>
                 <Divider />
@@ -195,13 +192,13 @@ class Header extends React.Component {
                             <MenuIcon />
                         </IconButton>
                         <div className={classes.grow}>
-                            <ButtonBase onClick={renderLink} >
-                                <Typography variant="h6" color="inherit" >
+                            <ButtonBase onClick={renderLink}>
+                                <Typography variant="h6" color="inherit">
                                     Multiprizer
                                 </Typography>
                             </ButtonBase>
                         </div>
-                        <Tooltip title={isWithdrawDisabled === true ? "Withdraw Winnings (disabled)" : "Withdraw Winnings"}>
+                        <Tooltip title={isWithdrawDisabled === true ? 'Withdraw Winnings (disabled)' : 'Withdraw Winnings'}>
                             <div>
                                 <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled} onClick={this.withdrawTokens}>
                                     <SaveAltIcon />
@@ -230,7 +227,7 @@ class Header extends React.Component {
                     <DialogTitle id="responsive-dialog-title">Withdraw Request Received</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            'Withdraw' action has been recorded. Please wait till your transaction is confirmed.
+                            &quot;Withdraw&quot; action has been recorded. Please wait till your transaction is confirmed.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -248,4 +245,4 @@ Header.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withMobileDialog()(withRouter(withStyles(styles)(Header)));  
+export default withMobileDialog()(withRouter(withStyles(styles)(Header)));

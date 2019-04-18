@@ -1,10 +1,10 @@
 
 
 // Ethscan URLs
-export const TX_HASH_URL = "https://ropsten.etherscan.io/tx/";
-//export const TX_HASH_URL = "https://etherscan.io/tx/";
-export const ADDRESS_HASH_URL = "https://ropsten.etherscan.io/address/";
-//export const ADDRESS_HASH_URL = "https://etherscan.io/address/";
+export const TX_HASH_URL = 'https://ropsten.etherscan.io/tx/';
+// export const TX_HASH_URL = "https://etherscan.io/tx/";
+export const ADDRESS_HASH_URL = 'https://ropsten.etherscan.io/address/';
+// export const ADDRESS_HASH_URL = "https://etherscan.io/address/";
 
 // Game ID names
 // ...
@@ -12,10 +12,9 @@ export const ADDRESS_HASH_URL = "https://ropsten.etherscan.io/address/";
 
 // Drawer Items
 export const DRAWERITEMS = [
-    'Notifications'
+    'Notifications',
 ];
 
 export const DRAWERICONS = [
-    'Notifications'
+    'Notifications',
 ];
-

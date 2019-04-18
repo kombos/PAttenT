@@ -7,6 +7,7 @@
     "test": "test"
   },
   "dependencies": {
+    "gh-pages": "^2.0.1",
     "truffle-hdwallet-provider": "^1.0.5"
   },
   "devDependencies": {},
@@ -22,5 +23,5 @@
   "bugs": {
     "url": "https://github.com/kombos/mp/issues"
   },
-  "homepage": "https://github.com/kombos/mp#readme"
+  "homepage": "https://kombos.github.com/mp"
 }
