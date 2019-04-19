@@ -2,7 +2,7 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
-import roundButton from './img/roundButton.png';
+import roundButton from '../img/roundButton.png';
 
 const styles = theme => ({
     indicator: {
@@ -110,14 +110,14 @@ class Indicator extends React.PureComponent {
             console.log('durationinsecs: ', duration);
             console.log('bountysize: ', bountySize);
             console.log('winningchance: ', winningChance);
-            console.log("path:: ", `./img/indicator${winningChance}.png`);
+            console.log("path:: ", `../img/indicator${winningChance}.png`);
 
             indicatorJSX = (
                 <div className={classes.flexContainer}>
                     <div className={classes.flexChild}>
                         <Tooltip title="Winning Chance">
                             <img
-                                src={require(`./img/Indicator${winningChance}.png`)}
+                                src={require(`../img/Indicator${winningChance}.png`)}
                                 alt="Winning Chance"
                                 className={classes.winningChance}
                             />
@@ -138,7 +138,7 @@ class Indicator extends React.PureComponent {
                     <div className={classes.flexChild}>
                         <Tooltip title="Bounty Size">
                             <img
-                                src={require(`./img/Indicator${bountySize}.png`)}
+                                src={require(`../img/Indicator${bountySize}.png`)}
                                 alt="Bounty Size"
                                 className={classes.bountySize}
                             />

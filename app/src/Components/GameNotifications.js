@@ -2,8 +2,6 @@ import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
-import { DrizzleContext } from 'drizzle-react';
-import { TX_HASH_URL as HASH_URL } from './Constants';
 
 const styles = theme => ({
     root: {
@@ -44,7 +42,7 @@ const styles = theme => ({
     },
     table: {
         fontFamily: theme.typography.fontFamily,
-        fontSize: theme.typography.fontSize * 0.95,
+        fontSize: theme.typography.fontSize,
         // fontWeight: theme.typography.fontWeightMedium,
     },
     flexContainer: {
@@ -55,7 +53,7 @@ const styles = theme => ({
     },
     tableRow: {
         cursor: 'pointer',
-        textAlign: 'center',
+        textAlign: 'left',
         // margin: 'auto 1em auto auto',
         paddingLeft: '1em',
         paddingRight: '1em',
@@ -89,27 +87,19 @@ const styles = theme => ({
         fontSize: theme.typography.fontSize,
         color: '#bdbdbd',
     },
-    trimmable: {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-    },
 
 });
 
 
-class GameWinners extends React.Component {
-    static contextType = DrizzleContext.Consumer;
-
-    constructor(props, context) {
+class GameNotifications extends React.Component {
+    constructor(props) {
         super(props);
-        this.context = context;
-        const sortBy = 'round';
+        const sortBy = 'timeSecs';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
-        // this.getEvents();
-        // this.sortList({ sortBy, sortDirection });
+        this.getEvents();
+        this.sortList({ sortBy, sortDirection });
     }
 
     getRowClassName = ({ index }) => {
@@ -162,27 +152,58 @@ class GameWinners extends React.Component {
         return stabilizedThis.map(el => el[0]);
     }
 
-    addressRenderer = ({ rowData }) => {
-        console.log('inside addressRenderer()');
-        console.log('rowdata: ', rowData);
-        return (
-            <a href={HASH_URL + rowData.transactionHash}>{rowData.winnerAddress}</a>
-        );
-    }
-
     getEvents() {
         const { events } = this.props;
-        const web3 = this.context.drizzle.web3;
+        const { drizzle } = this.context;
+        const { web3 } = drizzle;
+
         // prune the events and reformat
         this.gameEvents = events.map((value) => {
             const gameEvent = value.returnValues;
             gameEvent.transactionHash = value.transactionHash;
+            // gameEvent.serial = ++serial;
             gameEvent.logID = value.id;
-            // gameEvent.winnerAddress
-            // gameEvent.roundNumber
-            gameEvent.round = parseInt(value.returnValues.roundNumber, 10);
-            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
-            gameEvent.gameID = parseInt(value.returnValues.gameID, 10);
+            // gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
+            switch (value.event) {
+                case 'LogCompleteRound':
+                    if (gameEvent.numPlayers > 1) {
+                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon. Click to know more.`;
+                        break;
+                    } else {
+                        if (gameEvent.numPlayers === 1) {
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors. Click to know more.`;
+                            break;
+                        } else {
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated. Click to know more.`;
+                            break;
+                        }
+                    }
+
+                case 'LogCompleteMPRound':
+                    if (gameEvent.numPlayers > 1) {
+                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. Click to know more.`;
+                        break;
+                    } else {
+                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. MegaPrize amount carried forward to next round due to no contenders.`;
+                        break;
+                    }
+
+                case 'LogGameLocked':
+                    gameEvent.notification = `Game: ${gameEvent.gameID} has been locked by Admin and will resume soon. Meanwhile all your funds are safe.`;
+                    break;
+
+                case 'LogGameUnlocked':
+                    gameEvent.notification = `Game: ${gameEvent.gameID} has been unlocked now! Please resume your plays.`;
+                    break;
+
+                case 'LogMegaPrizeUpdate':
+                    gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game at least once to be eligible for MegaPrize pick!`;
+                    break;
+
+                default:
+                    gameEvent.notification = '';
+                    break;
+            }
 
             return gameEvent;
         });
@@ -220,7 +241,6 @@ class GameWinners extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
         console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
-        console.log("EVENTS: ", this.props.events);
         console.log('expression: ',
             (this.props.events.length !== nextProps.events.length
                 || this.state.sortBy !== nextState.sortBy
@@ -231,6 +251,7 @@ class GameWinners extends React.Component {
             || this.state.sortDirection !== nextState.sortDirection) {
             return true;
         }
+
         return false;
     }
 
@@ -248,7 +269,7 @@ class GameWinners extends React.Component {
 
         return (
             <div className={classes.root}>
-                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Winners</p> : <p>Game Winners (empty)</p>}</div>
+                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Notifications</p> : <p>Game Notifications (empty)</p>}</div>
                 <div className={classes.tableContainer}>
                     <AutoSizer>
                         {({ height, width }) => (
@@ -271,30 +292,22 @@ class GameWinners extends React.Component {
                                 sort={this.sort}
                             >
                                 <Column
-                                    width={90}
-                                    flexGrow={1}
-                                    label="GameID"
-                                    dataKey="gameID"
+                                    width={100}
+                                    flexGrow={1.0}
+                                    label="Time"
+                                    dataKey="timeSecs"
+                                    cellDataGetter={({ rowData }) => {
+                                        const timestamp = new Date(parseInt(rowData.timeSecs, 10) * 1000).toLocaleString();
+                                        // let timestamp = ;
+                                        console.log('rowdata: ', timestamp);
+                                        return (timestamp);
+                                    }}
                                 />
                                 <Column
-                                    width={90}
-                                    flexGrow={1}
-                                    label="Round"
-                                    dataKey="round"
-                                />
-                                <Column
-                                    width={180}
-                                    flexGrow={2}
-                                    label="Winner"
-                                    dataKey="winnerAddress"
-                                    cellRenderer={this.addressRenderer}
-                                    className={classes.trimmable}
-                                />
-                                <Column
-                                    width={120}
-                                    flexGrow={2}
-                                    label="Prize (eth)"
-                                    dataKey="prize"
+                                    width={250}
+                                    flexGrow={1.0}
+                                    label="Notification"
+                                    dataKey="notification"
                                 />
                             </Table>
                         )}
@@ -305,4 +318,4 @@ class GameWinners extends React.Component {
     }
 }
 
-export default withStyles(styles)(GameWinners);
+export default withStyles(styles)(GameNotifications);

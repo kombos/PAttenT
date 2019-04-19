@@ -327,6 +327,8 @@ contract Multiprizer is Ownable {
     event LogMegaPrizeWinner(uint256 megaPrizeNumber, address megaPrizeWinner, uint256 megaPrizeAmount, 
         uint256 timeSecs, uint256 timeBlock);
 
+    event LogMegaPrizeUpdate(uint256 megaPrizeNumber, uint256 megaPrizeAmount, uint256 timeSecs, uint256 timeBlock);
+
     /** 
     *  Constructor call 
     *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
@@ -473,6 +475,7 @@ contract Multiprizer is Ownable {
         megaPrizeAmount[megaPrizeNumber] += (_megaPrizeAmount);
         megaPrizeDurationInEpoch = _megaPrizeDurationInEpoch;
         megaPrizeDurationInBlocks = _megaPrizeDurationInBlocks;
+        emit LogMegaPrizeUpdate(megaPrizeNumber, megaPrizeAmount[megaPrizeNumber], now, block.number);
     }
 
     function unlockGamesByAdmin(uint256[] calldata _gameIDs) external

@@ -1,4 +1,4 @@
-import Multiprizer from './contracts/Multiprizer.json';
+import Multiprizer from '../contracts/Multiprizer.json';
 
 const drizzleOptions = {
     web3: {
@@ -51,6 +51,12 @@ const drizzleOptions = {
             },
             {
                 eventName: 'LogMegaPrizeWinner',
+                eventOptions: {
+                    fromBlock: 0,
+                },
+            },
+            {
+                eventName: 'LogMegaPrizeUpdate',
                 eventOptions: {
                     fromBlock: 0,
                 },

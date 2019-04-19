@@ -2,13 +2,13 @@ import React from 'react';
 import { DrizzleContext } from 'drizzle-react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import GameInput from './GameInput';
-import Timer from './Components/Timer';
-import Indicator from './Indicator';
-import TokensData from './TokensData';
-import PurchasedTokens from './PurchasedTokens';
-import GameProps from './GameProps';
-import MastHead from './MastHead';
+import GameInput from '../Components/GameInput';
+import Timer from '../Components/Timer';
+import Indicator from '../Components/Indicator';
+import TokensData from '../Components/TokensData';
+import PurchasedTokens from '../Components/PurchasedTokens';
+import GameProps from '../Components/GameProps';
+import MastHead from '../Components/MastHead';
 
 const styles = theme => ({
     root: {
@@ -215,8 +215,8 @@ class GameContainer extends React.Component {
             <div
                 className={classes.root}
                 style={{
-                    backgroundImage: `url(${require(`./img/bg${gameID}.jpg`)})`,
-                    // backgroundImage: 'url("./img/gameBG3.jpg")',
+                    backgroundImage: `url(${require(`../img/bg${gameID}.jpg`)})`,
+                    // backgroundImage: 'url("../img/gameBG3.jpg")',
                 }}
             >
                 <div className={classes.components}>

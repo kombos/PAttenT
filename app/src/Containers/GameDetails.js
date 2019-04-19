@@ -2,10 +2,10 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { DrizzleContext } from 'drizzle-react';
-import NotificationBar from './NotificationBar';
 import GameContainer from './GameContainer';
-import GameStats from './GameStats';
-import GameLogs from './GameLogs';
+import NotificationBar from '../Components/NotificationBar';
+import GameStats from '../Components/GameStats';
+import GameLogs from '../Components/GameLogs';
 
 const styles = theme => ({
     flexContainer: {

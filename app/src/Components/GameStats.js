@@ -1,39 +1,15 @@
 import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
+import { Tooltip } from '@material-ui/core';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
-import { TX_HASH_URL as HASH_URL } from './Constants';
+import { ADDRESS_HASH_URL as HASH_URL } from '../Constants';
 
 const styles = theme => ({
-    root: {
-        // padding: theme.spacing.unit * 0.5,
+    tableContainer: {
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: '1 1 auto',
-        height: 'auto',
-        backgroundColor: 'rgba(0,0,0,0.69)',
-        justifyContent: 'center',
-    },
-    transPanel: {
-        color: theme.palette.primary.light,
-        fontWeight: 'bold',
-        flex: '1 1 auto',
-        justifyContent: 'center',
-        // backgroundColor: "rgba(100,0,0,0.69)",
-        boxSizing: 'border-box',
-        maxHeight: '2.5em',
-        width: '100%',
-        margin: 'auto',
-        // margin: '0.5rem auto 0.5rem auto',
-        // borderRadius: theme.shape.borderRadius * 2,
-        // paddingTop: theme.spacing.unit * 0.05,
-        // paddingBottom: theme.spacing.unit * 0.05,
-        // paddingBottom: '0.02rem',
-    },
-    tableContainer: {
         // backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
         // filter: 'opacity(30%)',
         // backgroundSize: 'cover',
@@ -98,61 +74,18 @@ const styles = theme => ({
 });
 
 
-class GameMegaPrizeWinners extends React.Component {
+class GameStats extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
         super(props);
         this.context = context;
-        const sortBy = 'megaPrizeNumber';
-        const sortDirection = SortDirection.DESC;
+        const sortBy = 'serial';
+        const sortDirection = SortDirection.ASC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
-        // this.getEvents();
+        // this.getData();
         // this.sortList({ sortBy, sortDirection });
-    }
-
-    /* shouldComponentUpdate(nextProps, nextState) {
-        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
-        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
-        console.log("expression: ", (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection));
-
-        if (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection) {
-            this.flag = true;
-            return true;
-        }
-        else {
-            if (this.flag) {
-                console.log("inside if");
-                this.flag = false;
-                this.getEvents();
-                return true;
-            }
-            return false;
-        }
-    } */
-
-    shouldComponentUpdate(nextProps, nextState) {
-        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
-        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
-        console.log('expression: ', (this.props.events.length !== nextProps.events.length
-            || this.state.sortBy !== nextState.sortBy
-            || this.state.sortDirection !== nextState.sortDirection));
-
-        if (this.props.events.length !== nextProps.events.length
-            || this.state.sortBy !== nextState.sortBy
-            || this.state.sortDirection !== nextState.sortDirection) {
-            return true;
-        }
-        return false;
-    }
-
-    componentDidUpdate() {
-        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
     getRowClassName = ({ index }) => {
@@ -180,9 +113,9 @@ class GameMegaPrizeWinners extends React.Component {
         console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
-        const sortedData = this.stableSort(this.gameEvents, cmp);
+        const sortedData = this.stableSort(this.playersData, cmp);
         console.log('sortedData: ', sortedData);
-        this.gameEvents = sortedData;
+        this.playersData = sortedData;
     }
 
     desc = (a, b, sortBy) => {
@@ -209,65 +142,70 @@ class GameMegaPrizeWinners extends React.Component {
         console.log('inside addressRenderer()');
         console.log('rowdata: ', rowData);
         return (
-            <a href={HASH_URL + rowData.transactionHash}>{rowData.megaPrizeWinner}</a>
+            <a href={HASH_URL + rowData.player}>{rowData.player}</a>
         );
     }
 
-    getEvents() {
-        const { events } = this.props;
-        const web3 = this.context.drizzle.web3;
+    getData() {
+        console.log('inside getData  ');
 
-        /*  let events = [{
-             transactionHash: "0x7d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
-             id: "log_dcf38a3b",
-             returnValues: {
-                 megaPrizeNumber: "10",
-                 megaPrizeWinner: "0xd0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
-                 winnerAmount: 50000000000000000,
-                 timeSecs: "1551180548",
-                 roundNumber: "2"
-             }
-         },
-         {
-             transactionHash: "0x8d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
-             id: "log_dcf88a3b",
-             returnValues: {
-                 megaPrizeNumber: "11",
-                 megaPrizeWinner: "0xb0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
-                 winnerAmount: 5000000000000000,
-                 timeSecs: "1651180548",
-                 roundNumber: "4"
-             }
-         }]; */
-
-        // prune the events and reformat
-        this.gameEvents = events.map((value) => {
-            const gameEvent = value.returnValues;
-            gameEvent.transactionHash = value.transactionHash;
-            gameEvent.logID = value.id;
-            // gameEvent.megaPrizeWinner
-            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether'));
-            gameEvent.megaPrizeNumber = parseInt(value.returnValues.megaPrizeNumber, 10);
-
-            return gameEvent;
-        });
+        const { roundData } = this.props;
+        console.log('roundata inside gamestats: ', roundData);
+        const playerList = roundData.value._playerList;
+        const playerTokensList = roundData.value._playerTokensList;
+        this.playersData = [];
+        for (let i = 0; i < playerList.length; i += 1) {
+            this.playersData.push({
+                serial: i + 1,
+                player: playerList[i],
+                tokens: parseInt(playerTokensList[i], 10),
+            });
+        }
     }
+
+    componentDidUpdate() {
+        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
+    }
+
+    /* shouldComponentUpdate(nextthis.Props, nextState) {
+        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
+        console.log("this this.props: ", this.props.events.length, " next this.props: ", nextthis.Props.events.length);
+        console.log("expression: ", (this.props.events.length != nextthis.Props.events.length ||
+            this.state.sortBy != nextState.sortBy ||
+            this.state.sortDirection != nextState.sortDirection));
+
+        if (this.props.events.length != nextthis.Props.events.length ||
+            this.state.sortBy != nextState.sortBy ||
+            this.state.sortDirection != nextState.sortDirection) {
+            this.flag = true;
+            return true;
+        }
+        else {
+            if (this.flag) {
+                console.log("inside if");
+                this.flag = false;
+                this.getData();
+                return true;
+            }
+            return false;
+        }
+    } */
+
 
     render() {
         console.log('inside gamenotifications');
         const sortBy = this.state.sortBy;
         const sortDirection = this.state.sortDirection;
         const { classes } = this.props;
-        this.getEvents();
+        this.getData();
         this.sortList({ sortBy, sortDirection });
 
-        console.log('gameevents: ', this.gameEvents);
+        console.log('playersData: ', this.playersData);
         console.log('fn;;;;;;;;s  sortby: ', sortBy, ' sort Direction: ', sortDirection);
         console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
-            <div className={classes.root}>
-                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Megaprize Winners</p> : <p>Megaprize Winners (empty)</p>}</div>
+            <Tooltip title="Token Purchase Stats">
                 <div className={classes.tableContainer}>
                     <AutoSizer>
                         {({ height, width }) => (
@@ -281,8 +219,8 @@ class GameMegaPrizeWinners extends React.Component {
                                 headerClassName={classes.headerColumn}
                                 noRowsRenderer={this.noRowsRenderer}
                                 overscanRowCount={10}
-                                rowCount={this.gameEvents.length}
-                                rowGetter={({ index }) => this.gameEvents[index]}
+                                rowCount={this.playersData.length}
+                                rowGetter={({ index }) => this.playersData[index]}
                                 onRowClick={event => console.log(event)}
                                 onRequestSort={this.handleRequestSort}
                                 sortBy={sortBy}
@@ -290,32 +228,33 @@ class GameMegaPrizeWinners extends React.Component {
                                 sort={this.sort}
                             >
                                 <Column
-                                    width={90}
+                                    width={60}
+                                    label="Serial"
+                                    dataKey="serial"
                                     flexGrow={1}
-                                    label="MP No."
-                                    dataKey="megaPrizeNumber"
                                 />
                                 <Column
-                                    width={180}
-                                    flexGrow={2}
-                                    label="Winner"
-                                    dataKey="megaPrizeWinner"
+                                    width={150}
+                                    flexGrow={1}
+                                    label="Player"
+                                    dataKey="player"
                                     cellRenderer={this.addressRenderer}
                                     className={classes.trimmable}
                                 />
                                 <Column
-                                    width={120}
+                                    width={70}
                                     flexGrow={2}
-                                    label="Prize (eth)"
-                                    dataKey="prize"
+                                    label="Total Tokens"
+                                    dataKey="tokens"
                                 />
                             </Table>
                         )}
                     </AutoSizer>
                 </div>
-            </div>
+            </Tooltip>
+
         );
     }
 }
 
-export default withStyles(styles)(GameMegaPrizeWinners);
+export default withStyles(styles)(GameStats);

@@ -1,0 +1,11 @@
+.App {
+    text-align: center;
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    flex-direction: column;
+    background-image: url('../img/bg.jpg');
+    background-size: 20%;
+    overflow: hidden;
+}
+

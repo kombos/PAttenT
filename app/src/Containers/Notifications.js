@@ -2,9 +2,9 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { DrizzleContext } from 'drizzle-react';
-import GameWinners from './GameWinners';
-import GameMegaPrizeWinners from './GameMegaPrizeWinners';
-import GameNotifications from './GameNotifications';
+import GameWinners from '../Components/GameWinners';
+import GameMegaPrizeWinners from '../Components/GameMegaPrizeWinners';
+import GameNotifications from '../Components/GameNotifications';
 
 const styles = theme => ({
     flexChild: {

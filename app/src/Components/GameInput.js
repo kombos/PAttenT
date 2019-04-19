@@ -183,6 +183,10 @@ class GameInput extends React.Component {
             || remainingTokens === 0
         );
 
+        /* Pay routine:
+        '(' + (web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token') + ')' :
+        (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers')} */
+
         return (
             <Fragment>
                 <form onSubmit={this.handleSubmit} className={classes.flexContainer}>
@@ -225,9 +229,10 @@ class GameInput extends React.Component {
                         className={classes.button}
                         disabled={isDisabled}
                     >
-                        Pay {this.state.numTokens === '' ?
-                            '(' + (web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token') + ')' :
-                            (web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers')}
+                        Pay { this.state.numTokens === '' ?
+                            `(${web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token'})` :
+                            `${web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers'}` }
+                            
                     </Button>
                 </form>
                 <Dialog

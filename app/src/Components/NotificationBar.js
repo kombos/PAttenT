@@ -107,7 +107,7 @@ class NotificationBar extends React.Component {
         const web3 = this.context.drizzle.web3;
         const { events, classes } = this.props;
         console.log("events:: ", events);
-        if (events.length == 0) return;
+        if (events.length === 0) return;
         // filter only relevant events first
         for (var i = (events.length - 1); i >= 0; i--) {
             backEvent = events[i];
@@ -169,6 +169,10 @@ class NotificationBar extends React.Component {
 
             case 'LogMegaPrizeWinner':
                 gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} winner is ${gameEvent.megaPrizeWinner}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Click to know more.`;
+                break;
+
+            case 'LogMegaPrizeUpdate':
+                gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game at least once to be eligible for MegaPrize pick!`;
                 break;
 
             default:

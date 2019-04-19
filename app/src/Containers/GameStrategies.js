@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { DrizzleContext } from 'drizzle-react';
 import GameContainer from './GameContainer';
-import NotificationBar from './NotificationBar';
+import NotificationBar from '../Components/NotificationBar';
 
 const styles = theme => ({
     flexContainer: {
@@ -109,10 +109,10 @@ class GameStrategies extends React.Component {
         if (!initialized) {
             return 'Loading...';
         }
-        const dataKey = this.state.dataKey;
-        const drizzleState = this.props.drizzleState;
-        const multiprizer = this.props.drizzleState.contracts.Multiprizer;
-        const logEvents = this.props.drizzleState.contracts.Multiprizer.events;
+        const { dataKey } = this.state;
+        const { drizzleState } = this.props;
+        const multiprizer = drizzleState.contracts.Multiprizer;
+        const logEvents = multiprizer.events;
         console.log('multiprizer:  ', multiprizer);
         console.log('# datakey inside GameStrategy is  : ', dataKey);
 

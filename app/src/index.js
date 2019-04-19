@@ -2,12 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Drizzle, generateStore } from 'drizzle';
 import { DrizzleContext } from 'drizzle-react';
-import './index.css';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
-import App from './Components/App';
+import App from './App';
+import drizzleOptions from './Configurations/drizzleOptions';
+import './css/index.css';
 // import * as serviceWorker from './serviceWorker';
-import drizzleOptions from './drizzleOptions';
 
 console.log('inside index.js');
 

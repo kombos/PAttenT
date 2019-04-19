@@ -1,15 +1,39 @@
 import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import { Tooltip } from '@material-ui/core';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
-import { ADDRESS_HASH_URL as HASH_URL } from './Constants';
+import { TX_HASH_URL as HASH_URL } from '../Constants';
 
 const styles = theme => ({
-    tableContainer: {
+    root: {
+        // padding: theme.spacing.unit * 0.5,
         margin: '0.75rem 0.75rem 0.75rem 0.75rem',
         boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        flex: '1 1 auto',
+        height: 'auto',
+        backgroundColor: 'rgba(0,0,0,0.69)',
+        justifyContent: 'center',
+    },
+    transPanel: {
+        color: theme.palette.primary.light,
+        fontWeight: 'bold',
+        flex: '1 1 auto',
+        justifyContent: 'center',
+        // backgroundColor: "rgba(100,0,0,0.69)",
+        boxSizing: 'border-box',
+        maxHeight: '2.5em',
+        width: '100%',
+        margin: 'auto',
+        // margin: '0.5rem auto 0.5rem auto',
+        // borderRadius: theme.shape.borderRadius * 2,
+        // paddingTop: theme.spacing.unit * 0.05,
+        // paddingBottom: theme.spacing.unit * 0.05,
+        // paddingBottom: '0.02rem',
+    },
+    tableContainer: {
         // backgroundImage: `url(${require(`./img/tableBG.jpg`)})`,
         // filter: 'opacity(30%)',
         // backgroundSize: 'cover',
@@ -74,17 +98,17 @@ const styles = theme => ({
 });
 
 
-class GameStats extends React.Component {
+class GameWinners extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
     constructor(props, context) {
         super(props);
         this.context = context;
-        const sortBy = 'serial';
-        const sortDirection = SortDirection.ASC;
+        const sortBy = 'round';
+        const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
         this.flag = true;
-        // this.getData();
+        // this.getEvents();
         // this.sortList({ sortBy, sortDirection });
     }
 
@@ -113,9 +137,9 @@ class GameStats extends React.Component {
         console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
 
         const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
-        const sortedData = this.stableSort(this.playersData, cmp);
+        const sortedData = this.stableSort(this.gameEvents, cmp);
         console.log('sortedData: ', sortedData);
-        this.playersData = sortedData;
+        this.gameEvents = sortedData;
     }
 
     desc = (a, b, sortBy) => {
@@ -142,39 +166,40 @@ class GameStats extends React.Component {
         console.log('inside addressRenderer()');
         console.log('rowdata: ', rowData);
         return (
-            <a href={HASH_URL + rowData.player}>{rowData.player}</a>
+            <a href={HASH_URL + rowData.transactionHash}>{rowData.winnerAddress}</a>
         );
     }
 
-    getData() {
-        console.log('inside getData  ');
+    getEvents() {
+        const { events } = this.props;
+        const web3 = this.context.drizzle.web3;
+        // prune the events and reformat
+        this.gameEvents = events.map((value) => {
+            const gameEvent = value.returnValues;
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.logID = value.id;
+            // gameEvent.winnerAddress
+            // gameEvent.roundNumber
+            gameEvent.round = parseInt(value.returnValues.roundNumber, 10);
+            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
+            gameEvent.gameID = parseInt(value.returnValues.gameID, 10);
 
-        const { roundData } = this.props;
-        console.log('roundata inside gamestats: ', roundData);
-        const playerList = roundData.value._playerList;
-        const playerTokensList = roundData.value._playerTokensList;
-        this.playersData = [];
-        for (let i = 0; i < playerList.length; i += 1) {
-            this.playersData.push({
-                serial: i + 1,
-                player: playerList[i],
-                tokens: parseInt(playerTokensList[i], 10),
-            });
-        }
+            return gameEvent;
+        });
     }
 
     componentDidUpdate() {
         console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
-    /* shouldComponentUpdate(nextthis.Props, nextState) {
+    /* shouldComponentUpdate(nextProps, nextState) {
         console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
-        console.log("this this.props: ", this.props.events.length, " next this.props: ", nextthis.Props.events.length);
-        console.log("expression: ", (this.props.events.length != nextthis.Props.events.length ||
+        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
+        console.log("expression: ", (this.props.events.length != nextProps.events.length ||
             this.state.sortBy != nextState.sortBy ||
             this.state.sortDirection != nextState.sortDirection));
 
-        if (this.props.events.length != nextthis.Props.events.length ||
+        if (this.props.events.length != nextProps.events.length ||
             this.state.sortBy != nextState.sortBy ||
             this.state.sortDirection != nextState.sortDirection) {
             this.flag = true;
@@ -184,7 +209,7 @@ class GameStats extends React.Component {
             if (this.flag) {
                 console.log("inside if");
                 this.flag = false;
-                this.getData();
+                this.getEvents();
                 return true;
             }
             return false;
@@ -192,20 +217,38 @@ class GameStats extends React.Component {
     } */
 
 
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
+        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
+        console.log("EVENTS: ", this.props.events);
+        console.log('expression: ',
+            (this.props.events.length !== nextProps.events.length
+                || this.state.sortBy !== nextState.sortBy
+                || this.state.sortDirection !== nextState.sortDirection));
+
+        if (this.props.events.length !== nextProps.events.length
+            || this.state.sortBy !== nextState.sortBy
+            || this.state.sortDirection !== nextState.sortDirection) {
+            return true;
+        }
+        return false;
+    }
+
     render() {
         console.log('inside gamenotifications');
         const sortBy = this.state.sortBy;
         const sortDirection = this.state.sortDirection;
         const { classes } = this.props;
-        this.getData();
+        this.getEvents();
         this.sortList({ sortBy, sortDirection });
 
-        console.log('playersData: ', this.playersData);
+        console.log('gameevents: ', this.gameEvents);
         console.log('fn;;;;;;;;s  sortby: ', sortBy, ' sort Direction: ', sortDirection);
         console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
 
         return (
-            <Tooltip title="Token Purchase Stats">
+            <div className={classes.root}>
+                <div className={classes.transPanel}>{this.gameEvents.length > 0 ? <p>Game Winners</p> : <p>Game Winners (empty)</p>}</div>
                 <div className={classes.tableContainer}>
                     <AutoSizer>
                         {({ height, width }) => (
@@ -219,8 +262,8 @@ class GameStats extends React.Component {
                                 headerClassName={classes.headerColumn}
                                 noRowsRenderer={this.noRowsRenderer}
                                 overscanRowCount={10}
-                                rowCount={this.playersData.length}
-                                rowGetter={({ index }) => this.playersData[index]}
+                                rowCount={this.gameEvents.length}
+                                rowGetter={({ index }) => this.gameEvents[index]}
                                 onRowClick={event => console.log(event)}
                                 onRequestSort={this.handleRequestSort}
                                 sortBy={sortBy}
@@ -228,33 +271,38 @@ class GameStats extends React.Component {
                                 sort={this.sort}
                             >
                                 <Column
-                                    width={60}
-                                    label="Serial"
-                                    dataKey="serial"
+                                    width={90}
                                     flexGrow={1}
+                                    label="GameID"
+                                    dataKey="gameID"
                                 />
                                 <Column
-                                    width={150}
+                                    width={90}
                                     flexGrow={1}
-                                    label="Player"
-                                    dataKey="player"
+                                    label="Round"
+                                    dataKey="round"
+                                />
+                                <Column
+                                    width={180}
+                                    flexGrow={2}
+                                    label="Winner"
+                                    dataKey="winnerAddress"
                                     cellRenderer={this.addressRenderer}
                                     className={classes.trimmable}
                                 />
                                 <Column
-                                    width={70}
+                                    width={120}
                                     flexGrow={2}
-                                    label="Total Tokens"
-                                    dataKey="tokens"
+                                    label="Prize (eth)"
+                                    dataKey="prize"
                                 />
                             </Table>
                         )}
                     </AutoSizer>
                 </div>
-            </Tooltip>
-
+            </div>
         );
     }
 }
 
-export default withStyles(styles)(GameStats);
+export default withStyles(styles)(GameWinners);

@@ -1,11 +1,12 @@
 import React from "react";
 import { DrizzleContext } from "drizzle-react";
-import GameStrategies from "../GameStrategies";
-import { Header, Footer } from './Layouts';
+import Header from './Components/Header';
+import Footer from './Components/Footer';
+import GameStrategies from './Containers/GameStrategies';
+import GameDetails from './Containers/GameDetails';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import GameDetails from '../GameDetails';
-import Notifications from '../Notifications';
-import './App.css';
+import Notifications from './Containers/Notifications';
+import './css/App.css';
 
 export default () => (
     <DrizzleContext.Consumer>
@@ -34,7 +35,7 @@ export default () => (
 
 
             return (
-                <Router>
+                <Router basename={process.env.PUBLIC_URL}>
                     <div className="App" >
                         {header}
 

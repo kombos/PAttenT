@@ -43,7 +43,7 @@ class MastHead extends React.PureComponent {
 
         return (
             <div className={classes.flexContainer}>
-                <img src={require(`./img/${gameID}.png`)} alt="MastHead Img" className={classes.mastHeadImg} />
+                <img src={require(`../img/${gameID}.png`)} alt="MastHead Img" className={classes.mastHeadImg} />
             </div>
         );
     }

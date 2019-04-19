@@ -4,7 +4,7 @@ import { Tooltip } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
 import { DrizzleContext } from 'drizzle-react';
-import { TX_HASH_URL as HASH_URL } from './Constants';
+import { TX_HASH_URL as HASH_URL } from '../Constants';
 
 const styles = theme => ({
     tableContainer: {

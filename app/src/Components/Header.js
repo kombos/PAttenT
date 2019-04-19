@@ -54,7 +54,7 @@ const styles = theme => ({
     toolbar: {
         minHeight: theme.mixins.toolbar.minHeight,
         // eslint-disable-next-line global-require
-        backgroundImage: `url(${require('../../img/headerStrip.png')})`,
+        backgroundImage: `url(${require('../img/headerStrip.png')})`,
         backgroundSize: 'cover',
     },
 });
@@ -168,6 +168,10 @@ class Header extends React.Component {
             switch (itemIndex) {
                 case 0:
                     history.push('/notifications');
+                    break;
+
+                default:
+                    history.push('/');
                     break;
             }
         };
