@@ -25,6 +25,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import MultiprizerLogo from '../img/MultiprizerLogo.png';
 // import { DRAWERICONS as drawerIcons } from '../../Constants';
 
 
@@ -33,29 +34,62 @@ const styles = theme => ({
         // flexGrow: 1,
         // height:'20vh',
         height: theme.mixins.toolbar.minHeight,
-
     },
-    grow: {
-        flexGrow: 1,
-        // backgroundColor: "rgba(112,154,6,0.90)",
-        textAlign: 'left',
+    toolbar: {
+        //display: 'flex',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        height: theme.mixins.toolbar.minHeight,
+        // eslint-disable-next-line global-require
+        backgroundImage: `url(${require('../img/headerStrip.png')})`,
+        backgroundSize: 'cover',
+        //alignItems: 'center',
+        //margin:'auto',
     },
     menuButton: {
+        //flexGrow: 1,
         marginLeft: -12,
         marginRight: 10,
         // backgroundColor: "rgba(112,154,6,0.90)",
+    },
+    grow: {
+        flexGrow: 1,
+        display: 'flex',
+        //backgroundColor: "rgba(12,114,64,0.90)",
+        //maxWidth: '100%',
+        //maxHeight: '100%',
+        height: '100%',
+        margin: 'auto',
+        textAlign: 'left',
+        //padding: '0.1em',
+        //justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonBase: {
+        //flexGrow: 1,
+        width: theme.mixins.toolbar.minHeight * 3,
+        height: 'auto',
+        margin: 'auto 0 auto 0',
+        //maxWidth: '100%',
+        //maxHeight: '100%',
+        //backgroundColor: "rgba(12,15,46,0.90)",
+    },
+    headerLogo: {
+        flexGrow: 1,
+        width: '100%',
+        //height: 'auto',
+        //maxWidth: '100%',
+        //maxHeight: '100%',
+        //backgroundColor: "rgba(112,154,6,0.90)",
+    },
+    withdrawButton: {
+        //backgroundColor: "rgba(72,14,96,0.90)",
     },
     list: {
         width: 250,
     },
     fullList: {
         width: 'auto',
-    },
-    toolbar: {
-        minHeight: theme.mixins.toolbar.minHeight,
-        // eslint-disable-next-line global-require
-        backgroundImage: `url(${require('../img/headerStrip.png')})`,
-        backgroundSize: 'cover',
     },
 });
 
@@ -196,14 +230,16 @@ class Header extends React.Component {
                             <MenuIcon />
                         </IconButton>
                         <div className={classes.grow}>
-                            <ButtonBase onClick={renderLink}>
-                                <Typography variant="h6" color="inherit">
-                                    Multiprizer
-                                </Typography>
+                            <ButtonBase onClick={renderLink} className={classes.buttonBase}>
+                                <img
+                                    src={MultiprizerLogo}
+                                    alt="Header Logo"
+                                    className={classes.headerLogo}
+                                />
                             </ButtonBase>
                         </div>
                         <Tooltip title={isWithdrawDisabled === true ? 'Withdraw Winnings (disabled)' : 'Withdraw Winnings'}>
-                            <div>
+                            <div className={classes.withdrawButton}>
                                 <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled} onClick={this.withdrawTokens}>
                                     <SaveAltIcon />
                                 </IconButton>

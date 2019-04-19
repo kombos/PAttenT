@@ -55,12 +55,12 @@ const drizzleOptions = {
                     fromBlock: 0,
                 },
             },
-            {
+            /* {
                 eventName: 'LogMegaPrizeUpdate',
                 eventOptions: {
                     fromBlock: 0,
                 },
-            },
+            }, */
         ],
 
     },

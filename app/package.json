@@ -26,7 +26,8 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "predeploy": "npm run build",
-        "deploy": "node ./src/ghpages-script.js"
+        "deploy": "node ./src/Configurations/ghpages-script.js",
+        "onlyDeploy": "node ./src/Configurations/ghpages-script.js"
     },
     "browserslist": [
         ">0.2%",
@@ -41,8 +42,5 @@
     },
     "author": "Kamlesh Parikarath",
     "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/kombos/mp/issues"
-    },
-    "homepage": "https://kombos.github.com/mp-pages/"
+    "homepage": "https://ethereum.multiprizer.io"
 }

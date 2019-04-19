@@ -1,5 +1,7 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core';
+import MultiprizerLogoBlue from '../img/MultiprizerLogoBlue.png';
+
 
 const styles = theme => ({
     root: {
@@ -10,13 +12,21 @@ const styles = theme => ({
         backgroundColor: 'rgba(12,54,76,0.90)',
     },
     logo: {
+        display: 'flex',
+        alignItems: 'center',
         flexGrow: 1,
         color: '#17d4fe',
         alignSelf: 'flex-end',
         textAlign: 'left',
-        // backgroundColor: "rgba(122,154,6,0.90)",
+        //backgroundColor: "rgba(122,154,6,0.90)",
         paddingLeft: theme.spacing.unit * 3.2,
         paddingBottom: theme.spacing.unit * 0.8,
+    },
+    footerLogo: {
+        //backgroundColor: "rgba(92,14,69,0.90)",
+        width: theme.mixins.toolbar.minHeight * 2,
+        height: 'auto',
+        margin: 'auto 1em auto 1em',
     },
     smallText: {
         fontSize: '0.7rem',
@@ -34,29 +44,15 @@ function Footer(props) {
 
 
     return (
-
         <div className={classes.root}>
             <div className={classes.logo}>
-                <span className={classes.largeText}>Multiprizer</span>
-                <br />
-                <span className={classes.smallText}>Copyright 2019</span>
+                <img
+                    src={MultiprizerLogoBlue}
+                    alt="Header Logo"
+                    className={classes.footerLogo}
+                />
+                <p className={classes.mediumText}>(Copyright 2019)</p>
             </div>
-
-
-            {/*  <Paper >
-                <Tabs
-                    value={value}
-                    onChange={handleChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    centered
-                >
-                    <Tab label="Item One" />
-                    <Tab label="Item Two" />
-                    <Tab label="Item Three" />
-                </Tabs>
-            </Paper> */}
-
         </div>
     );
 }

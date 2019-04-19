@@ -1,4 +1,5 @@
 import React from 'react';
+import { DrizzleContext } from 'drizzle-react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { AutoSizer, Column, SortDirection, Table } from 'react-virtualized';
@@ -92,8 +93,11 @@ const styles = theme => ({
 
 
 class GameNotifications extends React.Component {
-    constructor(props) {
+    static contextType = DrizzleContext.Consumer;
+
+    constructor(props, context) {
         super(props);
+        this.context = context;
         const sortBy = 'timeSecs';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
@@ -196,9 +200,9 @@ class GameNotifications extends React.Component {
                     gameEvent.notification = `Game: ${gameEvent.gameID} has been unlocked now! Please resume your plays.`;
                     break;
 
-                case 'LogMegaPrizeUpdate':
+                /* case 'LogMegaPrizeUpdate':
                     gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game at least once to be eligible for MegaPrize pick!`;
-                    break;
+                    break; */
 
                 default:
                     gameEvent.notification = '';

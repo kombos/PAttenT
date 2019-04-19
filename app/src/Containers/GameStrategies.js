@@ -81,7 +81,6 @@ const styles = theme => ({
     },
 });
 
-
 class GameStrategies extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
