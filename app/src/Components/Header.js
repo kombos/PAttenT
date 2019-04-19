@@ -31,11 +31,13 @@ import MultiprizerLogo from '../img/MultiprizerLogo.png';
 
 const styles = theme => ({
     root: {
+        boxSizing: 'border-box',
         // flexGrow: 1,
         // height:'20vh',
         height: theme.mixins.toolbar.minHeight,
     },
     toolbar: {
+        boxSizing: 'border-box',
         //display: 'flex',
         maxWidth: '100%',
         maxHeight: '100%',
@@ -53,8 +55,10 @@ const styles = theme => ({
         // backgroundColor: "rgba(112,154,6,0.90)",
     },
     grow: {
+        boxSizing: 'border-box',
         flexGrow: 1,
         display: 'flex',
+        alignItems: 'center',
         //backgroundColor: "rgba(12,114,64,0.90)",
         //maxWidth: '100%',
         //maxHeight: '100%',
@@ -63,9 +67,9 @@ const styles = theme => ({
         textAlign: 'left',
         //padding: '0.1em',
         //justifyContent: 'center',
-        alignItems: 'center',
     },
     buttonBase: {
+        boxSizing: 'border-box',
         //flexGrow: 1,
         width: theme.mixins.toolbar.minHeight * 3,
         height: 'auto',
@@ -75,6 +79,7 @@ const styles = theme => ({
         //backgroundColor: "rgba(12,15,46,0.90)",
     },
     headerLogo: {
+        boxSizing: 'border-box',
         flexGrow: 1,
         width: '100%',
         //height: 'auto',
@@ -86,6 +91,7 @@ const styles = theme => ({
         //backgroundColor: "rgba(72,14,96,0.90)",
     },
     list: {
+        boxSizing: 'border-box',
         width: 250,
     },
     fullList: {
@@ -262,9 +268,9 @@ class Header extends React.Component {
                     fullScreen={fullScreen}
                     open={this.state.isDialogOpen}
                     onClose={this.handleClose}
-                    aria-labelledby="responsive-dialog-title"
+                    aria-labelledby="withraw-dialog-title"
                 >
-                    <DialogTitle id="responsive-dialog-title">Withdraw Request Received</DialogTitle>
+                    <DialogTitle id="withraw-dialog-title">Withdraw Request Received</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             &quot;Withdraw&quot; action has been recorded. Please wait till your transaction is confirmed.

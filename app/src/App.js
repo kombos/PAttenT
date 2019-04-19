@@ -6,6 +6,7 @@ import GameStrategies from './Containers/GameStrategies';
 import GameDetails from './Containers/GameDetails';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Notifications from './Containers/Notifications';
+import Web3NotFound from "./Components/Web3NotFound";
 import './css/App.css';
 
 export default () => (
@@ -13,6 +14,9 @@ export default () => (
         {drizzleContext => {
             console.log("inside App.js");
             const { drizzle, drizzleState, initialized } = drizzleContext;
+            if (!initialized) {
+                return <Web3NotFound/>;
+            }
             let header = null;
             if (drizzleState) {
                 const playerAddress = drizzleState.accounts[0];
@@ -23,11 +27,6 @@ export default () => (
             console.log("initialized: ", initialized);
             console.log("drizzleState: ", drizzleState);
             console.log("drizzle: ", drizzle);
-
-            if (!initialized) {
-                return "Loading...";
-            }
-
             console.log("value of initialized: ", initialized);
             console.log("drizzleState: ", drizzleState);
             console.log("drizzle: ", drizzle);
