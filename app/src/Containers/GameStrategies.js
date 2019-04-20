@@ -102,12 +102,7 @@ class GameStrategies extends React.Component {
 
     render() {
         console.log('# GameStrategy: INSIDE RENDER : ');
-        const { classes, initialized } = this.props;
-        console.log('# initialized value: ', initialized);
-
-        if (!initialized) {
-            return 'Loading...';
-        }
+        const { classes } = this.props;
         const { dataKey } = this.state;
         const { drizzleState } = this.props;
         const multiprizer = drizzleState.contracts.Multiprizer;

@@ -105,11 +105,6 @@ class GameDetails extends React.Component {
         console.log(' inside GameDetails render: ');
         this.gameID = this.props.gameID;
         const { classes } = this.props;
-        const initialized = this.context.initialized;
-
-        if (!initialized) {
-            return 'Loading...';
-        }
         const gameKey = this.state.gameKey;
         const roundKey = this.state.roundKey;
         const multiprizer = this.props.drizzleState.contracts.Multiprizer;

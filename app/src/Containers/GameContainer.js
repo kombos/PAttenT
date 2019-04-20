@@ -79,11 +79,6 @@ class GameContainer extends React.Component {
     render() {
         console.log(' inside GameContainer render: ');
         const { gameID, drizzleState, classes } = this.props;
-        const { initialized } = this.context;
-
-        if (!initialized) {
-            return 'Loading...';
-        }
         const { gameKey, roundKey } = this.state;
         const { Multiprizer } = drizzleState.contracts;
 

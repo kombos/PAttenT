@@ -131,13 +131,7 @@ class Notifications extends React.Component {
         console.log(' inside Notifications render: ');
         this.gameID = this.props.gameID;
         const { classes } = this.props;
-        const initialized = this.context.initialized;
         this.getEvents();
-
-        if (!initialized) {
-            return 'Loading...';
-        }
-
         return (
             <Grid container spacing={0} className={classes.flexChild}>
                 <Grid item xs={12} sm={12} md={4} lg={4}>

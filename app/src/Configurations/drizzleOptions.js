@@ -2,17 +2,15 @@ import Multiprizer from '../contracts/Multiprizer.json';
 
 const drizzleOptions = {
     web3: {
-        block: false,
+        //block: false,
         fallback: {
             type: 'ws',
             url: 'ws://127.0.0.1:7545',
         },
     },
     contracts: [Multiprizer],
-
     events: {
         Multiprizer: [
-
             {
                 eventName: 'LogPlayGame',
                 eventOptions: {
@@ -62,11 +60,9 @@ const drizzleOptions = {
                 },
             }, */
         ],
-
     },
-
     polls: {
-        accounts: 3000,
+        blocks: 3000,
     },
 };
 
