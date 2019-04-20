@@ -78,11 +78,8 @@ class GameInput extends React.Component {
             isDialogOpen: false,
         };
         this.context = context;
-        this.prevStackID = this.state.stackID;
         this.txHash = null;
-        // this.valueRef = React.createRef();
         this.MINTOKENS = 1;
-
         this.handleSubmit = this.handleSubmit.bind();
         this.handleChange = this.handleChange.bind();
         this.handleClose = this.handleClose.bind();
@@ -129,33 +126,11 @@ class GameInput extends React.Component {
             from: drizzleState.accounts[0],
             value: tokenAmount,
         });
-
+        this.handleClickOpen();
         this.setState({
             stackID: stackID,
             numTokens: '',
         });
-    };
-
-    shouldComponentUpdate = () => {
-        console.log("inside getTxStatus()");
-        console.log("this.prevStackID: ", this.prevStackID, " and state stackID: ", this.state.stackID);
-        // get the transaction states from the drizzle state
-
-        if (this.prevStackID !== this.state.stackID) {
-            // get the transaction hash using our saved `stackID`
-            const { transactions, transactionStack } = this.context.drizzleState;
-            const txHash = transactionStack[this.state.stackID];
-            console.log("txHash: ", txHash);
-            console.log("txns txhash: ", transactions[txHash]);
-            // if transaction hash does not exist, don't display anything
-            if (txHash && transactions[txHash] && (transactions[txHash].status === "pending"
-                || transactions[txHash].status === "success")) {
-                this.handleClickOpen();
-                this.prevStackID = this.state.stackID;
-                return true;
-            }
-        }
-        return true;
     };
 
     handleClickOpen = () => {
@@ -165,10 +140,6 @@ class GameInput extends React.Component {
     handleClose = () => {
         this.setState({ isDialogOpen: false });
     }
-
-    /* handleClose = () => {
-        this.prevStackID = this.state.stackID;
-    } */
 
     render() {
         const { drizzle } = this.context;
@@ -241,10 +212,10 @@ class GameInput extends React.Component {
                     onClose={this.handleClose}
                     aria-labelledby="responsive-dialog-title"
                 >
-                    <DialogTitle id="responsive-dialog-title">Purchase Request Received</DialogTitle>
+                    <DialogTitle id="responsive-dialog-title">Wait for Purchase Confirmation</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            'Purchase' action has been recorded. Please wait till your transaction is confirmed.
+                            Once you have given request to purchase tokens, please wait till your transaction is confirmed.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

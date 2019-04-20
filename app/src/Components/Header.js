@@ -26,6 +26,7 @@ import Button from '@material-ui/core/Button';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MultiprizerLogo from '../img/MultiprizerLogo.png';
+import headerStrip from '../img/headerStrip.png';
 // import { DRAWERICONS as drawerIcons } from '../../Constants';
 
 
@@ -43,7 +44,7 @@ const styles = theme => ({
         maxHeight: '100%',
         height: theme.mixins.toolbar.minHeight,
         // eslint-disable-next-line global-require
-        backgroundImage: `url(${require('../img/headerStrip.png')})`,
+        backgroundImage: `url(${headerStrip})`,
         backgroundSize: 'cover',
         //alignItems: 'center',
         //margin:'auto',
@@ -113,32 +114,12 @@ class Header extends React.Component {
             stackID: null,
             isDialogOpen: false,
         };
-        this.prevStackID = this.state.stackID;
         this.withdrawTokens = this.withdrawTokens.bind();
-        // this.getWithdrawals = this.getWithdrawals.bind();
+        this.handleClose = this.handleClose.bind();
     }
 
     componentDidMount() {
         this.getWithdrawals(this.props.playerAddress);
-    }
-
-    shouldComponentUpdate() {
-        const { stackID } = this.state;
-        const { drizzleState } = this.context;
-        if (this.prevStackID !== stackID) {
-            // get the transaction hash using our saved `stackID`
-            const { transactions, transactionStack } = drizzleState;
-            const txHash = transactionStack[stackID];
-            console.log('txHash: ', txHash);
-            console.log('txns txhash: ', transactions[txHash]);
-            // if transaction hash does not exist, don't display anything
-            if (txHash && transactions[txHash] && (transactions[txHash].status === 'pending'
-                || transactions[txHash].status === 'success')) {
-                this.handleClickOpen();
-                this.prevStackID = stackID;
-            }
-        }
-        return true;
     }
 
     componentDidUpdate(prevProps) {
@@ -170,6 +151,7 @@ class Header extends React.Component {
         const stackID = Multiprizer.methods.withdraw.cacheSend({
             from: playerAddress,
         });
+        this.handleClickOpen();
         console.log('stackID: ', stackID);
         this.setState({ stackID: stackID });
     }
@@ -270,10 +252,10 @@ class Header extends React.Component {
                     onClose={this.handleClose}
                     aria-labelledby="withraw-dialog-title"
                 >
-                    <DialogTitle id="withraw-dialog-title">Withdraw Request Received</DialogTitle>
+                    <DialogTitle id="withraw-dialog-title">Wait for Withdraw Confirmation</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            &quot;Withdraw&quot; action has been recorded. Please wait till your transaction is confirmed.
+                            Once you have given request to withdraw tokens, please wait till your transaction is confirmed.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

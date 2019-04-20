@@ -86,31 +86,8 @@ class PurchasedTokens extends React.Component {
         };
         this.context = context;
         this.revertTokens = this.revertTokens.bind();
-        this.prevStackID = this.state.stackID;
+        this.handleClose = this.handleClose.bind();
     }
-
-    shouldComponentUpdate = () => {
-        console.log("inside getTxStatus()");
-        console.log("this.prevStackID: ", this.prevStackID, " and state stackID: ", this.state.stackID);
-        // get the transaction states from the drizzle state
-
-        if (this.prevStackID !== this.state.stackID) {
-            // get the transaction hash using our saved `stackID`
-            const { transactions, transactionStack } = this.context.drizzleState;
-            const txHash = transactionStack[this.state.stackID];
-            console.log("txHash: ", txHash);
-            console.log("txns txhash: ", transactions[txHash]);
-            // if transaction hash does not exist, don't display anything
-            if (txHash && transactions[txHash] && (transactions[txHash].status === "pending"
-                || transactions[txHash].status === "success")) {
-                this.handleClickOpen();
-                this.prevStackID = this.state.stackID;
-                return true;
-            }
-        }
-
-        return true;
-    };
 
     handleClickOpen = () => {
         this.setState({ isDialogOpen: true });
@@ -131,6 +108,7 @@ class PurchasedTokens extends React.Component {
         const stackID = Multiprizer.methods.revertGame.cacheSend(gameID, playerAddress, {
             from: drizzleState.accounts[0]
         });
+        this.handleClickOpen();
         console.log('stackID: ', stackID, "this.state.stackID: ", this.state.stackID);
         this.setState({ stackID: stackID });
     }
@@ -140,7 +118,7 @@ class PurchasedTokens extends React.Component {
         console.log('roundnumber: ', roundNumber);
         console.log('playerTokens: ', playerTokens);
         console.log('maxTokensPerPlayer: ', maxTokensPerPlayer);
-        
+
         return (
             <div className={classes.purchasedTokens}>
                 <div className={classes.flexContainer}>
@@ -177,10 +155,10 @@ class PurchasedTokens extends React.Component {
                     onClose={this.handleClose}
                     aria-labelledby="responsive-dialog-title"
                 >
-                    <DialogTitle id="responsive-dialog-title">Revert Request Received</DialogTitle>
+                    <DialogTitle id="responsive-dialog-title">Wait for Revert Confirmation</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            'Revert' action has been recorded. Please wait till your transaction is confirmed.
+                            Once you have given request to revert tokens, please wait till your transaction is confirmed.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
