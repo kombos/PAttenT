@@ -1,6 +1,9 @@
 import React from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
@@ -12,6 +15,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Slide from '@material-ui/core/Slide';
 import { withStyles } from '@material-ui/core/styles';
 import MultiprizerSplash from '../img/MultiprizerSplash.png';
+import metamask from '../img/metamask.png';
+import trustWallet from '../img/trustWallet.png';
 
 
 
@@ -109,6 +114,9 @@ class Web3NotFound extends React.Component {
                     <List>
                         <a href="https://metamask.io/">
                             <ListItem button >
+                                <ListItemAvatar>
+                                    <Avatar alt="MetaMask" src={metamask} />
+                                </ListItemAvatar>
                                 <ListItemText
                                     primary="Get Metamask"
                                     secondary="applicable for Desktops/Laptops"
@@ -124,6 +132,9 @@ class Web3NotFound extends React.Component {
                         <Divider />
                         <a href="https://trustwallet.com/">
                             <ListItem button>
+                                <ListItemAvatar>
+                                    <Avatar alt="MetaMask" src={trustWallet} />
+                                </ListItemAvatar>
                                 <ListItemText
                                     primary="Get Trust Wallet"
                                     secondary="applicable for Mobile Devices"

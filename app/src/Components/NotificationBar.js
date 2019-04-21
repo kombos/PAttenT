@@ -7,12 +7,6 @@ import { withRouter } from 'react-router';
 import InfoIcon from '@material-ui/icons/Info';
 
 const styles = theme => ({
-    root: {
-        flexGrow: 1,
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(1,5,16,0.7)',
-    },
     container: {
         // padding: theme.spacing.unit * 0.5,
         display: 'flex',
@@ -35,7 +29,6 @@ const styles = theme => ({
     child: {
         paddingLeft: theme.spacing.unit * 0.7,
         paddingRight: theme.spacing.unit * 0.7,
-        // display: 'inline-block',
         flexGrow: 1,
         // lineHeight: '1.2em',
         // margin:'auto',
@@ -43,7 +36,7 @@ const styles = theme => ({
         // height: 'auto',
         boxSizing: 'border-box',
         // minHeight:"50px",
-        backgroundColor: 'rgba(17,210,254,0.9)',
+        backgroundColor: '#17d4fe',
         // textOverflow: 'ellipsis',
         // whiteSpace: 'nowrap',
         // overflowWrap:'break-word',

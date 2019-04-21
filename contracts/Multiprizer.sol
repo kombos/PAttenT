@@ -632,13 +632,6 @@ contract Multiprizer is Ownable {
     onlyOwners {
         if (isMegaPrizeEnabled) {
             isMegaPrizeMatured = true;
-            // delete previous megaprize player data once winner calculated and amount compensated
-            if (megaPrizeAmount[megaPrizeNumber.sub(1)] == 0) {
-                delete megaPrizePlayersKeys[megaPrizeNumber.sub(1)];
-                delete megaPrizePlayers[megaPrizeNumber.sub(1)];
-                delete mpNumberOfOraclizeID[megaPrizeOraclizeID[megaPrizeNumber.sub(1)]];
-                delete megaPrizeOraclizeID[megaPrizeNumber.sub(1)];
-            }
             // emit mega prize round completion event
             emit LogCompleteMPRound(megaPrizeNumber, megaPrizePlayersKeys[megaPrizeNumber].length, now, block.timestamp);
             // generate oraclize ID and move to the next round
@@ -670,7 +663,6 @@ contract Multiprizer is Ownable {
         if (gameStrategies[_gameID].isGameLocked) {
             return;
         }
-
         uint256 _roundNumber;
         uint256 _nextRoundNumber;
         uint256 _roundID;
@@ -683,6 +675,7 @@ contract Multiprizer is Ownable {
         // to close the current round requires it to be not already closed or not 0
         if (_roundNumber != 0 && rounds[_roundID].isRoundOpen) {
             // set oraclizeID only if the number of players is more than 1
+            emit LogCompleteRound(_gameID, _roundNumber, rounds[_roundID].playerList.length, now, block.number);
             if (rounds[_roundID].playerList.length > 1) {
                 // generate oraclizeID
                 _oraclizeID = multiprizerOraclize.newRandomDSQuery();
@@ -702,7 +695,6 @@ contract Multiprizer is Ownable {
             }
             // close the current round flag
             rounds[_roundID].isRoundOpen = false;
-            emit LogCompleteRound(_gameID, _roundNumber, rounds[_roundID].playerList.length, now, block.number);
         }
         // increment the round number and start a new round
         _nextRoundNumber = _roundNumber + (1);
@@ -777,6 +769,10 @@ contract Multiprizer is Ownable {
                 address payable _megaPrizeWinner = megaPrizePlayersKeys[_megaPrizeNumber][_oraclizeRandomNumber];
                 megaPrizeWinners.push(_megaPrizeWinner);
                 uint256 _megaPrizeAmount = megaPrizeAmount[_megaPrizeNumber];
+                delete megaPrizePlayersKeys[_megaPrizeNumber];
+                delete megaPrizePlayers[_megaPrizeNumber];
+                delete mpNumberOfOraclizeID[megaPrizeOraclizeID[_megaPrizeNumber]];
+                delete megaPrizeOraclizeID[_megaPrizeNumber];
                 delete megaPrizeAmount[_megaPrizeNumber];
                 emit LogMegaPrizeWinner(_megaPrizeNumber, _megaPrizeWinner, _megaPrizeAmount, now, block.number);
                 // reset all megaPrize storage variable values pertaining to players

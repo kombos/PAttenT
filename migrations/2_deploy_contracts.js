@@ -93,27 +93,27 @@ module.exports = function (deployer, network, accounts) {
             .then(function (instance) {
                 multiprizerInstance = instance;
                 console.log("nominate timekeeper....... ");
-                return multiprizerInstance.transferTimekeeping(accounts[1], { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.transferTimekeeping(accounts[1], { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties2, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties2, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties3, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties3, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties4, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties4, { from: accounts[0], gasPrice: 5e9 });
             })
             // deploy MultiprizerOraclize
             .then(function (receipt) {
@@ -129,19 +129,19 @@ module.exports = function (deployer, network, accounts) {
                 let _delayOraclize = 0;
                 console.log("Update Oraclize props .... ");
                 return multiprizerOraclizeInstance.updateOraclizePropsByAdmin(_gasLimitOraclize, _gasPriceOraclize,
-                    _numBytesOraclize, _delayOraclize, { from: accounts[0], gasPrice: 5e9});
+                    _numBytesOraclize, _delayOraclize, { from: accounts[0], gasPrice: 5e9 });
             })
             // set deployed address of MultiprizerOraclize in Multiprizer
             .then(function (receipt) {
                 console.log("Set Oraclize by admin .... ");
                 console.log("Multiprizer.address", multiprizerInstance.address);
                 console.log("Oraclize address: ", multiprizerOraclizeInstance.address);
-                return multiprizerInstance.setOraclizeByAdmin(multiprizerOraclizeInstance.address, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.setOraclizeByAdmin(multiprizerOraclizeInstance.address, { from: accounts[0], gasPrice: 5e9 });
             })
             // unlock games
             .then(function (receipt) {
                 console.log("unlock games ..... ");
-                return multiprizerInstance.unlockGamesByAdmin([102, 103, 104, 105], { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.unlockGamesByAdmin([102, 103, 104, 105], { from: accounts[0], gasPrice: 5e9 });
             })
             /* // complete rounds
             .then(function (receipt) {
@@ -162,7 +162,7 @@ module.exports = function (deployer, network, accounts) {
             }) */
             .then(function (receipt) {
                 console.log("enable megaprize ..... ");
-                return multiprizerInstance.unlockMegaPrizeByAdmin({ from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.unlockMegaPrizeByAdmin({ from: accounts[0], gasPrice: 5e9 });
             })
             .then(function (receipt) {
                 console.log(" ALL DONE!  ..... ");
@@ -181,32 +181,32 @@ module.exports = function (deployer, network, accounts) {
                 console.log("nominate timekeeper....... ");
                 console.log("accounts[1]: ", accounts[1]);
                 console.log("accounts[0]: ", accounts[0]);
-                return multiprizerInstance.transferTimekeeping(TIMEKEEPER, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.transferTimekeeping(TIMEKEEPER, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties2, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties2, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties3, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties3, { from: accounts[0], gasPrice: 5e9 });
             })
             // add a new game
             .then(function (receipt) {
                 console.log("Add Game by admin ......  ");
-                return multiprizerInstance.addGameByAdmin(_gameProperties4, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.addGameByAdmin(_gameProperties4, { from: accounts[0], gasPrice: 5e9 });
             })
             // deploy MultiprizerOraclize
             .then(function (receipt) {
                 console.log("deploy MultiprizerOraclize ....... ");
-                return deployer.deploy(MultiprizerOraclize, Multiprizer.address, { from: accounts[0], gasPrice: 5e9});
+                return deployer.deploy(MultiprizerOraclize, Multiprizer.address, { from: accounts[0], gasPrice: 5e9 });
             })
             // update MultiprizerOraclize props
             .then(function (oraclize_instance) {
@@ -217,40 +217,29 @@ module.exports = function (deployer, network, accounts) {
                 let _delayOraclize = 0;
                 console.log("Update Oraclize props .... ");
                 return multiprizerOraclizeInstance.updateOraclizePropsByAdmin(_gasLimitOraclize, _gasPriceOraclize,
-                    _numBytesOraclize, _delayOraclize, { from: accounts[0], gasPrice: 5e9});
+                    _numBytesOraclize, _delayOraclize, { from: accounts[0], gasPrice: 5e9 });
             })
             // set deployed address of MultiprizerOraclize in Multiprizer
             .then(function (receipt) {
                 console.log("Set Oraclize by admin .... ");
                 console.log("Multiprizer.address", multiprizerInstance.address);
                 console.log("Oraclize address: ", multiprizerOraclizeInstance.address);
-                return multiprizerInstance.setOraclizeByAdmin(multiprizerOraclizeInstance.address, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.setOraclizeByAdmin(multiprizerOraclizeInstance.address, { from: accounts[0], gasPrice: 5e9 });
             })
             // unlock games
             .then(function (receipt) {
                 console.log("unlock game ..... ");
-                return multiprizerInstance.unlockGamesByAdmin([102, 103, 104, 105], { from: accounts[0], gasPrice: 5e9});
-            })
-           /*  // complete rounds
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(102, { from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.unlockGamesByAdmin([102, 103, 104, 105], { from: accounts[0], gasPrice: 5e9 });
             })
             .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(103, { from: accounts[0], gasPrice: 5e9});
+                console.log("update megaprize props ..... ");
+                let gameDurationInEpoch = 7 * 24 * 60 * 60;
+                let gameDurationInBlocks = 7 * 24 * 60 * 4;
+                return multiprizerInstance.updateMegaPrizeByAdmin(0, gameDurationInEpoch, gameDurationInBlocks, { from: accounts[0], gasPrice: 5e9 });
             })
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(104, { from: accounts[0], gasPrice: 5e9});
-            })
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(105, { from: accounts[0], gasPrice: 5e9});
-            }) */
             .then(function (receipt) {
                 console.log("enable megaprize ..... ");
-                return multiprizerInstance.unlockMegaPrizeByAdmin({ from: accounts[0], gasPrice: 5e9});
+                return multiprizerInstance.unlockMegaPrizeByAdmin({ from: accounts[0], gasPrice: 5e9 });
             })
             .then(function (receipt) {
                 console.log(" ALL DONE!  ..... ");
