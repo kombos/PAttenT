@@ -16,9 +16,10 @@ import { withStyles } from '@material-ui/core/styles';
 import MultiprizerSplash from '../img/MultiprizerSplash.png';
 import metamask from '../img/metamask.png';
 import trustWallet from '../img/trustWallet.png';
+import web3bg from '../img/web3bg.jpg';
 
 
-const styles = () => ({
+const styles = (theme) => ({
     appBar: {
         position: 'relative',
     },
@@ -26,23 +27,29 @@ const styles = () => ({
         flex: 1,
     },
     dialogRoot: {
-        backgroundColor: 'rgba(102,0,51,1)',
+        //backgroundColor: 'rgba(102,0,51,1)',
+        backgroundImage: `url(${web3bg})`,
+        backgroundSize: 'cover',
         // color: "#17d4fe",
         // height: '100%',
         // width: 'auto',
     },
     imageContainer: {
+        padding: '5px',
         boxSizing: 'border-box',
         // display: 'flex',
         // backgroundColor: 'rgba(51,51,51,1)',
-        backgroundColor: 'rgba(0,0,0,1)',
-        width: '100%',
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        //width: '100%',
+        //height: '10%',
+        height: theme.mixins.toolbar.minHeight,
         textAlign: 'center',
     },
     image: {
         boxSizing: 'border-box',
-        width: '60%',
-        height: 'auto',
+        //width: '60%',
+        height: '100%',
+        margin: 'auto',
     },
 });
 
@@ -86,13 +93,6 @@ class Web3NotFound extends React.Component {
                         paper: classes.dialogRoot,
                     }}
                 >
-                    <AppBar className={classes.appBar}>
-                        <Toolbar>
-                            <Typography variant="h6" color="inherit" className={classes.flex}>
-                                Welcome to Multiprizer !
-                            </Typography>
-                        </Toolbar>
-                    </AppBar>
                     <div className={classes.imageContainer}>
                         <img
                             src={MultiprizerSplash}
@@ -102,10 +102,11 @@ class Web3NotFound extends React.Component {
                     </div>
                     <br />
                     <DialogContent>
-                        <DialogContentText color="error">
-                            Multiprizer - Multiply your prize winnings by playing your tokens strategically!
+                        <DialogContentText color="inherit">
+                            <b>Multiprizer</b> - Multiply your prize winnings by playing your tokens strategically!
                             <br />
-                            This DApp requires MetaMask if you are in a Desktop / Laptop, or Trust Wallet App if you are in a Mobile device. Also, the wallets need to be set to Ropsten Testnet for now, since this app is in beta phase. Please select an item below.
+                            This DApp requires <b>MetaMask</b> if you are in a Desktop / Laptop, or <b>Trust Wallet App</b> if you are in a Mobile device.<br/> 
+                            Also, the wallets need to be set to <b>Ropsten Testnet</b> for now, since this app is in beta phase. Please select an item below.
                         </DialogContentText>
                     </DialogContent>
                     <List>
@@ -121,7 +122,7 @@ class Web3NotFound extends React.Component {
                                         color: 'primary',
                                     }}
                                     secondaryTypographyProps={{
-                                        color: 'error',
+                                        color: 'secondary',
                                     }}
                                 />
                             </ListItem>
@@ -139,7 +140,7 @@ class Web3NotFound extends React.Component {
                                         color: 'primary',
                                     }}
                                     secondaryTypographyProps={{
-                                        color: 'error',
+                                        color: 'secondary',
                                     }}
                                 />
                             </ListItem>
