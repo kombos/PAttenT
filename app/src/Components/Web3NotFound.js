@@ -108,7 +108,7 @@ class Web3NotFound extends React.Component {
                         <DialogContentText color="error">
                             Multiprizer - Multiply your prize winnings by playing your tokens strategically!
                             <br />
-                            This DApp requires MetaMask if you are in a Desktop / Laptop, or Trust Wallet App if you are in a Mobile device. Please select an item below.
+                            This DApp requires MetaMask if you are in a Desktop / Laptop, or Trust Wallet App if you are in a Mobile device. Also, the wallets need to be set to Ropsten Testnet for now, since this app is in beta phase. Please select an item below.
                         </DialogContentText>
                     </DialogContent>
                     <List>
