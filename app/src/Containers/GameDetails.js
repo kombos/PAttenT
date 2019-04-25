@@ -82,7 +82,7 @@ class GameDetails extends React.Component {
         const multiprizer = this.context.drizzle.contracts.Multiprizer;
         // get and save the key for the variable we are interested in
         const gameKey = multiprizer.methods.gameStrategies.cacheCall(gameID);
-        console.log('gameKey value is:' + gameKey);
+        console.log(`gameKey value is:${gameKey}`);
         this.setState({ gameKey: gameKey });
     }
 

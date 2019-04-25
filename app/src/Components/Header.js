@@ -28,7 +28,6 @@ import MultiprizerLogo from '../img/MultiprizerLogo.png';
 import headerStrip from '../img/headerStrip.png';
 // import { DRAWERICONS as drawerIcons } from '../../Constants';
 
-
 const styles = theme => ({
     root: {
         boxSizing: 'border-box',
@@ -38,18 +37,18 @@ const styles = theme => ({
     },
     toolbar: {
         boxSizing: 'border-box',
-        //display: 'flex',
+        // display: 'flex',
         maxWidth: '100%',
         maxHeight: '100%',
         height: theme.mixins.toolbar.minHeight,
         // eslint-disable-next-line global-require
         backgroundImage: `url(${headerStrip})`,
         backgroundSize: 'cover',
-        //alignItems: 'center',
-        //margin:'auto',
+        // alignItems: 'center',
+        // margin:'auto',
     },
     menuButton: {
-        //flexGrow: 1,
+        // flexGrow: 1,
         marginLeft: -12,
         marginRight: 10,
         // backgroundColor: "rgba(112,154,6,0.90)",
@@ -59,36 +58,36 @@ const styles = theme => ({
         flexGrow: 1,
         display: 'flex',
         alignItems: 'center',
-        //backgroundColor: "rgba(12,114,64,0.90)",
-        //maxWidth: '100%',
-        //maxHeight: '100%',
+        // backgroundColor: "rgba(12,114,64,0.90)",
+        // maxWidth: '100%',
+        // maxHeight: '100%',
         height: '100%',
         margin: 'auto',
         textAlign: 'left',
-        //padding: '0.1em',
-        //justifyContent: 'center',
+        // padding: '0.1em',
+        // justifyContent: 'center',
     },
     buttonBase: {
         boxSizing: 'border-box',
-        //flexGrow: 1,
+        // flexGrow: 1,
         width: theme.mixins.toolbar.minHeight * 3,
         height: 'auto',
         margin: 'auto 0 auto 0',
-        //maxWidth: '100%',
-        //maxHeight: '100%',
-        //backgroundColor: "rgba(12,15,46,0.90)",
+        // maxWidth: '100%',
+        // maxHeight: '100%',
+        // backgroundColor: "rgba(12,15,46,0.90)",
     },
     headerLogo: {
         boxSizing: 'border-box',
         flexGrow: 1,
         width: '100%',
-        //height: 'auto',
-        //maxWidth: '100%',
-        //maxHeight: '100%',
-        //backgroundColor: "rgba(112,154,6,0.90)",
+        // height: 'auto',
+        // maxWidth: '100%',
+        // maxHeight: '100%',
+        // backgroundColor: "rgba(112,154,6,0.90)",
     },
     withdrawButton: {
-        //backgroundColor: "rgba(72,14,96,0.90)",
+        // backgroundColor: "rgba(72,14,96,0.90)",
     },
     list: {
         boxSizing: 'border-box',
@@ -98,7 +97,6 @@ const styles = theme => ({
         width: 'auto',
     },
 });
-
 
 class Header extends React.Component {
     static contextType = DrizzleContext.Consumer;
@@ -134,12 +132,14 @@ class Header extends React.Component {
         const { Multiprizer } = drizzle.contracts;
         // get and save the key for the variable we are interested in
         console.log('player : ', playerAddress);
-        const dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(playerAddress);
+        const dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(
+            playerAddress,
+        );
         console.log('# Header datakey value is:', dataKey);
         this.setState({
             dataKey: dataKey,
         });
-    }
+    };
 
     withdrawTokens = () => {
         console.log('inside withdrawTokens() ');
@@ -153,15 +153,15 @@ class Header extends React.Component {
         this.handleClickOpen();
         console.log('stackID: ', stackID);
         this.setState({ stackID: stackID });
-    }
+    };
 
     handleClickOpen = () => {
         this.setState({ isDialogOpen: true });
-    }
+    };
 
     handleClose = () => {
         this.setState({ isDialogOpen: false });
-    }
+    };
 
     render() {
         console.log('# inside render ');
@@ -176,9 +176,14 @@ class Header extends React.Component {
         console.log('this.state.dataKey : ', dataKey);
         console.log('player: ', this.props.playerAddress);
         const withdrawAmount = Multiprizer.viewWithdrawalInfo[dataKey];
-        console.log('withdraw amt : ', withdrawAmount && parseInt(withdrawAmount.value, 10));
+        console.log(
+            'withdraw amt : ',
+            withdrawAmount && parseInt(withdrawAmount.value, 10),
+        );
         // const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
-        const isWithdrawDisabled = !(withdrawAmount && withdrawAmount.value.toString() !== '0');
+        const isWithdrawDisabled = !(
+            withdrawAmount && withdrawAmount.value.toString() !== '0'
+        );
         console.log('isWithdrawDisabled: ', isWithdrawDisabled);
 
         const renderLink = () => {
@@ -200,8 +205,14 @@ class Header extends React.Component {
         const sideList = (
             <div className={classes.list}>
                 <List>
-                    <ListItem button key="Notifications" onClick={() => (renderDrawerItems(0))}>
-                        <ListItemIcon><NotificationsIcon /></ListItemIcon>
+                    <ListItem
+                        button
+                        key="Notifications"
+                        onClick={() => renderDrawerItems(0)}
+                    >
+                        <ListItemIcon>
+                            <NotificationsIcon />
+                        </ListItemIcon>
                         <ListItemText primary="Notifications" />
                     </ListItem>
                 </List>
@@ -213,7 +224,12 @@ class Header extends React.Component {
             <div className={classes.root}>
                 <AppBar position="static">
                     <Toolbar className={classes.toolbar}>
-                        <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={toggleDrawer(true)}>
+                        <IconButton
+                            className={classes.menuButton}
+                            color="inherit"
+                            aria-label="Menu"
+                            onClick={toggleDrawer(true)}
+                        >
                             <MenuIcon />
                         </IconButton>
                         <div className={classes.grow}>
@@ -225,9 +241,20 @@ class Header extends React.Component {
                                 />
                             </ButtonBase>
                         </div>
-                        <Tooltip title={isWithdrawDisabled === true ? 'Withdraw Winnings (disabled)' : 'Withdraw Winnings'}>
+                        <Tooltip
+                            title={
+                                isWithdrawDisabled === true
+                                    ? 'Withdraw Winnings (disabled)'
+                                    : 'Withdraw Winnings'
+                            }
+                        >
                             <div className={classes.withdrawButton}>
-                                <IconButton color="inherit" aria-label="Menu" disabled={isWithdrawDisabled} onClick={this.withdrawTokens}>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="Menu"
+                                    disabled={isWithdrawDisabled}
+                                    onClick={this.withdrawTokens}
+                                >
                                     <SaveAltIcon />
                                 </IconButton>
                             </div>
@@ -251,10 +278,13 @@ class Header extends React.Component {
                     onClose={this.handleClose}
                     aria-labelledby="withraw-dialog-title"
                 >
-                    <DialogTitle id="withraw-dialog-title">Wait for Withdraw Confirmation</DialogTitle>
+                    <DialogTitle id="withraw-dialog-title">
+                        Wait for Withdraw Confirmation
+                    </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Once you have given request to withdraw tokens, please wait till your transaction is confirmed.
+                            Once you have given request to withdraw tokens, please wait till
+                            your transaction is confirmed.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

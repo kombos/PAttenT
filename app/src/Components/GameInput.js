@@ -83,8 +83,8 @@ class GameInput extends React.Component {
         this.handleSubmit = this.handleSubmit.bind();
         this.handleChange = this.handleChange.bind();
         this.handleClose = this.handleClose.bind();
-        //this.getTxStatus = this.getTxStatus.bind();
-        //this.handleFocus = this.handleFocus.bind();
+        // this.getTxStatus = this.getTxStatus.bind();
+        // this.handleFocus = this.handleFocus.bind();
     }
 
     handleChange = (e) => {
@@ -115,7 +115,7 @@ class GameInput extends React.Component {
         console.log('inside setvalue() ');
         const { gameData } = this.props;
         const { drizzle, drizzleState } = this.context;
-        const {tokenValue, gameID} = gameData.value;
+        const { tokenValue, gameID } = gameData.value;
         const multiprizer = drizzle.contracts.Multiprizer;
         const tokenAmount = numTokens * tokenValue;
 
@@ -147,7 +147,7 @@ class GameInput extends React.Component {
         const { gameData, playerTokens, classes, fullScreen } = this.props;
         const { isGameLocked, currentRound, tokenValue, maxTokensPerPlayer } = gameData.value;
         const remainingTokens = (maxTokensPerPlayer - playerTokens);
-        //console.log('tokenvalue: ', remainingTokens);
+        // console.log('tokenvalue: ', remainingTokens);
         const isDisabled = (
             isGameLocked === true
             || currentRound === 0
@@ -200,10 +200,10 @@ class GameInput extends React.Component {
                         className={classes.button}
                         disabled={isDisabled}
                     >
-                        Pay { this.state.numTokens === '' ?
-                            `(${web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token'})` :
-                            `${web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers'}` }
-                            
+                        Pay {this.state.numTokens === '' ?
+                            `(${web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token'})`
+                            : `${web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers'}`}
+
                     </Button>
                 </form>
                 <Dialog

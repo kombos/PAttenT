@@ -106,10 +106,10 @@ class PurchasedTokens extends React.Component {
 
         console.log('playeraddr: ', playerAddress, ' and gameID: ', gameID);
         const stackID = Multiprizer.methods.revertGame.cacheSend(gameID, playerAddress, {
-            from: drizzleState.accounts[0]
+            from: drizzleState.accounts[0],
         });
         this.handleClickOpen();
-        console.log('stackID: ', stackID, "this.state.stackID: ", this.state.stackID);
+        console.log('stackID: ', stackID, 'this.state.stackID: ', this.state.stackID);
         this.setState({ stackID: stackID });
     }
 

@@ -17,7 +17,7 @@ const styles = theme => ({
         justifyContent: 'center',
     },
     transPanel: {
-        color: "#17d4fe",
+        color: '#17d4fe',
         fontWeight: 'bold',
         flex: '1 1 auto',
         justifyContent: 'center',

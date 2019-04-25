@@ -18,7 +18,7 @@ const styles = theme => ({
         justifyContent: 'center',
     },
     transPanel: {
-        color: "#17d4fe",
+        color: '#17d4fe',
         fontWeight: 'bold',
         flex: '1 1 auto',
         justifyContent: 'center',
@@ -97,7 +97,6 @@ const styles = theme => ({
 
 });
 
-
 class GameWinners extends React.Component {
     static contextType = DrizzleContext.Consumer;
 
@@ -110,6 +109,45 @@ class GameWinners extends React.Component {
         this.flag = true;
         // this.getEvents();
         // this.sortList({ sortBy, sortDirection });
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
+        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
+        console.log('EVENTS: ', this.props.events);
+        console.log('expression: ',
+            (this.props.events.length !== nextProps.events.length
+                || this.state.sortBy !== nextState.sortBy
+                || this.state.sortDirection !== nextState.sortDirection));
+
+        if (this.props.events.length !== nextProps.events.length
+            || this.state.sortBy !== nextState.sortBy
+            || this.state.sortDirection !== nextState.sortDirection) {
+            return true;
+        }
+        return false;
+    }
+
+    componentDidUpdate() {
+        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
+    }
+
+    getEvents() {
+        const { events } = this.props;
+        const web3 = this.context.drizzle.web3;
+        // prune the events and reformat
+        this.gameEvents = events.map((value) => {
+            const gameEvent = value.returnValues;
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.logID = value.id;
+            // gameEvent.winnerAddress
+            // gameEvent.roundNumber
+            gameEvent.round = parseInt(value.returnValues.roundNumber, 10);
+            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
+            gameEvent.gameID = parseInt(value.returnValues.gameID, 10);
+
+            return gameEvent;
+        });
     }
 
     getRowClassName = ({ index }) => {
@@ -168,70 +206,6 @@ class GameWinners extends React.Component {
         return (
             <a href={HASH_URL + rowData.transactionHash}>{rowData.winnerAddress}</a>
         );
-    }
-
-    getEvents() {
-        const { events } = this.props;
-        const web3 = this.context.drizzle.web3;
-        // prune the events and reformat
-        this.gameEvents = events.map((value) => {
-            const gameEvent = value.returnValues;
-            gameEvent.transactionHash = value.transactionHash;
-            gameEvent.logID = value.id;
-            // gameEvent.winnerAddress
-            // gameEvent.roundNumber
-            gameEvent.round = parseInt(value.returnValues.roundNumber, 10);
-            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.winnerAmount).toString(), 'ether'));
-            gameEvent.gameID = parseInt(value.returnValues.gameID, 10);
-
-            return gameEvent;
-        });
-    }
-
-    componentDidUpdate() {
-        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
-    }
-
-    /* shouldComponentUpdate(nextProps, nextState) {
-        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
-        console.log("this props: ", this.props.events.length, " next props: ", nextProps.events.length);
-        console.log("expression: ", (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection));
-
-        if (this.props.events.length != nextProps.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection) {
-            this.flag = true;
-            return true;
-        }
-        else {
-            if (this.flag) {
-                console.log("inside if");
-                this.flag = false;
-                this.getEvents();
-                return true;
-            }
-            return false;
-        }
-    } */
-
-
-    shouldComponentUpdate(nextProps, nextState) {
-        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
-        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
-        console.log("EVENTS: ", this.props.events);
-        console.log('expression: ',
-            (this.props.events.length !== nextProps.events.length
-                || this.state.sortBy !== nextState.sortBy
-                || this.state.sortDirection !== nextState.sortDirection));
-
-        if (this.props.events.length !== nextProps.events.length
-            || this.state.sortBy !== nextState.sortBy
-            || this.state.sortDirection !== nextState.sortDirection) {
-            return true;
-        }
-        return false;
     }
 
     render() {

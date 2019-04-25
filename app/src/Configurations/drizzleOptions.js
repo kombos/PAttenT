@@ -59,7 +59,7 @@ const drizzleOptions = {
                     eventOptions: {
                         fromBlock: 0,
                     },
-                },*/
+                }, */
             ],
     },
     polls: {

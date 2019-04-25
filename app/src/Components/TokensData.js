@@ -27,7 +27,7 @@ const styles = theme => ({
         // position:'relative',
         // flexGrow: 1,
         // backgroundColor: "rgba(62,94,76,0.99)",
-        backgroundColor: "rgba(12,54,76,0.90)",
+        backgroundColor: 'rgba(12,54,76,0.90)',
         boxSizing: 'border-box',
         // width: '80%',
         height: '100%',

@@ -18,7 +18,7 @@ const styles = theme => ({
         justifyContent: 'center',
     },
     transPanel: {
-        color: "#17d4fe",
+        color: '#17d4fe',
         fontWeight: 'bold',
         flex: '1 1 auto',
         justifyContent: 'center',
@@ -155,6 +155,22 @@ class GameMegaPrizeWinners extends React.Component {
         console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
+    getEvents() {
+        const { events } = this.props;
+        const web3 = this.context.drizzle.web3;
+        // prune the events and reformat
+        this.gameEvents = events.map((value) => {
+            const gameEvent = value.returnValues;
+            gameEvent.transactionHash = value.transactionHash;
+            gameEvent.logID = value.id;
+            // gameEvent.megaPrizeWinner
+            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether'));
+            gameEvent.megaPrizeNumber = parseInt(value.returnValues.megaPrizeNumber, 10);
+
+            return gameEvent;
+        });
+    }
+
     getRowClassName = ({ index }) => {
         const { classes } = this.props;
 
@@ -211,46 +227,6 @@ class GameMegaPrizeWinners extends React.Component {
         return (
             <a href={HASH_URL + rowData.transactionHash}>{rowData.megaPrizeWinner}</a>
         );
-    }
-
-    getEvents() {
-        const { events } = this.props;
-        const web3 = this.context.drizzle.web3;
-
-        /*  let events = [{
-             transactionHash: "0x7d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
-             id: "log_dcf38a3b",
-             returnValues: {
-                 megaPrizeNumber: "10",
-                 megaPrizeWinner: "0xd0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
-                 winnerAmount: 50000000000000000,
-                 timeSecs: "1551180548",
-                 roundNumber: "2"
-             }
-         },
-         {
-             transactionHash: "0x8d9595634ec6220edb993b5f4fc283671615e14923551aac71e81ea23f945308",
-             id: "log_dcf88a3b",
-             returnValues: {
-                 megaPrizeNumber: "11",
-                 megaPrizeWinner: "0xb0D6a7C5B920737666bbD2027420aA260F7Fb8C1",
-                 winnerAmount: 5000000000000000,
-                 timeSecs: "1651180548",
-                 roundNumber: "4"
-             }
-         }]; */
-
-        // prune the events and reformat
-        this.gameEvents = events.map((value) => {
-            const gameEvent = value.returnValues;
-            gameEvent.transactionHash = value.transactionHash;
-            gameEvent.logID = value.id;
-            // gameEvent.megaPrizeWinner
-            gameEvent.prize = parseFloat(web3.utils.fromWei((value.returnValues.megaPrizeAmount).toString(), 'ether'));
-            gameEvent.megaPrizeNumber = parseInt(value.returnValues.megaPrizeNumber, 10);
-
-            return gameEvent;
-        });
     }
 
     render() {

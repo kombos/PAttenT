@@ -77,7 +77,7 @@ class NotificationBar extends React.Component {
         console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
         console.log('expression: ', (this.props.events.length !== nextProps.events.length));
         if (this.props.events.length !== nextProps.events.length) {
-            //this.flag = true;
+            // this.flag = true;
             return true;
         }
         return false;
@@ -94,13 +94,14 @@ class NotificationBar extends React.Component {
 
     getLatestNotifications() {
         this.notificationsJSX = [];
-        let gameEvent, backEvent = null;
+        let gameEvent = null;
+        let backEvent = null;
         const gameEvents = [];
-        //const idArray = [];
+        // const idArray = [];
         const { drizzle } = this.context;
         const { web3 } = drizzle;
         const { events, classes } = this.props;
-        console.log("events:: ", events);
+        console.log('events:: ', events);
         if (events.length === 0) return;
         // filter only relevant events first
         for (var i = (events.length - 1); i >= 0; i--) {
@@ -115,11 +116,11 @@ class NotificationBar extends React.Component {
             } else break;
         }
 
-        console.log("txhash:: ", backEvent.transactionHash);
-        console.log("events.length-1 : ", (events.length - 1));
-        //if (idArray.findIndex(i => i === backEvent.id) !== -1) continue;
-        //if (i < (events.length - 1) && gameEvents && backEvent.transactionHash !== gameEvents[0].transactionHash) break;
-        //idArray.push(backEvent.id);
+        console.log('txhash:: ', backEvent.transactionHash);
+        console.log('events.length-1 : ', (events.length - 1));
+        // if (idArray.findIndex(i => i === backEvent.id) !== -1) continue;
+        // if (i < (events.length - 1) && gameEvents && backEvent.transactionHash !== gameEvents[0].transactionHash) break;
+        // idArray.push(backEvent.id);
         gameEvent = backEvent.returnValues;
         gameEvent.transactionHash = backEvent.transactionHash;
         console.log('transaction hashes: ', gameEvent.transactionHash);
@@ -180,7 +181,7 @@ class NotificationBar extends React.Component {
                 &nbsp;
                 {gameEvent.notification}
                 &nbsp;&nbsp;
-            </span>
+            </span>,
         );
         console.log('gameevents:: ', gameEvents);
         // prune the events and reformat

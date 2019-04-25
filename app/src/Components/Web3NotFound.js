@@ -3,7 +3,6 @@ import Dialog from '@material-ui/core/Dialog';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
@@ -19,8 +18,7 @@ import metamask from '../img/metamask.png';
 import trustWallet from '../img/trustWallet.png';
 
 
-
-const styles = theme => ({
+const styles = () => ({
     appBar: {
         position: 'relative',
     },
@@ -28,15 +26,15 @@ const styles = theme => ({
         flex: 1,
     },
     dialogRoot: {
-        backgroundColor: "rgba(102,0,51,1)",
-        //color: "#17d4fe",
-        //height: '100%',
-        //width: 'auto',
+        backgroundColor: 'rgba(102,0,51,1)',
+        // color: "#17d4fe",
+        // height: '100%',
+        // width: 'auto',
     },
     imageContainer: {
         boxSizing: 'border-box',
-        //display: 'flex',
-        //backgroundColor: 'rgba(51,51,51,1)',
+        // display: 'flex',
+        // backgroundColor: 'rgba(51,51,51,1)',
         backgroundColor: 'rgba(0,0,0,1)',
         width: '100%',
         textAlign: 'center',
@@ -50,10 +48,9 @@ const styles = theme => ({
 
 const Transition = (props) => {
     return <Slide direction="up" {...props} />;
-}
+};
 
 class Web3NotFound extends React.Component {
-
     constructor(props) {
         console.log('#___ inside constructor___');
         super(props);
@@ -71,7 +68,7 @@ class Web3NotFound extends React.Component {
     }
 
     render() {
-        console.log("inside render of web3notfound");
+        console.log('inside render of web3notfound');
         const { isDialogOpen } = this.state;
         const { classes } = this.props;
 
@@ -113,7 +110,7 @@ class Web3NotFound extends React.Component {
                     </DialogContent>
                     <List>
                         <a href="https://metamask.io/">
-                            <ListItem button >
+                            <ListItem button>
                                 <ListItemAvatar>
                                     <Avatar alt="MetaMask" src={metamask} />
                                 </ListItemAvatar>
@@ -121,10 +118,10 @@ class Web3NotFound extends React.Component {
                                     primary="Get Metamask"
                                     secondary="applicable for Desktops/Laptops"
                                     primaryTypographyProps={{
-                                        color: "primary"
+                                        color: 'primary',
                                     }}
                                     secondaryTypographyProps={{
-                                        color: "error"
+                                        color: 'error',
                                     }}
                                 />
                             </ListItem>
@@ -139,10 +136,10 @@ class Web3NotFound extends React.Component {
                                     primary="Get Trust Wallet"
                                     secondary="applicable for Mobile Devices"
                                     primaryTypographyProps={{
-                                        color: "primary"
+                                        color: 'primary',
                                     }}
                                     secondaryTypographyProps={{
-                                        color: "error"
+                                        color: 'error',
                                     }}
                                 />
                             </ListItem>

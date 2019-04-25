@@ -110,7 +110,7 @@ class Indicator extends React.PureComponent {
             console.log('durationinsecs: ', duration);
             console.log('bountysize: ', bountySize);
             console.log('winningchance: ', winningChance);
-            console.log("path:: ", `../img/indicator${winningChance}.png`);
+            console.log('path:: ', `../img/indicator${winningChance}.png`);
 
             indicatorJSX = (
                 <div className={classes.flexContainer}>

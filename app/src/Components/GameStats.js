@@ -70,9 +70,7 @@ const styles = theme => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
     },
-
 });
-
 
 class GameStats extends React.Component {
     static contextType = DrizzleContext.Consumer;
@@ -88,61 +86,9 @@ class GameStats extends React.Component {
         // this.sortList({ sortBy, sortDirection });
     }
 
-    getRowClassName = ({ index }) => {
-        const { classes } = this.props;
-
-        return classNames(classes.tableRow, classes.flexContainer,
-            { [classes.tableRowHover]: index !== -1 });
-    };
-
-    noRowsRenderer = () => {
-        const { classes } = this.props;
-        return <div className={classes.noRows}>No rows</div>;
-    }
-
-    sort = ({ sortBy, sortDirection }) => {
-        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
-        this.sortList({ sortBy, sortDirection });
-        this.setState({
-            sortDirection: sortDirection,
-            sortBy: sortBy,
-        });
-    }
-
-    sortList = ({ sortBy, sortDirection }) => {
-        console.log('inside sort() :: sortby: ', sortBy, ' sortdirection: ', sortDirection);
-
-        const cmp = sortDirection === SortDirection.DESC ? (a, b) => this.desc(a, b, sortBy) : (a, b) => -this.desc(a, b, sortBy);
-        const sortedData = this.stableSort(this.playersData, cmp);
-        console.log('sortedData: ', sortedData);
-        this.playersData = sortedData;
-    }
-
-    desc = (a, b, sortBy) => {
-        if (b[sortBy] < a[sortBy]) {
-            return -1;
-        }
-        if (b[sortBy] > a[sortBy]) {
-            return 1;
-        }
-        return 0;
-    }
-
-    stableSort = (array, cmp) => {
-        const stabilizedThis = array.map((el, index) => [el, index]);
-        stabilizedThis.sort((a, b) => {
-            const order = cmp(a[0], b[0]);
-            if (order !== 0) return order;
-            return a[1] - b[1];
-        });
-        return stabilizedThis.map(el => el[0]);
-    }
-
-    addressRenderer = ({ rowData }) => {
-        console.log('inside addressRenderer()');
-        console.log('rowdata: ', rowData);
-        return (
-            <a href={HASH_URL + rowData.player}>{rowData.player}</a>
+    componentDidUpdate() {
+        console.log(
+            'inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ',
         );
     }
 
@@ -163,34 +109,98 @@ class GameStats extends React.Component {
         }
     }
 
-    componentDidUpdate() {
-        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
-    }
+    getRowClassName = ({ index }) => {
+        const { classes } = this.props;
+
+        return classNames(classes.tableRow, classes.flexContainer, {
+            [classes.tableRowHover]: index !== -1,
+        });
+    };
+
+    sort = ({ sortBy, sortDirection }) => {
+        console.log(
+            'inside sort() :: sortby: ',
+            sortBy,
+            ' sortdirection: ',
+            sortDirection,
+        );
+        this.sortList({ sortBy, sortDirection });
+        this.setState({
+            sortDirection: sortDirection,
+            sortBy: sortBy,
+        });
+    };
+
+    sortList = ({ sortBy, sortDirection }) => {
+        console.log(
+            'inside sort() :: sortby: ',
+            sortBy,
+            ' sortdirection: ',
+            sortDirection,
+        );
+
+        const cmp = sortDirection === SortDirection.DESC
+            ? (a, b) => this.desc(a, b, sortBy)
+            : (a, b) => -this.desc(a, b, sortBy);
+        const sortedData = this.stableSort(this.playersData, cmp);
+        console.log('sortedData: ', sortedData);
+        this.playersData = sortedData;
+    };
+
+    desc = (a, b, sortBy) => {
+        if (b[sortBy] < a[sortBy]) {
+            return -1;
+        }
+        if (b[sortBy] > a[sortBy]) {
+            return 1;
+        }
+        return 0;
+    };
+
+    stableSort = (array, cmp) => {
+        const stabilizedThis = array.map((el, index) => [el, index]);
+        stabilizedThis.sort((a, b) => {
+            const order = cmp(a[0], b[0]);
+            if (order !== 0) return order;
+            return a[1] - b[1];
+        });
+        return stabilizedThis.map(el => el[0]);
+    };
+
+    addressRenderer = ({ rowData }) => {
+        console.log('inside addressRenderer()');
+        console.log('rowdata: ', rowData);
+        return <a href={HASH_URL + rowData.player}>{rowData.player}</a>;
+    };
+
+    noRowsRenderer = () => {
+        const { classes } = this.props;
+        return <div className={classes.noRows}>No rows</div>;
+    };
 
     /* shouldComponentUpdate(nextthis.Props, nextState) {
-        console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
-        console.log("this this.props: ", this.props.events.length, " next this.props: ", nextthis.Props.events.length);
-        console.log("expression: ", (this.props.events.length != nextthis.Props.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection));
+          console.log("************** inside shouldcomponentupdate ((((((((((((((((((((((( ");
+          console.log("this this.props: ", this.props.events.length, " next this.props: ", nextthis.Props.events.length);
+          console.log("expression: ", (this.props.events.length != nextthis.Props.events.length ||
+              this.state.sortBy != nextState.sortBy ||
+              this.state.sortDirection != nextState.sortDirection));
 
-        if (this.props.events.length != nextthis.Props.events.length ||
-            this.state.sortBy != nextState.sortBy ||
-            this.state.sortDirection != nextState.sortDirection) {
-            this.flag = true;
-            return true;
-        }
-        else {
-            if (this.flag) {
-                console.log("inside if");
-                this.flag = false;
-                this.getData();
-                return true;
-            }
-            return false;
-        }
-    } */
-
+          if (this.props.events.length != nextthis.Props.events.length ||
+              this.state.sortBy != nextState.sortBy ||
+              this.state.sortDirection != nextState.sortDirection) {
+              this.flag = true;
+              return true;
+          }
+          else {
+              if (this.flag) {
+                  console.log("inside if");
+                  this.flag = false;
+                  this.getData();
+                  return true;
+              }
+              return false;
+          }
+      } */
 
     render() {
         console.log('inside gamenotifications');
@@ -201,8 +211,18 @@ class GameStats extends React.Component {
         this.sortList({ sortBy, sortDirection });
 
         console.log('playersData: ', this.playersData);
-        console.log('fn;;;;;;;;s  sortby: ', sortBy, ' sort Direction: ', sortDirection);
-        console.log('fn;;;;;;;;s  sortby: ', this.state.sortBy, ' sort Direction: ', this.state.sortDirection);
+        console.log(
+            'fn;;;;;;;;s  sortby: ',
+            sortBy,
+            ' sort Direction: ',
+            sortDirection,
+        );
+        console.log(
+            'fn;;;;;;;;s  sortby: ',
+            this.state.sortBy,
+            ' sort Direction: ',
+            this.state.sortDirection,
+        );
 
         return (
             <Tooltip title="Token Purchase Stats">
@@ -252,7 +272,6 @@ class GameStats extends React.Component {
                     </AutoSizer>
                 </div>
             </Tooltip>
-
         );
     }
 }
