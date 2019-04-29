@@ -11,7 +11,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-
 const styles = theme => ({
 
     flexContainer: {
@@ -102,7 +101,6 @@ class GameInput extends React.Component {
             return;
         }
 
-        // let numTokens = Math.floor(parseInt(this.valueRef.current.value));
         const numTokens = Math.floor(parseInt(this.state.numTokens, 10));
         console.log('numtokens: ', numTokens);
         console.log('state value: ', this.state.numTokens);
@@ -113,14 +111,16 @@ class GameInput extends React.Component {
 
     setValue = (numTokens) => {
         console.log('inside setvalue() ');
-        const { gameData } = this.props;
         const { drizzle, drizzleState } = this.context;
+        const web3 = drizzle.web3;
+        const BN = web3.utils.BN;
+        const { gameData } = this.props;
         const { tokenValue, gameID } = gameData.value;
         const multiprizer = drizzle.contracts.Multiprizer;
-        const tokenAmount = numTokens * tokenValue;
+        const tokenAmount = new BN(numTokens).mul(new BN(tokenValue));
 
         console.log('# tokenvalue: ', tokenValue, '  gameID: ', gameID, '  numtokens: ', numTokens);
-        console.log('# token amount: ', tokenAmount);
+        console.log('# token amount: ', tokenAmount.toString());
 
         const stackID = multiprizer.methods.playGame.cacheSend(gameID, numTokens, {
             from: drizzleState.accounts[0],
@@ -144,6 +144,7 @@ class GameInput extends React.Component {
     render() {
         const { drizzle } = this.context;
         const web3 = drizzle.web3;
+        const BN = web3.utils.BN;
         const { gameData, playerTokens, classes, fullScreen } = this.props;
         const { isGameLocked, currentRound, tokenValue, maxTokensPerPlayer } = gameData.value;
         const remainingTokens = (maxTokensPerPlayer - playerTokens);
@@ -201,8 +202,8 @@ class GameInput extends React.Component {
                         disabled={isDisabled}
                     >
                         Pay {this.state.numTokens === '' ?
-                            `(${web3.utils.fromWei((1 * tokenValue).toString(), 'ether') + ' eth per token'})`
-                            : `${web3.utils.fromWei((this.state.numTokens * tokenValue).toString(), 'ether') + ' ethers'}`}
+                            `(${web3.utils.fromWei(new BN(tokenValue).mul(new BN(1)).toString(), 'ether') + ' eth per token'})`
+                            : `${web3.utils.fromWei(new BN(tokenValue).mul(new BN(this.state.numTokens)).toString(), 'ether') + ' ethers'}`}
 
                     </Button>
                 </form>

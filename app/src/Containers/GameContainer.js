@@ -116,13 +116,18 @@ class GameContainer extends React.Component {
 
         if (gameData) {
             this.prevRound = this.currentRound;
-            this.currentRound = gameData.value.currentRound;
-            maxTokens = gameData.value.maxTokens;
-            maxTokensPerPlayer = gameData.value.maxTokensPerPlayer;
+            this.currentRound = parseInt(gameData.value.currentRound, 10);
+            console.log("currentRound typeof: ", typeof this.currentRound, " and value: ", this.currentRound);
+            maxTokens = parseInt(gameData.value.maxTokens, 10);
+            maxTokensPerPlayer = parseInt(gameData.value.maxTokensPerPlayer, 10);
             tokenValue = gameData.value.tokenValue;
+            console.log("tokenvalue typeof: ", typeof tokenValue, " and value: ", tokenValue);
             isGameLocked = gameData.value.isGameLocked;
+            console.log("isgamelocked typeof: ", typeof isGameLocked, " and value: ", isGameLocked);
             totalValueForGame = gameData.value.totalValueForGame;
+            console.log("totalValueForGame typeof: ", typeof totalValueForGame, " and value: ", totalValueForGame);
             totalWinnings = gameData.value.totalWinnings;
+            console.log("totalWinnings typeof: ", typeof totalWinnings, " and value: ", totalWinnings);
             console.log('is game locked? : ', isGameLocked);
             console.log('current round is :::::: ', this.currentRound);
             console.log('expression value: ', isGameLocked !== true && this.currentRound !== 0);
@@ -199,7 +204,7 @@ class GameContainer extends React.Component {
                         gameTokens={0}
                         duration={0}
                         tokenValue={0}
-                        isGameLocked={isGameLocked}
+                        isGameLocked={true}
                     />
                 );
             }

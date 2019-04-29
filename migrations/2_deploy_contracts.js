@@ -143,23 +143,6 @@ module.exports = function (deployer, network, accounts) {
                 console.log("unlock games ..... ");
                 return multiprizerInstance.unlockGamesByAdmin([102, 103, 104, 105], { from: accounts[0], gasPrice: 5e9 });
             })
-            /* // complete rounds
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(102, { from: accounts[0], gasPrice: 5e9});
-            })
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(103, { from: accounts[0], gasPrice: 5e9});
-            })
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(104, { from: accounts[0], gasPrice: 5e9});
-            })
-            .then(function (receipt) {
-                console.log("complete round for current game ..... ");
-                return multiprizerInstance.completeRoundByAdmin(105, { from: accounts[0], gasPrice: 5e9});
-            }) */
             .then(function (receipt) {
                 console.log("enable megaprize ..... ");
                 return multiprizerInstance.unlockMegaPrizeByAdmin({ from: accounts[0], gasPrice: 5e9 });

@@ -6,7 +6,6 @@
         "@material-ui/core": "^3.9.0",
         "@material-ui/icons": "^3.0.2",
         "@material-ui/styles": "^3.0.0-alpha.8",
-        "bignumber.js": "^8.0.2",
         "classnames": "^2.2.6",
         "drizzle": "^1.3.3",
         "drizzle-react": "^1.2.0",
@@ -43,5 +42,5 @@
     },
     "author": "Kamlesh Parikarath",
     "license": "ISC",
-    "homepage": "https://ethereum.multiprizer.io"
+    "homepage": "https://ropsten.multiprizer.io"
 }

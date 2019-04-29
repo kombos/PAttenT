@@ -489,6 +489,7 @@ contract Multiprizer is Ownable {
             gameStrategies[_gameIDs[i]].isGameLocked = false;
             gameStrategies[_gameIDs[i]].isGameLateLocked = false;
             _roundNumber = gameStrategies[_gameIDs[i]].currentRound == 0 ? 1 : gameStrategies[_gameIDs[i]].currentRound;
+            gameStrategies[_gameIDs[i]].currentRound = _roundNumber;
             _roundID = cantorPairing(_gameIDs[i], _roundNumber);
             rounds[_roundID].gameID = _gameIDs[i];
             rounds[_roundID].roundStartTimeSecs = now;
@@ -582,10 +583,14 @@ contract Multiprizer is Ownable {
         if (isMegaPrizeEnabled) {
             for (i = 0; i < megaPrizePlayersKeys[megaPrizeNumber].length; i++) {
                 if (megaPrizePlayersKeys[megaPrizeNumber][i] == _playerAddress) {
-                    megaPrizePlayersKeys[megaPrizeNumber][i] = megaPrizePlayersKeys[megaPrizeNumber][megaPrizePlayersKeys[megaPrizeNumber].length - 1];
-                    megaPrizePlayersKeys[megaPrizeNumber].length = megaPrizePlayersKeys[megaPrizeNumber].length.sub(1);
-                    megaPrizePlayers[megaPrizeNumber][i] = megaPrizePlayers[megaPrizeNumber][megaPrizePlayers[megaPrizeNumber].length - 1];
-                    megaPrizePlayers[megaPrizeNumber].length = megaPrizePlayers[megaPrizeNumber].length.sub(1);
+                    megaPrizePlayers[megaPrizeNumber][i] = megaPrizePlayers[megaPrizeNumber][i].sub(_playerTokens);
+                    if (megaPrizePlayers[megaPrizeNumber][i] == 0) {
+                        // remove the megaprize entry of that player
+                        megaPrizePlayersKeys[megaPrizeNumber][i] = megaPrizePlayersKeys[megaPrizeNumber][megaPrizePlayersKeys[megaPrizeNumber].length - 1];
+                        megaPrizePlayersKeys[megaPrizeNumber].length = megaPrizePlayersKeys[megaPrizeNumber].length.sub(1);
+                        megaPrizePlayers[megaPrizeNumber][i] = megaPrizePlayers[megaPrizeNumber][megaPrizePlayers[megaPrizeNumber].length - 1];
+                        megaPrizePlayers[megaPrizeNumber].length = megaPrizePlayers[megaPrizeNumber].length.sub(1);
+                    }
                     break;
                 }
             }
@@ -649,7 +654,6 @@ contract Multiprizer is Ownable {
             if (isMegaPrizeLateLocked) {
                 isMegaPrizeEnabled = false;
             } else {
-                isMegaPrizeEnabled = true;
                 megaPrizeStartTimeSecs = now;
             }
         }

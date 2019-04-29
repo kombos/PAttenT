@@ -18,3 +18,6 @@ export const DRAWERITEMS = [
 export const DRAWERICONS = [
     'Notifications',
 ];
+
+// Indicator Props
+export const BOUNTY_SIZE_DIVISOR = 5e18;

@@ -56,6 +56,7 @@ class GameProps extends React.PureComponent {
     render() {
         console.log('inside gameProps');
         const web3 = this.context.drizzle.web3;
+        const BN = web3.utils.BN;
         let isRoundZero = false;
         let currentRoundText = '';
 
@@ -106,9 +107,9 @@ class GameProps extends React.PureComponent {
                         textAlign: 'right',
                     }}
                 >
-                    {`Total Plays : ${(web3.utils.fromWei((parseInt(totalValueForGame, 10)).toString(), 'ether') * 1).toFixed(3)} eth`}
+                    {`Total Plays : ${(web3.utils.fromWei((new BN(totalValueForGame)).toString(), 'ether') * 1).toFixed(3)} eth`}
                     <br />
-                    {`Total Wins : ${(web3.utils.fromWei((parseInt(totalWinnings, 10)).toString(), 'ether') * 1).toFixed(3)} eth`}
+                    {`Total Wins : ${(web3.utils.fromWei((new BN(totalWinnings)).toString(), 'ether') * 1).toFixed(3)} eth`}
                 </div>
             </div>
         );

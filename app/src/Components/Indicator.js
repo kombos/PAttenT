@@ -3,6 +3,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
 import roundButton from '../img/roundButton.png';
+import { BOUNTY_SIZE_DIVISOR as BOUNTY_SIZE_DIVISOR } from '../Constants';
+import Big from 'big.js';
 
 const styles = theme => ({
     indicator: {
@@ -72,11 +74,12 @@ const styles = theme => ({
 });
 
 class Indicator extends React.PureComponent {
+
     render() {
         console.log('inside indictor');
-        let indicatorJSX = null;
-
         const { userTokens, gameTokens, duration, tokenValue, isGameLocked, classes } = this.props;
+        let indicatorJSX = null;
+        console.log("tokenvalue typeof: ", typeof tokenValue, " and value: ", tokenValue);
         console.log('gamelocked? : ', isGameLocked);
         if (isGameLocked) {
             indicatorJSX = (
@@ -95,7 +98,9 @@ class Indicator extends React.PureComponent {
                 </div>
             );
         } else {
-            let bountySize = Math.floor((tokenValue * gameTokens) / 5e18) + 1;
+            let tokenValueEther = new Big(tokenValue).div(BOUNTY_SIZE_DIVISOR);
+            console.log("tokenValueEther: ", tokenValueEther.toString());
+            let bountySize = Math.floor(tokenValueEther * gameTokens) + 1;
             console.log('old bountysize: ', bountySize);
             bountySize = bountySize > 0 ? (bountySize > 6 ? 6 : bountySize) : 1;
 

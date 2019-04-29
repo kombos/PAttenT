@@ -346,7 +346,7 @@ contract("Multiprizer", accounts => {
             })
     });
 
-    it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundByAdmin() ", async () => {
+    /* it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing
         let _gameID = 102;
         let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
@@ -367,7 +367,7 @@ contract("Multiprizer", accounts => {
                     assert.fail("Error: round completed but gameData not set ");
                 }
             })
-    });
+    }); */
 
 
     it("should initiate play game : Positive Scenario   : playGame() ", async () => {
