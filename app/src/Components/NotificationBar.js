@@ -166,10 +166,10 @@ class NotificationBar extends React.Component {
                 gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} winner is ${gameEvent.megaPrizeWinner}. Prize: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Click to know more.`;
                 break;
 
-            /* case 'LogMegaPrizeUpdate':
+            case 'LogMegaPrizeUpdate':
                 gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game at least once to be eligible for MegaPrize pick!`;
                 break;
-            */
+           
             default:
                 gameEvent.notification = '';
                 break;

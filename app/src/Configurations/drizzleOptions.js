@@ -31,6 +31,12 @@ const drizzleOptions = {
                     },
                 },
                 {
+                    eventName: 'LogCompleteMPRound',
+                    eventOptions: {
+                        fromBlock: 0,
+                    },
+                },
+                {
                     eventName: 'LogGameLocked',
                     eventOptions: {
                         fromBlock: 0,
@@ -54,12 +60,12 @@ const drizzleOptions = {
                         fromBlock: 0,
                     },
                 },
-                /* {
+                {
                     eventName: 'LogMegaPrizeUpdate',
                     eventOptions: {
                         fromBlock: 0,
                     },
-                }, */
+                },
             ],
     },
     polls: {

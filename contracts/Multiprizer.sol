@@ -492,6 +492,7 @@ contract Multiprizer is Ownable {
             gameStrategies[_gameIDs[i]].currentRound = _roundNumber;
             _roundID = cantorPairing(_gameIDs[i], _roundNumber);
             rounds[_roundID].gameID = _gameIDs[i];
+            rounds[_roundID].roundNumber = _roundNumber;
             rounds[_roundID].roundStartTimeSecs = now;
             rounds[_roundID].roundStartTimeBlock = block.number;
             rounds[_roundID].isRoundOpen = true;

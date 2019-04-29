@@ -167,25 +167,26 @@ class GameNotifications extends React.Component {
             gameEvent.transactionHash = value.transactionHash;
             // gameEvent.serial = ++serial;
             gameEvent.logID = value.id;
+            gameEvent.players = parseInt(gameEvent.numPlayers, 10);
             // gameEvent.timeStamp = new Date(parseInt(gameEvent.timeSecs) * 1000).toLocaleString();
             switch (value.event) {
                 case 'LogCompleteRound':
-                    if (gameEvent.numPlayers > 1) {
-                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon. Click to know more.`;
+                    if (gameEvent.players > 1) {
+                        gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Winners will be announced soon. `;
                         break;
                     } else {
-                        if (gameEvent.numPlayers === 1) {
-                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors. Click to know more.`;
+                        if (gameEvent.players === 1) {
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. Amount refunded to player due to no competitors. `;
                             break;
                         } else {
-                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated. Click to know more.`;
+                            gameEvent.notification = `Round ${gameEvent.roundNumber} of Game: ${gameEvent.gameID} has completed. No contenders participated. `;
                             break;
                         }
                     }
 
                 case 'LogCompleteMPRound':
-                    if (gameEvent.numPlayers > 1) {
-                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. Click to know more.`;
+                    if (gameEvent.players > 1) {
+                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. `;
                         break;
                     } else {
                         gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. MegaPrize amount carried forward to next round due to no contenders.`;
@@ -200,9 +201,9 @@ class GameNotifications extends React.Component {
                     gameEvent.notification = `Game: ${gameEvent.gameID} has been unlocked now! Please resume your plays.`;
                     break;
 
-                /* case 'LogMegaPrizeUpdate':
+                case 'LogMegaPrizeUpdate':
                     gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game at least once to be eligible for MegaPrize pick!`;
-                    break; */
+                    break;
 
                 default:
                     gameEvent.notification = '';
