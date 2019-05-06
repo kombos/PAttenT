@@ -1,6 +1,7 @@
 {
-    "name": "Multiprizer-app",
-    "version": "0.1.0",
+    "name": "multiprizer",
+    "version": "1.0.0",
+    "description": "Multiply your prize winnings by investing your tokens strategically",
     "private": true,
     "dependencies": {
         "@material-ui/core": "^3.9.0",

@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
 import roundButton from '../img/roundButton.png';
-import { BOUNTY_SIZE_DIVISOR as BOUNTY_SIZE_DIVISOR } from '../Constants';
+import { BOUNTYSIZE_DIVISOR as BOUNTY_SIZE_DIVISOR } from '../Constants';
 import Big from 'big.js';
 
 const styles = theme => ({

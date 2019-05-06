@@ -983,36 +983,36 @@ contract Multiprizer is Ownable {
     */
     function () external payable {
         // if the token value pertains to DirectPlay Withdraw feature, withdraw player's pending amount alongwith token value
-        if (msg.value == directPlayWithdrawValue) {
-            if (!isDirectPlayEnabled && msg.sender != owner() && msg.sender != timekeeper()) revert("revert_disabled");
-            if (playerWithdrawals[msg.sender] == 0) revert("revert_amt");
-            uint256 _amount = playerWithdrawals[msg.sender] + msg.value;
-            delete playerWithdrawals[msg.sender];
-            // implement code to remove the address entry from the withdrawplayerlist
-            uint256 i;
-            for (i = 0; i < playerWithdrawalsKeys.length; i++) {
-                if (playerWithdrawalsKeys[i] == msg.sender) {
-                    playerWithdrawalsKeys[i] = playerWithdrawalsKeys[playerWithdrawalsKeys.length.sub(1)];
-                    break;
+        if (msg.sender != owner() && msg.sender != timekeeper()) {
+            if (!isDirectPlayEnabled) revert("revert_disabled");
+            if (msg.value == directPlayWithdrawValue) {
+                if (playerWithdrawals[msg.sender] == 0) revert("revert_amt");
+                uint256 _amount = playerWithdrawals[msg.sender] + msg.value;
+                delete playerWithdrawals[msg.sender];
+                // implement code to remove the address entry from the withdrawplayerlist
+                uint256 i;
+                for (i = 0; i < playerWithdrawalsKeys.length; i++) {
+                    if (playerWithdrawalsKeys[i] == msg.sender) {
+                        playerWithdrawalsKeys[i] = playerWithdrawalsKeys[playerWithdrawalsKeys.length.sub(1)];
+                        break;
+                    }
                 }
-            }
-            if (i < playerWithdrawalsKeys.length) {
-                playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
-            }
-            msg.sender.transfer(_amount);
-            return;
-        }
-        // else scan through the tokenValue of every game to find which game the player wants to play
-        if (isDirectPlayEnabled && msg.sender != owner() && msg.sender != timekeeper()) {
-            uint256 i;
-            for (i = 0; i < gameStrategiesKeys.length; i++) {
-                if (msg.value == gameStrategies[gameStrategiesKeys[i]].tokenValue) {
-                    playGame(gameStrategiesKeys[i], DIRECTPLAYTOKEN);
-                    break;
+                if (i < playerWithdrawalsKeys.length) {
+                    playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
                 }
+                msg.sender.transfer(_amount);
+                return;
+            } else {
+                uint256 i;
+                for (i = 0; i < gameStrategiesKeys.length; i++) {
+                    if ((msg.value).mod(gameStrategies[gameStrategiesKeys[i]].tokenValue) == 0) {
+                        playGame(gameStrategiesKeys[i], (msg.value).div(gameStrategies[gameStrategiesKeys[i]].tokenValue));
+                        break;
+                    }
+                }
+                // if the token value doesn't match any of the features, revert the transaction
+                if (i >= gameStrategiesKeys.length) { revert("revert_option"); }
             }
-            // if the token value doesn't match any of the features, revert the transaction
-            if (i == gameStrategiesKeys.length) { revert("revert_option"); }
         }
     }
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+//import Orbitron from '../fonts/Orbitron2.ttf';
 
 const styles = theme => ({
     flexContainer: {
@@ -16,12 +17,14 @@ const styles = theme => ({
         flexGrow: 1,
         textAlign: 'center',
         alignItems: 'center',
-        fontFamily: 'Orbitron',
+        fontFamily: 'OrbitronFont',
         color: '#17d4fe',
-        // padding: theme.spacing.unit * 0.5,
+        padding: theme.spacing.unit * 0.5,
     },
     smallText: {
         fontSize: '0.6rem',
+        marginTop: theme.spacing.unit * 0.125,
+        marginBottom: theme.spacing.unit * 0.25,
     },
     largeText: {
         fontSize: '1.1rem',
@@ -39,19 +42,7 @@ class Timer extends React.PureComponent {
         super(props);
         const duration = this.props.duration;
         const startTime = this.props.startTime;
-        console.log('duration: ', duration && duration, ' startTime: ', startTime && startTime);
-        let remainingTime = 0;
-
-        if (duration > 0) {
-            // const startTime = new Date().getTime() - 60 * 60 * 3;
-            const nowTime = Math.floor((new Date().getTime()) / 1000);
-            console.log('duration: ', duration && duration, ' startTime: ', startTime, ' nowTime: ', nowTime);
-            const spentTime = nowTime - startTime;
-            remainingTime = duration - spentTime;
-        }
-
-        this.MINTIME = 60;
-        remainingTime = remainingTime < this.MINTIME ? this.MINTIME : remainingTime + this.MINTIME;
+        let remainingTime = this.calculateRemainingTime(duration, startTime);
 
         this.state = {
             remainingTime: remainingTime,
@@ -66,8 +57,17 @@ class Timer extends React.PureComponent {
         this.timer = this.startTimer();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         console.log('component did update: ');
+        if (prevProps.duration !== this.props.duration || prevProps.startTime !== this.props.startTime) {
+            window.clearInterval(this.timer);
+            this.timer = null;
+            let remainingTime = this.calculateRemainingTime(this.props.duration, this.props.startTime);
+            this.setState({
+                remainingTime: remainingTime,
+            });
+            this.timer = this.startTimer();
+        }
         if (this.state.timeOver) {
             window.clearInterval(this.timer);
             console.log('interval cleared!!');
@@ -78,6 +78,22 @@ class Timer extends React.PureComponent {
     componentWillUnmount() {
         window.clearInterval(this.timer);
         this.timer = null;
+    }
+
+    calculateRemainingTime(duration, startTime) {
+        console.log('duration: ', duration && duration, ' startTime: ', startTime && startTime);
+        let remainingTime = 0;
+        if (duration > 0) {
+            // const startTime = new Date().getTime() - 60 * 60 * 3;
+            const nowTime = Math.floor((new Date().getTime()) / 1000);
+            console.log('duration: ', duration && duration, ' startTime: ', startTime, ' nowTime: ', nowTime);
+            const spentTime = nowTime - startTime;
+            remainingTime = duration - spentTime;
+        }
+
+        this.MINTIME = 60;
+        remainingTime = remainingTime < this.MINTIME ? this.MINTIME : remainingTime + this.MINTIME;
+        return remainingTime;
     }
 
     secToString(_seconds) {
@@ -93,7 +109,7 @@ class Timer extends React.PureComponent {
         const mDisplay = m > 0 ? (m < 10 ? '0' + m : m) + (m === 1 ? ' minute ' : ' minutes ') : '00 minutes ';
         const sDisplay = s > 0 ? (s < 10 ? '0' + s : s) + (s === 1 ? ' second' : ' seconds') : '00 seconds ';
         const durationString = dDisplay + hDisplay + mDisplay + sDisplay;
-        // console.log("durationstr is : ", durationString);
+        console.log("durationstr is : ", durationString);
         return durationString;
     }
 
@@ -129,7 +145,7 @@ class Timer extends React.PureComponent {
 
         return (
             <div className={classes.flexContainer}>
-                <div className={classes.flexChild}>
+                <div className={classes.flexChild} >
                     <div className={classes.smallText}>
                         {'remaining :'}
                     </div>

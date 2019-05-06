@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+//import { browserHistory } from 'react-router';
 import { DrizzleContext } from 'drizzle-react';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
@@ -7,6 +8,9 @@ import GameStrategies from './Containers/GameStrategies';
 import GameDetails from './Containers/GameDetails';
 import Notifications from './Containers/Notifications';
 import Web3NotFound from './Components/Web3NotFound';
+import PageNotFound from './Components/PageNotFound';
+import Loading from './Components/Loading';
+
 import './css/App.css';
 
 export default () => (
@@ -14,6 +18,9 @@ export default () => (
         {(drizzleContext) => {
             console.log('inside App.js');
             const { drizzle, drizzleState, initialized } = drizzleContext;
+            console.log('initialized: ', initialized);
+            console.log('drizzleState: ', drizzleState);
+            console.log('drizzle: ', drizzle);
             if (!initialized) {
                 return <Web3NotFound />;
             }
@@ -23,15 +30,10 @@ export default () => (
                 console.log('playeraddress: ', playerAddress);
                 header = <Header playerAddress={playerAddress} />;
             }
-
-            console.log('initialized: ', initialized);
-            console.log('drizzleState: ', drizzleState);
-            console.log('drizzle: ', drizzle);
             console.log('value of initialized: ', initialized);
             console.log('drizzleState: ', drizzleState);
             console.log('drizzle: ', drizzle);
             const logEvents = drizzleState.contracts.Multiprizer.events;
-
 
             return (
                 <Router basename={process.env.PUBLIC_URL}>
@@ -54,7 +56,7 @@ export default () => (
                                 render={
                                     () => <Notifications drizzleState={drizzleState} events={logEvents} />}
                             />
-                            <Route render={() => <div><p> Error </p></div>} />
+                            <Route render={() => <PageNotFound />} />
                         </Switch>
 
                         <Footer />

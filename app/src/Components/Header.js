@@ -24,6 +24,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import NotesIcon from '@material-ui/icons/Notes';
+import StarsIcon from '@material-ui/icons/Stars';
+import GamesIcon from '@material-ui/icons/Games';
+import ContactSupportIcon from '@material-ui/icons/ContactSupport';
+import DescriptionIcon from '@material-ui/icons/Description';
+import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
 import MultiprizerLogo from '../img/MultiprizerLogo.png';
 import headerStrip from '../img/headerStrip.png';
 // import { DRAWERICONS as drawerIcons } from '../../Constants';
@@ -202,18 +208,84 @@ class Header extends React.Component {
             }
         };
 
-        const sideList = (
+        const drawerItems = (
             <div className={classes.list}>
                 <List>
                     <ListItem
                         button
-                        key="Notifications"
+                        key="notifications"
                         onClick={() => renderDrawerItems(0)}
                     >
                         <ListItemIcon>
                             <NotificationsIcon />
                         </ListItemIcon>
                         <ListItemText primary="Notifications" />
+                    </ListItem>
+                    <ListItem
+                        button
+                        key="howtoplay"
+                        component='a'
+                        href='https://docs.multiprizer.io/how-to-play'
+                    >
+                        <ListItemIcon>
+                            <NotesIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="How to Play" />
+                    </ListItem>
+                    <ListItem
+                        button
+                        key="megaprize"
+                        component='a'
+                        href='https://docs.multiprizer.io/megaprize'
+                    >
+                        <ListItemIcon>
+                            <StarsIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="MegaPrize" />
+                    </ListItem>
+                    <ListItem
+                        button
+                        key="directplay"
+                        component='a'
+                        href='https://docs.multiprizer.io/directplay'
+                    >
+                        <ListItemIcon>
+                            <GamesIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="DirectPlay" />
+                    </ListItem>
+                    <ListItem
+                        button
+                        key="contact"
+                        component='a'
+                        href='https://multiprizer.io/#contact'
+                    >
+                        <ListItemIcon>
+                            <ContactSupportIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Contact Admin" />
+                    </ListItem>
+                    <ListItem
+                        button
+                        key="documentation"
+                        component='a'
+                        href='https://docs.multiprizer.io'
+                    >
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Documentation" />
+                    </ListItem>
+                    <ListItem
+                        button
+                        key="whitepaper"
+                        component='a'
+                        href='https://docs.multiprizer.io/whitepaper'
+                    >
+                        <ListItemIcon>
+                            <DeveloperBoardIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="WhitePaper" />
                     </ListItem>
                 </List>
                 <Divider />
@@ -269,7 +341,7 @@ class Header extends React.Component {
                         onClick={toggleDrawer(false)}
                         onKeyDown={toggleDrawer(false)}
                     >
-                        {sideList}
+                        {drawerItems}
                     </div>
                 </Drawer>
                 <Dialog

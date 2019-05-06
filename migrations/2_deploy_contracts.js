@@ -32,12 +32,12 @@ module.exports = function (deployer, network, accounts) {
         0,
         0,
         0,
-        web3.utils.toHex(1e16)
+        123456
     ];
     var _gameProperties3 = [
         103,
         300,
-        web3.utils.toHex(5e13),
+        web3.utils.toHex(55e15),
         (60 * 60 * 36),
         (4 * 60 * 36),
         30,
@@ -46,12 +46,12 @@ module.exports = function (deployer, network, accounts) {
         0,
         0,
         0,
-        web3.utils.toHex(1e16)
+        123456
     ];
     var _gameProperties2 = [
         104,
         40,
-        web3.utils.toHex(1e17),
+        web3.utils.toHex(2e17),
         (60 * 60 * 8),
         (4 * 60 * 8),
         2,
@@ -60,7 +60,7 @@ module.exports = function (deployer, network, accounts) {
         0,
         0,
         0,
-        web3.utils.toHex(1e16)
+        123456
     ];
     var _gameProperties = [
         105,
@@ -74,7 +74,7 @@ module.exports = function (deployer, network, accounts) {
         0,
         0,
         0,
-        web3.utils.toHex(1e16)
+        123456
     ];
 
     var multiprizerInstance, multiprizerOraclizeInstance;

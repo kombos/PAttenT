@@ -6,9 +6,6 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import Slide from '@material-ui/core/Slide';
@@ -17,19 +14,15 @@ import MultiprizerSplash from '../img/MultiprizerSplash.png';
 import metamask from '../img/metamask.png';
 import trustWallet from '../img/trustWallet.png';
 import web3bg from '../img/web3bg.jpg';
+import { TRUST_WALLET_DEEPLINK as TRUST_WALLET_LINK } from '../Constants';
 
 
 const styles = (theme) => ({
-    appBar: {
-        position: 'relative',
-    },
-    flex: {
-        flex: 1,
-    },
     dialogRoot: {
         //backgroundColor: 'rgba(102,0,51,1)',
         backgroundImage: `url(${web3bg})`,
         backgroundSize: 'cover',
+        //transform: 'scaleX(-1)',
         // color: "#17d4fe",
         // height: '100%',
         // width: 'auto',
@@ -105,8 +98,8 @@ class Web3NotFound extends React.Component {
                         <DialogContentText color="inherit">
                             <b>Multiprizer</b> - Multiply your prize winnings by playing your tokens strategically!
                             <br />
-                            This DApp requires <b>MetaMask</b> if you are in a Desktop / Laptop, or <b>Trust Wallet App</b> if you are in a Mobile device.<br/> 
-                            Also, the wallets need to be set to <b>Ropsten Testnet</b> for now, since this app is in beta phase. Please select an item below.
+                            This DApp requires <b>MetaMask</b> if you are in a Desktop / Laptop, or <b>Trust Wallet App</b> if you are in a Mobile device.<br />
+                            Please select an item below.
                         </DialogContentText>
                     </DialogContent>
                     <List>
@@ -116,7 +109,7 @@ class Web3NotFound extends React.Component {
                                     <Avatar alt="MetaMask" src={metamask} />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary="Get Metamask"
+                                    primary="Open using Metamask"
                                     secondary="applicable for Desktops/Laptops"
                                     primaryTypographyProps={{
                                         color: 'primary',
@@ -128,13 +121,13 @@ class Web3NotFound extends React.Component {
                             </ListItem>
                         </a>
                         <Divider />
-                        <a href="https://trustwallet.com/">
+                        <a href={TRUST_WALLET_LINK}>
                             <ListItem button>
                                 <ListItemAvatar>
                                     <Avatar alt="MetaMask" src={trustWallet} />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary="Get Trust Wallet"
+                                    primary="Open using Trust Wallet"
                                     secondary="applicable for Mobile Devices"
                                     primaryTypographyProps={{
                                         color: 'primary',
