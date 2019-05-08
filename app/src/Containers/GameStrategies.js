@@ -1,7 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { DrizzleContext } from 'drizzle-react';
 import GameContainer from './GameContainer';
 import NotificationBar from '../Components/NotificationBar';
 
@@ -82,18 +81,17 @@ const styles = theme => ({
 });
 
 class GameStrategies extends React.Component {
-    static contextType = DrizzleContext.Consumer;
 
-    constructor(props, context) {
+    constructor(props) {
         console.log('#___ inside constructor___');
         super(props);
-        this.context = context;
         this.state = { dataKey: null };
     }
 
     componentDidMount() {
         console.log('# GameStrategy: $$$$$ INSIDE COMPONENT DID MOUNT $$$$$');
-        const Multiprizer = this.context.drizzle.contracts.Multiprizer;
+        const { drizzle } = this.props;
+        const { Multiprizer } = drizzle.contracts;
         // get and save the key for the variable we are interested in
         const dataKey = Multiprizer.methods.viewGameIDs.cacheCall();
         console.log('# GameStrategy datakey value is:' + dataKey);
@@ -102,9 +100,8 @@ class GameStrategies extends React.Component {
 
     render() {
         console.log('# GameStrategy: INSIDE RENDER : ');
-        const { classes } = this.props;
+        const { classes, drizzleState, drizzle } = this.props;
         const { dataKey } = this.state;
-        const { drizzleState } = this.props;
         const multiprizer = drizzleState.contracts.Multiprizer;
         const logEvents = multiprizer.events;
         console.log('multiprizer:  ', multiprizer);
@@ -128,7 +125,11 @@ class GameStrategies extends React.Component {
                         console.log('GameID from GameStrategy : ', gameID);
                         return (
                             <Grid key={gameID} item xs={12} sm={6} md={3} lg={3}>
-                                <GameContainer gameID={gameID} drizzleState={drizzleState} />
+                                <GameContainer
+                                    gameID={gameID}
+                                    drizzleState={drizzleState}
+                                    drizzle={drizzle}
+                                />
                             </Grid>
                         );
                     },

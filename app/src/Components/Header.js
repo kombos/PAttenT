@@ -188,7 +188,7 @@ class Header extends React.Component {
         );
         // const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
         const isWithdrawDisabled = !(
-            withdrawAmount && withdrawAmount.value.toString() !== '0'
+            withdrawAmount && withdrawAmount.value && withdrawAmount.value.toString() !== '0'
         );
         console.log('isWithdrawDisabled: ', isWithdrawDisabled);
 
@@ -263,7 +263,7 @@ class Header extends React.Component {
                         <ListItemIcon>
                             <ContactSupportIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Contact Admin" />
+                        <ListItemText primary="Contact Support" />
                     </ListItem>
                     <ListItem
                         button

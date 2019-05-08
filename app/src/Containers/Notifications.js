@@ -1,7 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { DrizzleContext } from 'drizzle-react';
 import GameWinners from '../Components/GameWinners';
 import GameMegaPrizeWinners from '../Components/GameMegaPrizeWinners';
 import GameNotifications from '../Components/GameNotifications';
@@ -50,26 +49,16 @@ const styles = theme => ({
 });
 
 class Notifications extends React.Component {
-    static contextType = DrizzleContext.Consumer;
-
-    constructor(props, context) {
-        super(props);
-        this.context = context;
-        this.flag = true;
-    }
 
     shouldComponentUpdate(nextProps) {
-        console.log('************** inside shouldcomponentupdate ((((((((((((((((((((((( ');
-        console.log('this props: ', this.props.events.length, ' next props: ', nextProps.events.length);
-        console.log('expression: ', (this.props.events.length !== nextProps.events.length));
-        if (this.props.events.length !== nextProps.events.length) {
+        const { events } = this.props;
+        console.log('inside shouldComponentUpdate()');
+        console.log('this props: ', events.length, ' next props: ', nextProps.events.length);
+        console.log('expression: ', (events.length !== nextProps.events.length));
+        if (events.length !== nextProps.events.length) {
             return true;
         }
         return false;
-    }
-
-    componentDidUpdate() {
-        console.log('inside componentDidUpdate ::::::::::::::::::::::::::::::::::::::::::::: ');
     }
 
     /* shouldComponentUpdate(nextProps, nextState) {
@@ -92,17 +81,16 @@ class Notifications extends React.Component {
     } */
 
     getEvents() {
-        // const logEvents = this.props.drizzleState.contracts.Multiprizer.events;
-        const logEvents = this.props.events;
-        console.log('logevents: ', logEvents);
+        const { events } = this.props;
+        console.log('events: ', events);
 
-        if (logEvents) {
+        if (events) {
             const gameNotificationsLogs = [];
             const gameWinnersLogs = [];
             const gameMegaPrizeWinnersLogs = [];
 
-            logEvents.forEach((logEvent, index) => {
-                if (!(logEvents.findIndex(i => i.id === logEvent.id) < index)) {
+            events.forEach((logEvent, index) => {
+                if (!(events.findIndex(i => i.id === logEvent.id) < index)) {
                     if (
                         logEvent.event === 'LogCompleteRound'
                         || logEvent.event === 'LogCompleteMPRound'
@@ -119,8 +107,9 @@ class Notifications extends React.Component {
                 }
             });
 
-            console.log('gamenotificationslogs: ', gameNotificationsLogs);
-
+            console.log('gameNotificationsLogs: ', gameNotificationsLogs);
+            console.log('gameWinnersLogs: ', gameWinnersLogs);
+            console.log('gameMegaPrizeWinnersLogs: ', gameMegaPrizeWinnersLogs);
             this.gameNotifications = <GameNotifications events={gameNotificationsLogs} />;
             this.gameWinners = <GameWinners events={gameWinnersLogs} />;
             this.gameMegaPrizeWinners = <GameMegaPrizeWinners events={gameMegaPrizeWinnersLogs} />;
@@ -129,7 +118,6 @@ class Notifications extends React.Component {
 
     render() {
         console.log(' inside Notifications render: ');
-        this.gameID = this.props.gameID;
         const { classes } = this.props;
         this.getEvents();
         return (

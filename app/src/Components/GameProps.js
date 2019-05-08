@@ -16,7 +16,8 @@ const styles = theme => ({
         width: '90%',
         margin: 'auto',
         fontFamily: theme.typography.fontFamily,
-        // backgroundColor: "rgba(121,124,27,0.99)",
+        // backgroundColor: 'rgba(255,255,255,0.70)',
+        // borderRadius: theme.shape.borderRadius * 8,
         // paddingTop: (theme.spacing.unit * 1),
         paddingBottom: (theme.spacing.unit * 1),
         // paddingLeft: (theme.spacing.unit * 1),
@@ -41,7 +42,7 @@ const styles = theme => ({
         fontSize: '1.0rem',
     },
     mediumText: {
-        fontSize: '0.8rem',
+        fontSize: '0.75rem',
     },
 });
 
@@ -83,7 +84,7 @@ class GameProps extends React.PureComponent {
                         {`Round : ${currentRoundText}`}
                     </span>
                     <br />
-                    {`GameID : ${gameID}`}
+                    <b>{`GameID : ${gameID}`}</b>
                     <br />
                 </div>
                 <div
@@ -102,14 +103,14 @@ class GameProps extends React.PureComponent {
                     </Tooltip>
                 </div>
                 <div
-                    className={classNames(classes.flexChild, classes.smallText)}
+                    className={classNames(classes.flexChild, classes.mediumText)}
                     style={{
                         textAlign: 'right',
                     }}
                 >
-                    {`Total Plays : ${(web3.utils.fromWei((new BN(totalValueForGame)).toString(), 'ether') * 1).toFixed(3)} eth`}
+                    {`Total Plays : ${(web3.utils.fromWei((new BN(totalValueForGame)).toString(), 'ether') * 1).toFixed(2)} eth`}
                     <br />
-                    {`Total Wins : ${(web3.utils.fromWei((new BN(totalWinnings)).toString(), 'ether') * 1).toFixed(3)} eth`}
+                    {`Total Wins : ${(web3.utils.fromWei((new BN(totalWinnings)).toString(), 'ether') * 1).toFixed(2)} eth`}
                 </div>
             </div>
         );

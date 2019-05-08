@@ -17,7 +17,6 @@ module.exports = function (deployer, network, accounts) {
         _gameProperties[8] : uint256 currentRound,
         _gameProperties[9] : uint256 totalValueForGame,
         _gameProperties[10] : uint256 totalWinnings,
-        _gameProperties[11] : uint256 directPlayTokenGas
 */
 
     var _gameProperties4 = [
@@ -31,8 +30,7 @@ module.exports = function (deployer, network, accounts) {
         1000,
         0,
         0,
-        0,
-        123456
+        0
     ];
     var _gameProperties3 = [
         103,
@@ -45,8 +43,7 @@ module.exports = function (deployer, network, accounts) {
         1000,
         0,
         0,
-        0,
-        123456
+        0
     ];
     var _gameProperties2 = [
         104,
@@ -59,8 +56,7 @@ module.exports = function (deployer, network, accounts) {
         1000,
         0,
         0,
-        0,
-        123456
+        0
     ];
     var _gameProperties = [
         105,
@@ -73,19 +69,10 @@ module.exports = function (deployer, network, accounts) {
         1000,
         0,
         0,
-        0,
-        123456
+        0
     ];
 
     var multiprizerInstance, multiprizerOraclizeInstance;
-
-    if (network == "development") {
-        deployer.deploy(Multiprizer, { gas: 10000000 }).then(function (instance) {
-            multiprizerInstance = instance;
-            return deployer.deploy(MultiprizerOraclize, Multiprizer.address, { gas: 10000000 });
-        });
-
-    }
 
     if (network == "ganache") {
         console.log("deploy Multiprizer ...");
@@ -120,9 +107,13 @@ module.exports = function (deployer, network, accounts) {
                 console.log("deploy MultiprizerOraclize ....... ");
                 return deployer.deploy(MultiprizerOraclize, Multiprizer.address, { from: accounts[0], gas: 10000000 });
             })
-            // update MultiprizerOraclize props
+            // update TimeKeeper Address
             .then(function (oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
+                return multiprizerInstance.transferTimekeeping(TIMEKEEPER, { from: accounts[0], gasPrice: 5e9 });
+            })
+            // update MultiprizerOraclize props
+            .then(function (receipt) {
                 let _gasLimitOraclize = 350000;
                 let _gasPriceOraclize = 5e9;
                 let _numBytesOraclize = 7;
@@ -191,9 +182,13 @@ module.exports = function (deployer, network, accounts) {
                 console.log("deploy MultiprizerOraclize ....... ");
                 return deployer.deploy(MultiprizerOraclize, Multiprizer.address, { from: accounts[0], gasPrice: 5e9 });
             })
-            // update MultiprizerOraclize props
+            // update TimeKeeper Address
             .then(function (oraclize_instance) {
                 multiprizerOraclizeInstance = oraclize_instance;
+                return multiprizerInstance.transferTimekeeping(TIMEKEEPER, { from: accounts[0], gasPrice: 5e9 });
+            })
+            // update MultiprizerOraclize props
+            .then(function (receipt) {
                 let _gasLimitOraclize = 350000;
                 let _gasPriceOraclize = 5e9;
                 let _numBytesOraclize = 7;

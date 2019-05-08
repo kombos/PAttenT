@@ -9,7 +9,6 @@ import GameDetails from './Containers/GameDetails';
 import Notifications from './Containers/Notifications';
 import Web3NotFound from './Components/Web3NotFound';
 import PageNotFound from './Components/PageNotFound';
-import Loading from './Components/Loading';
 
 import './css/App.css';
 
@@ -44,17 +43,34 @@ export default () => (
                             <Route
                                 exact
                                 path="/"
-                                render={
-                                    () => (<GameStrategies initialized={initialized} drizzleState={drizzleState} />)}
+                                render={() => (
+                                    <GameStrategies
+                                        drizzleState={drizzleState}
+                                        drizzle={drizzle}
+                                    />
+                                )}
+
                             />
                             <Route
                                 path="/gameDetails/:gameID"
-                                render={({ match }) => <GameDetails gameID={match.params.gameID} drizzleState={drizzleState} />}
+                                render={({ match }) => (
+                                    <GameDetails
+                                        gameID={parseInt(match.params.gameID,10)}
+                                        drizzleState={drizzleState}
+                                        drizzle={drizzle}
+                                    />
+                                )}
                             />
                             <Route
                                 path="/notifications"
                                 render={
-                                    () => <Notifications drizzleState={drizzleState} events={logEvents} />}
+                                    () => (
+                                        <Notifications
+                                            drizzleState={drizzleState}
+                                            drizzle={drizzle}
+                                            events={logEvents}
+                                        />
+                                    )}
                             />
                             <Route render={() => <PageNotFound />} />
                         </Switch>

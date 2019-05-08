@@ -48,12 +48,13 @@ const styles = theme => ({
     textFieldStyles: {
         padding: theme.spacing.unit * 1,
         fontSize: '0.9rem',
-        backgroundColor: 'rgba(255,255,255,0.69)',
+        backgroundColor: 'rgba(255,255,255,0.89)',
     },
     textLabelStyles: {
         // padding: theme.spacing.unit * 0.8,
         fontSize: '0.8rem',
         color: theme.palette.text.primary,
+        fontWeight: 'bold',
     },
     button: {
         flexGrow: 1,
@@ -111,11 +112,10 @@ class GameInput extends React.Component {
 
     setValue = (numTokens) => {
         console.log('inside setvalue() ');
+        const { gameID, tokenValue } = this.props;
         const { drizzle, drizzleState } = this.context;
         const web3 = drizzle.web3;
         const BN = web3.utils.BN;
-        const { gameData } = this.props;
-        const { tokenValue, gameID } = gameData.value;
         const multiprizer = drizzle.contracts.Multiprizer;
         const tokenAmount = new BN(numTokens).mul(new BN(tokenValue));
 
@@ -142,17 +142,21 @@ class GameInput extends React.Component {
     }
 
     render() {
+        const { classes, fullScreen } = this.props;
+        const { maxTokens, tokenValue, isGameLocked, currentRound, maxTokensPerPlayer,
+            playerTokens, totalTokensPurchased } = this.props;
         const { drizzle } = this.context;
+
         const web3 = drizzle.web3;
         const BN = web3.utils.BN;
-        const { gameData, playerTokens, classes, fullScreen } = this.props;
-        const { isGameLocked, currentRound, tokenValue, maxTokensPerPlayer } = gameData.value;
         const remainingTokens = (maxTokensPerPlayer - playerTokens);
-        // console.log('tokenvalue: ', remainingTokens);
+        const remainingTotalTokens = (maxTokens - totalTokensPurchased);
+        
         const isDisabled = (
             isGameLocked === true
             || currentRound === 0
             || remainingTokens === 0
+            || remainingTotalTokens === 0
         );
 
         /* Pay routine:

@@ -95,10 +95,7 @@ class GameStats extends React.Component {
     getData() {
         console.log('inside getData  ');
 
-        const { roundData } = this.props;
-        console.log('roundata inside gamestats: ', roundData);
-        const playerList = roundData.value._playerList;
-        const playerTokensList = roundData.value._playerTokensList;
+        const { playerList, playerTokensList } = this.props;
         this.playersData = [];
         for (let i = 0; i < playerList.length; i += 1) {
             this.playersData.push({
@@ -204,8 +201,7 @@ class GameStats extends React.Component {
 
     render() {
         console.log('inside gamenotifications');
-        const sortBy = this.state.sortBy;
-        const sortDirection = this.state.sortDirection;
+        const {sortBy, sortDirection} = this.state;
         const { classes } = this.props;
         this.getData();
         this.sortList({ sortBy, sortDirection });
@@ -216,12 +212,6 @@ class GameStats extends React.Component {
             sortBy,
             ' sort Direction: ',
             sortDirection,
-        );
-        console.log(
-            'fn;;;;;;;;s  sortby: ',
-            this.state.sortBy,
-            ' sort Direction: ',
-            this.state.sortDirection,
         );
 
         return (

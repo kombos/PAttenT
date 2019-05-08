@@ -235,8 +235,6 @@ contract Multiprizer is Ownable {
         uint256 megaPrizeEdge;
         uint256 totalValueForGame;
         uint256 totalWinnings;
-        // directPlayTokenGas limit value initially set to upto 8 game iteration check in fallback function + playGame
-        uint256 directPlayTokenGas;
         uint256 currentRound;
         bool isGameLocked;
         bool isGameLateLocked;
@@ -262,8 +260,8 @@ contract Multiprizer is Ownable {
     *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
       */
     uint256 constant private DIVISOR_POWER_5 = 100000;
-    uint256 constant private DIRECTPLAYTOKEN = 1;
     uint256 private directPlayWithdrawValue;
+    uint256 private directPlayTokenGas;
     bool private isDirectPlayEnabled;
 
     /** 
@@ -338,6 +336,7 @@ contract Multiprizer is Ownable {
         // set DirectPlay parameters
         isDirectPlayEnabled = true;
         directPlayWithdrawValue = 234560000000000;
+        directPlayTokenGas = 234567;
         // set MegaPrize parameters. Duration set to 7 days as default
         megaPrizeNumber = 1;
         isMegaPrizeEnabled = false;
@@ -361,9 +360,8 @@ contract Multiprizer is Ownable {
             _gameProperties[8] : uint256 currentRound,
             _gameProperties[9] : uint256 totalValueForGame,
             _gameProperties[10] : uint256 totalWinnings,
-            _gameProperties[11] : uint256 directPlayTokenGas
     */
-    function addGameByAdmin(uint256[12]calldata _gameProperties) external
+    function addGameByAdmin(uint256[11]calldata _gameProperties) external
     onlyOwner {
 
         require(gameStrategies[_gameProperties[0]].gameID == 0, "gameID_err");
@@ -385,7 +383,6 @@ contract Multiprizer is Ownable {
         gameObj.currentRound = _gameProperties[8];
         gameObj.totalValueForGame = _gameProperties[9];
         gameObj.totalWinnings = _gameProperties[10];
-        gameObj.directPlayTokenGas = _gameProperties[11];
         gameObj.isGameLocked = true;
         gameObj.isGameLateLocked = true;
         gameStrategies[gameObj.gameID] = gameObj;
@@ -393,7 +390,7 @@ contract Multiprizer is Ownable {
         //# EMIT EVENT LOG - to be done
     }
 
-    function updateGameByAdmin(uint256[12]calldata _gameProperties) external
+    function updateGameByAdmin(uint256[11]calldata _gameProperties) external
     onlyOwner {
 
         uint256 _gameID = _gameProperties[0];
@@ -418,7 +415,6 @@ contract Multiprizer is Ownable {
         gameStrategies[_gameID].currentRound = _gameProperties[8];
         gameStrategies[_gameID].totalValueForGame = _gameProperties[9];
         gameStrategies[_gameID].totalWinnings = _gameProperties[10];
-        gameStrategies[_gameID].directPlayTokenGas = _gameProperties[11];
         gameStrategies[_gameID].isGameLocked = true;
         gameStrategies[_gameID].isGameLateLocked = true;
         //# EMIT EVENT LOG - to be done
@@ -455,9 +451,10 @@ contract Multiprizer is Ownable {
         oraclizeAddress = _contractAddress;
     }
 
-    function updateDirectPlayByAdmin(uint256 _directPlayWithdrawValue, bool _isDirectPlayEnabled) external
+    function updateDirectPlayByAdmin(uint256 _directPlayWithdrawValue, uint256 _directPlayTokenGas, bool _isDirectPlayEnabled) external
     onlyOwners {
         directPlayWithdrawValue = _directPlayWithdrawValue;
+        directPlayTokenGas = _directPlayTokenGas;
         isDirectPlayEnabled = _isDirectPlayEnabled;
     }
 
@@ -826,9 +823,11 @@ contract Multiprizer is Ownable {
     function viewDirectPlayInfo() external view
     returns(
         uint256 _directPlayWithdrawValue,
+        uint256 _directPlayTokenGas,
         bool _isDirectPlayEnabled
     ) {
         _directPlayWithdrawValue = directPlayWithdrawValue;
+        _directPlayTokenGas = directPlayTokenGas;
         _isDirectPlayEnabled = isDirectPlayEnabled;
     }
 
@@ -930,7 +929,7 @@ contract Multiprizer is Ownable {
         }
     }
 
-    function getOraclizeRoundsByAdmin(bytes32 _oraclizeID) external view onlyOwners returns(uint256  _oraclizeRound) {
+    function getOraclizeRoundByAdmin(bytes32 _oraclizeID) external view onlyOwners returns(uint256  _oraclizeRound) {
         _oraclizeRound = roundOfOraclizeID[_oraclizeID];
     }
 
@@ -950,7 +949,6 @@ contract Multiprizer is Ownable {
             }
             playerWithdrawals[_toAddress] = (playerWithdrawals[_toAddress]).add(_amount);
         }
-
     }
 
     /**
@@ -985,32 +983,34 @@ contract Multiprizer is Ownable {
         // if the token value pertains to DirectPlay Withdraw feature, withdraw player's pending amount alongwith token value
         if (msg.sender != owner() && msg.sender != timekeeper()) {
             if (!isDirectPlayEnabled) revert("revert_disabled");
-            if (msg.value == directPlayWithdrawValue) {
-                if (playerWithdrawals[msg.sender] == 0) revert("revert_amt");
-                uint256 _amount = playerWithdrawals[msg.sender] + msg.value;
-                delete playerWithdrawals[msg.sender];
-                // implement code to remove the address entry from the withdrawplayerlist
-                uint256 i;
-                for (i = 0; i < playerWithdrawalsKeys.length; i++) {
-                    if (playerWithdrawalsKeys[i] == msg.sender) {
-                        playerWithdrawalsKeys[i] = playerWithdrawalsKeys[playerWithdrawalsKeys.length.sub(1)];
-                        break;
-                    }
+        }
+        if (msg.value == directPlayWithdrawValue) {
+            if (playerWithdrawals[msg.sender] == 0) revert("revert_amt");
+            uint256 _amount = playerWithdrawals[msg.sender] + msg.value;
+            delete playerWithdrawals[msg.sender];
+            // implement code to remove the address entry from the withdrawplayerlist
+            uint256 i;
+            for (i = 0; i < playerWithdrawalsKeys.length; i++) {
+                if (playerWithdrawalsKeys[i] == msg.sender) {
+                    playerWithdrawalsKeys[i] = playerWithdrawalsKeys[playerWithdrawalsKeys.length.sub(1)];
+                    break;
                 }
-                if (i < playerWithdrawalsKeys.length) {
-                    playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
+            }
+            if (i < playerWithdrawalsKeys.length) {
+                playerWithdrawalsKeys.length = (playerWithdrawalsKeys.length).sub(1);
+            }
+            msg.sender.transfer(_amount);
+            return;
+        } else {
+            uint256 i;
+            for (i = 0; i < gameStrategiesKeys.length; i++) {
+                if ((msg.value).mod(gameStrategies[gameStrategiesKeys[i]].tokenValue) == 0) {
+                    playGame(gameStrategiesKeys[i], (msg.value).div(gameStrategies[gameStrategiesKeys[i]].tokenValue));
+                    break;
                 }
-                msg.sender.transfer(_amount);
-                return;
-            } else {
-                uint256 i;
-                for (i = 0; i < gameStrategiesKeys.length; i++) {
-                    if ((msg.value).mod(gameStrategies[gameStrategiesKeys[i]].tokenValue) == 0) {
-                        playGame(gameStrategiesKeys[i], (msg.value).div(gameStrategies[gameStrategiesKeys[i]].tokenValue));
-                        break;
-                    }
-                }
-                // if the token value doesn't match any of the features, revert the transaction
+            }
+            // if the token value doesn't match any of the features, revert the transaction
+            if (msg.sender != owner() && msg.sender != timekeeper()) {
                 if (i >= gameStrategiesKeys.length) { revert("revert_option"); }
             }
         }

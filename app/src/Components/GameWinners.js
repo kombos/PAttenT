@@ -210,8 +210,7 @@ class GameWinners extends React.Component {
 
     render() {
         console.log('inside gamenotifications');
-        const sortBy = this.state.sortBy;
-        const sortDirection = this.state.sortDirection;
+        const {sortBy, sortDirection} = this.state;
         const { classes } = this.props;
         this.getEvents();
         this.sortList({ sortBy, sortDirection });

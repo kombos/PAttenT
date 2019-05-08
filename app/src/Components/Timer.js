@@ -37,11 +37,10 @@ const styles = theme => ({
     },
 });
 
-class Timer extends React.PureComponent {
+class Timer extends React.Component {
     constructor(props) {
         super(props);
-        const duration = this.props.duration;
-        const startTime = this.props.startTime;
+        const { duration, startTime } = this.props;
         let remainingTime = this.calculateRemainingTime(duration, startTime);
 
         this.state = {
@@ -49,23 +48,40 @@ class Timer extends React.PureComponent {
             timeOver: false,
         };
 
-        console.log('# time is : ', this.state.remainingTime);
+        console.log('remaining time is : ', this.state.remainingTime);
     }
 
     componentDidMount() {
+        console.log("inside componentDidMount()");
         // this.timeOver = false;
         this.timer = this.startTimer();
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        console.log('component did update: ');
-        if (prevProps.duration !== this.props.duration || prevProps.startTime !== this.props.startTime) {
+    shouldComponentUpdate(nextProps) {
+        console.log('shouldComponentUpdate: ');
+        const { duration, startTime } = this.props;
+        console.log("next duration: ", nextProps.duration, " and now duration: ", duration);
+        console.log("next startTime: ", nextProps.startTime, " and now startTime: ", startTime);
+        if (nextProps.duration !== duration || nextProps.startTime !== startTime) {
+            let remainingTime = this.calculateRemainingTime(nextProps.duration, nextProps.startTime);
+            console.log("remaining time: ", remainingTime);
             window.clearInterval(this.timer);
             this.timer = null;
-            let remainingTime = this.calculateRemainingTime(this.props.duration, this.props.startTime);
+            console.log("%%%%%%%%%%%%%% timer cleared!! ");
             this.setState({
                 remainingTime: remainingTime,
+                timeOver: false
             });
+        }
+        return true;
+
+    }
+
+    componentDidUpdate(prevProps) {
+        console.log('component did update: ');
+        const { duration, startTime } = this.props;
+        console.log("state.timeover: : ", this.state.timeOver);
+        if (prevProps.duration !== duration || prevProps.startTime !== startTime) {
             this.timer = this.startTimer();
         }
         if (this.state.timeOver) {
@@ -76,12 +92,13 @@ class Timer extends React.PureComponent {
     }
 
     componentWillUnmount() {
+        console.log("inside componentWillUnmount()");
         window.clearInterval(this.timer);
         this.timer = null;
     }
 
     calculateRemainingTime(duration, startTime) {
-        console.log('duration: ', duration && duration, ' startTime: ', startTime && startTime);
+        console.log("inside calculateRemainingTime()")
         let remainingTime = 0;
         if (duration > 0) {
             // const startTime = new Date().getTime() - 60 * 60 * 3;
@@ -97,6 +114,7 @@ class Timer extends React.PureComponent {
     }
 
     secToString(_seconds) {
+        console.log("inside secToString()");
         const seconds = Number(_seconds);
         // console.log("duration is : ", seconds);
         const d = Math.floor(seconds / (3600 * 24));
@@ -114,11 +132,14 @@ class Timer extends React.PureComponent {
     }
 
     startTimer() {
+        console.log("inside startTimer()");
         const _this = this;
         console.log('remaining time: ', _this.state.remainingTime, ' MINTIME: ', _this.MINTIME);
         return window.setInterval(() => {
+            console.log("-- inside interval --");
             if (_this.state.remainingTime > _this.MINTIME) {
                 const _remainingTime = _this.state.remainingTime - 1;
+                console.log("remainingTime:: ", _remainingTime);
                 // console.log("timer time: ", _remainingTime);
                 _this.setState({
                     remainingTime: _remainingTime,
@@ -136,8 +157,12 @@ class Timer extends React.PureComponent {
     }
 
     render() {
+        console.log("inside render()");
         const { classes, duration } = this.props;
-        const { remainingTime } = this.state;
+        const { remainingTime, timeOver } = this.state;
+        console.log("remaining time: ", remainingTime);
+        console.log("timeOver: ", timeOver);
+
         const durationStr = this.secToString(duration);
         const durationArr = durationStr.split(' ');
         const remTimeStr = this.secToString(remainingTime);

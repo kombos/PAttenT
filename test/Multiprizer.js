@@ -63,7 +63,6 @@ contract("MultiprizerOraclize", accounts => {
         _gameProperties[8] : uint256 currentRound,
         _gameProperties[9] : uint256 totalValueForGame,
         _gameProperties[10] : uint256 totalWinnings,
-        _gameProperties[11] : uint256 directPlayTokenValue
 */
 
 /**
@@ -106,7 +105,7 @@ contract("Multiprizer", accounts => {
 
     it("should add games by admin : positive scenario  : addGameByAdmin() ", async () => {
 
-        let _gameProperties = [100, 100, 2e15, (60 * 60 * 24 * 2), (4 * 60 * 24 * 2), 5, 5000, 1000, 0, 0, 0, 1e14];
+        let _gameProperties = [100, 100, 2e15, (60 * 60 * 24 * 2), (4 * 60 * 24 * 2), 5, 5000, 1000, 0, 0, 0];
         let gasEstimate = await multiprizer.methods.addGameByAdmin(_gameProperties).estimateGas({ from: accounts[0] });
         console.log(" addGameByAdmin() Invocation Gas : ", gasEstimate);
         await instance.addGameByAdmin(_gameProperties, { from: accounts[0] })
@@ -122,7 +121,7 @@ contract("Multiprizer", accounts => {
 
     it("should again add games by admin : positive scenario   : addGameByAdmin() ", async () => {
 
-        let _gameProperties = [101, 400, 2e15, (60 * 60 * 24 * 2), (4 * 60 * 24 * 2), 5, 8000, 1000, 0, 0, 0, 1e14];
+        let _gameProperties = [101, 400, 2e15, (60 * 60 * 24 * 2), (4 * 60 * 24 * 2), 5, 8000, 1000, 0, 0, 0];
         let gasEstimate = await multiprizer.methods.addGameByAdmin(_gameProperties).estimateGas({ from: accounts[0] });
         console.log(" addGameByAdmin() Invocation Gas : ", gasEstimate);
         await instance.addGameByAdmin(_gameProperties, { from: accounts[0] })
@@ -138,7 +137,7 @@ contract("Multiprizer", accounts => {
 
     it("should update games by admin : positive scenario   : updateGameByAdmin() ", async () => {
 
-        let _gameProperties = [101, 305, 2e15, (60 * 50 * 24 * 2), (4 * 60 * 24 * 2), 7, 8000, 1000, 0, 0, 0, 1e14];
+        let _gameProperties = [101, 305, 2e15, (60 * 50 * 24 * 2), (4 * 60 * 24 * 2), 7, 8000, 1000, 0, 0, 0];
         let gasEstimate = await multiprizer.methods.updateGameByAdmin(_gameProperties).estimateGas({ from: accounts[0] });
         console.log(" updateGameByAdmin() Invocation Gas : ", gasEstimate);
         await instance.updateGameByAdmin(_gameProperties, { from: accounts[0] })
@@ -154,7 +153,7 @@ contract("Multiprizer", accounts => {
 
     it("should again update games by admin : positive scenario   : updateGameByAdmin() ", async () => {
 
-        let _gameProperties = [100, 550, 2e14, (60 * 50 * 24 * 2), (4 * 60 * 24 * 2), 7, 8000, 1000, 0, 0, 0, 1e14];
+        let _gameProperties = [100, 550, 2e14, (60 * 50 * 24 * 2), (4 * 60 * 24 * 2), 7, 8000, 1000, 0, 0, 0];
         let gasEstimate = await multiprizer.methods.updateGameByAdmin(_gameProperties).estimateGas({ from: accounts[0] });
         console.log(" updateGameByAdmin() Invocation Gas : ", gasEstimate);
         await instance.updateGameByAdmin(_gameProperties, { from: accounts[0] })
@@ -216,61 +215,18 @@ contract("Multiprizer", accounts => {
             })
     });
 
-    /*  it("should Pause all games : Positive Scenario   : pauseAllGamesByAdmin() ", async () => {
- 
-         let gasEstimate = await multiprizer.methods.pauseAllGamesByAdmin().estimateGas({ from: accounts[0] });
-         console.log(" pauseAllGamesByAdmin() Invocation Gas : ", gasEstimate);
-         await instance.pauseAllGamesByAdmin({ from: accounts[0] })
-             .then(async function (receipt) {
-                 console.log("Transaction Receipt : " + receipt);
-                 let gameIDs = await instance.viewGameIDs({ from: accounts[0] });
-                 let i, _gameID;
-                 for (i = 0; i < gameIDs.length; i++) {
-                     _gameID = gameIDs[i];
-                     let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-                     if (!gameData.isGameLocked || !gameData.isGameLateLocked) {
-                         assert.fail("Error: game paused but gameData parameters dont match! ");
-                     }
-                 }
-                 assert.ok(true);
- 
-             })
- 
-     });
- 
-     it("should resume all games : Positive Scenario   : resumeAllGamesByAdmin() ", async () => {
- 
-         let gasEstimate = await multiprizer.methods.resumeAllGamesByAdmin().estimateGas({ from: accounts[0] });
-         console.log(" resumeAllGamesByAdmin() Invocation Gas : ", gasEstimate);
-         await instance.resumeAllGamesByAdmin({ from: accounts[0] })
-             .then(async function (receipt) {
-                 console.log("Transaction Receipt : " + receipt);
-                 let gameIDs = await instance.viewGameIDs({ from: accounts[0] });
-                 let i, _gameID;
-                 for (i = 0; i < gameIDs.length; i++) {
-                     _gameID = gameIDs[i];
-                     let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-                     if (gameData.isLocked || gameData.isLateLocked) {
-                         assert.fail("Error: game paused but gameData parameters dont match! ");
-                     }
-                 }
-                 assert.ok(true);
- 
-             })
- 
-     }); */
-
     it("should update the directPlay variables : Positive Scenario   : updateDirectPlayByAdmin() ", async () => {
 
         let _directPlayWithdrawValue = 1e15;
+        let _directPlayTokenGas = 234567;
         let _isDirectPlayEnabled = true;
-        let gasEstimate = await multiprizer.methods.updateDirectPlayByAdmin(_directPlayWithdrawValue, _isDirectPlayEnabled).estimateGas({ from: accounts[0] });
+        let gasEstimate = await multiprizer.methods.updateDirectPlayByAdmin(_directPlayWithdrawValue, _directPlayTokenGas, _isDirectPlayEnabled).estimateGas({ from: accounts[0] });
         console.log(" updateDirectPlayByAdmin() Invocation Gas : ", gasEstimate);
-        await instance.updateDirectPlayByAdmin(_directPlayWithdrawValue, _isDirectPlayEnabled, { from: accounts[0] })
+        await instance.updateDirectPlayByAdmin(_directPlayWithdrawValue, _directPlayTokenGas, _isDirectPlayEnabled, { from: accounts[0] })
             .then(async function (receipt) {
                 console.log("Transaction Receipt : " + receipt);
                 let gameData = await instance.viewDirectPlayInfo({ from: accounts[0] });
-                if (gameData._directPlayWithdrawValue == _directPlayWithdrawValue && gameData._isDirectPlayEnabled == _isDirectPlayEnabled)
+                if (gameData._directPlayWithdrawValue == _directPlayWithdrawValue && gameData._directPlayTokenGas == _directPlayTokenGas && gameData._isDirectPlayEnabled == _isDirectPlayEnabled)
                     assert.ok(true);
                 else
                     assert.fail("Error: DirectPlay updated but gameData parameters dont match! ");
@@ -345,30 +301,6 @@ contract("Multiprizer", accounts => {
                     assert.fail("Error: megaPrize unlocked but gameData parameters dont match! ");
             })
     });
-
-    /* it("should complete pending rounds and create new rounds : Positive Scenario   : completeRoundByAdmin() ", async () => {
-        // this has to be further combined with winners calculation for integration testing
-        let _gameID = 102;
-        let gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-        let _currentRound = gameData.currentRound;
-        console.log("current round BEFORE completeRound: ", _currentRound.toNumber());
-        let gasEstimate = await multiprizer.methods.completeRoundByAdmin(_gameID).estimateGas({ from: accounts[0] });
-        console.log(" completeRoundByAdmin() Invocation Gas : ", gasEstimate);
-        await instance.completeRoundByAdmin(_gameID, { from: accounts[0] })
-            .then(async function (receipt) {
-                console.log("Transaction Receipt : " + receipt);
-                gameData = await instance.gameStrategies(_gameID, { from: accounts[0] });
-                _currentRound = gameData.currentRound;
-                console.log("current round after completeRound: ", _currentRound.toNumber());
-                if (gameData.currentRound != 0) {
-                    assert.ok(true);
-                }
-                else {
-                    assert.fail("Error: round completed but gameData not set ");
-                }
-            })
-    }); */
-
 
     it("should initiate play game : Positive Scenario   : playGame() ", async () => {
         // this has to be further combined with winners calculation for integration testing
@@ -456,12 +388,12 @@ contract("Multiprizer", accounts => {
         // this has to be further combined with winners calculation for integration testing
         let _gameID = 102;
         //let gasEstimate = await multiprizer.methods.completeRoundByAdmin([_gameID]).estimateGas({ from: accounts[0] });
-        //console.log(" completeRoundByAdmin() Invocation Gas : ", gasEstimate);
+        console.log(" completeRoundByAdmin() Invocation Gas : ", gasEstimate);
 
         //await instance.send(10, {from:accounts[0]});
         await oraclizeInstance.send(web3.utils.toHex(1e19), { from: accounts[0] });
         web3.eth.getBalance(oraclizeInstance.address).then((balance) => (console.log("oraclize balance: ", balance)));
-        //console.log("oraclize instance balance: ", web3.eth.getBalance(oraclizeInstance.address));
+        console.log("oraclize instance balance: ", web3.eth.getBalance(oraclizeInstance.address));
         await instance.send(web3.utils.toHex(1e19), { from: accounts[0] });
         console.log("last?");
         await instance.completeRoundByAdmin(_gameID, { from: accounts[0], gas: 10000000 })
@@ -478,7 +410,6 @@ contract("Multiprizer", accounts => {
                 }
             })
     });
-
 
     it("should get oraclize result by admin   : getOraclizeResultByAdmin() ", async () => {
         // this has to be further combined with winners calculation for integration testing

@@ -113,6 +113,7 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
       */
     MultiprizerAbstract private multiprizer;
+    address payable public multiprizerAddress;
 
     /** 
     *  Oraclize Props Variables 
@@ -125,13 +126,6 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     uint256 private delayOraclize;
     uint256 public priceOraclize;
     string constant private DATASOURCE = "random";
-
-    /** 
-    *  Control Variables 
-    *  @dev DirectPlay enables a player to place a single token for any of the strategy games   
-    *  execute manual withdraw of your prizes won by sending directPlayWithdraw value of ethers. 
-      */
-    address payable public multiprizerAddress;
 
     /** 
     *  Event Logs 
@@ -225,7 +219,6 @@ contract MultiprizerOraclize is Ownable, usingOraclize {
     // self destruct contract after reverting all pending games of players and sending back funds
     function ownerKill() external
     onlyOwner {
-
         selfdestruct(owner());
     }
 
