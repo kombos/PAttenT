@@ -127,14 +127,6 @@ class RoundDetails extends React.Component {
         console.log('is game locked? : ', isGameLocked);
         console.log('expression value: ', isGameLocked !== true && currentRound !== 0);
 
-        gameContainer = (
-            <GameContainer
-                gameID={gameID}
-                drizzleState={drizzleState}
-                drizzle={drizzle}
-            />
-        );
-
         if (isGameLocked !== true && currentRound !== 0) {
             if (roundData && roundData.value) {
                 playerList = roundData.value._playerList;
@@ -165,6 +157,14 @@ class RoundDetails extends React.Component {
                 );
             }
         }
+
+        gameContainer = (
+            <GameContainer
+                gameID={gameID}
+                drizzleState={drizzleState}
+                drizzle={drizzle}
+            />
+        );
 
         return (
             <div className={classes.flexContainer}>
