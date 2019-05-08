@@ -186,10 +186,10 @@ class GameNotifications extends React.Component {
 
                 case 'LogCompleteMPRound':
                     if (gameEvent.players > 1) {
-                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. `;
+                        gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. `;
                         break;
                     } else {
-                        gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. MegaPrize amount carried forward to next round due to no contenders.`;
+                        gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} has completed. Amount carried forward to next round due to no contenders.`;
                         break;
                     }
 
@@ -202,7 +202,7 @@ class GameNotifications extends React.Component {
                     break;
 
                 case 'LogMegaPrizeUpdate':
-                    gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game at least once to be eligible for MegaPrize pick!`;
+                    gameEvent.notification = `Extra Amount added to MegaPrize making it a total: ${(web3.utils.fromWei((parseInt(gameEvent.megaPrizeAmount, 10)).toString(), 'ether') + ' eth')}. Play any game now to be eligible!`;
                     break;
 
                 default:

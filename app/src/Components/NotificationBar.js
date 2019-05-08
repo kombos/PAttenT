@@ -142,10 +142,10 @@ class NotificationBar extends React.Component {
 
             case 'LogCompleteMPRound':
                 if (gameEvent.numPlayers > 1) {
-                    gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. Click to know more.`;
+                    gameEvent.notification = `MegaPrize: ${gameEvent.megaPrizeNumber} has completed. Winners will be announced soon. Click to know more.`;
                     break;
                 } else {
-                    gameEvent.notification = `MegaPrize round number: ${gameEvent.megaPrizeNumber} has completed. MegaPrize amount carried forward to next round due to no contenders.`;
+                    gameEvent.notification = `MegaPriz: ${gameEvent.megaPrizeNumber} has completed. Amount carried forward to next round due to no contenders.`;
                     break;
                 }
 

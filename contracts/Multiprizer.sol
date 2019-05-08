@@ -634,11 +634,11 @@ contract Multiprizer is Ownable {
     function completeMegaPrizeRoundByAdmin() external
     onlyOwners {
         if (isMegaPrizeEnabled) {
-            isMegaPrizeMatured = true;
             // emit mega prize round completion event
             emit LogCompleteMPRound(megaPrizeNumber, megaPrizePlayersKeys[megaPrizeNumber].length, now, block.timestamp);
             // generate oraclize ID and move to the next round
             if (megaPrizePlayersKeys[megaPrizeNumber].length > 1 && megaPrizeAmount[megaPrizeNumber] > 0) {
+                isMegaPrizeMatured = true;
                 bytes32 _oraclizeID = multiprizerOraclize.newRandomDSQuery();
                 megaPrizeOraclizeID[megaPrizeNumber] = _oraclizeID;
                 mpNumberOfOraclizeID[_oraclizeID] = megaPrizeNumber;
