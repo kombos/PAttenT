@@ -226,6 +226,7 @@ contract Multiprizer is Ownable {
 
     struct Game {
         uint256 gameID;
+        uint256 currentRound;
         uint256 maxTokens;
         uint256 tokenValue;
         uint256 gameDurationInEpoch;
@@ -235,7 +236,6 @@ contract Multiprizer is Ownable {
         uint256 megaPrizeEdge;
         uint256 totalValueForGame;
         uint256 totalWinnings;
-        uint256 currentRound;
         bool isGameLocked;
         bool isGameLateLocked;
     }
@@ -853,8 +853,10 @@ contract Multiprizer is Ownable {
         _amount = playerWithdrawals[_playerAddress];
     }
 
-    function viewRoundInfo(uint256 _gameID, uint256 _roundNumber) external view
+    function viewRoundInfo(uint256 gameID, uint256 roundNumber) external view
     returns(
+        uint256 _gameID,
+        uint256 _roundNumber,
         uint256 _totalTokensPurchased,
         uint256 _roundStartTimeSecs,
         uint256 _roundStartTimeBlock,
@@ -863,13 +865,15 @@ contract Multiprizer is Ownable {
         address payable _winner,
         bool _isRoundOpen
     ) {
-        // _gameID should be valid
-        require(gameStrategies[_gameID].gameID != 0, "gameID_err");
-        // check _roundNumber is valid and not the current round number
-        require(_roundNumber != 0,
+        // gameID should be valid
+        require(gameStrategies[gameID].gameID != 0, "gameID_err");
+        // check roundNumber is valid and not the current round number
+        require(roundNumber != 0,
             "round_zero");
-        // get the unique roundID value from the _gameID & _roundNumber pair (pairing function)
-        uint256 roundID = cantorPairing(_gameID, _roundNumber);
+        // get the unique roundID value from the gameID & roundNumber pair (pairing function)
+        uint256 roundID = cantorPairing(gameID, roundNumber);
+        _gameID = rounds[roundID].gameID;
+        _roundNumber = rounds[roundID].roundNumber;
         _totalTokensPurchased = rounds[roundID].totalTokensPurchased;
         _roundStartTimeSecs = rounds[roundID].roundStartTimeSecs;
         _roundStartTimeBlock = rounds[roundID].roundStartTimeBlock;

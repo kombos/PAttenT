@@ -109,6 +109,7 @@ module.exports = function (deployer, network, accounts) {
             })
             // update TimeKeeper Address
             .then(function (oraclize_instance) {
+                console.log("nominate timekeeper....... ");
                 multiprizerOraclizeInstance = oraclize_instance;
                 return multiprizerInstance.transferTimekeeping(TIMEKEEPER, { from: accounts[0], gasPrice: 5e9 });
             })
@@ -184,6 +185,7 @@ module.exports = function (deployer, network, accounts) {
             })
             // update TimeKeeper Address
             .then(function (oraclize_instance) {
+                console.log("nominate timekeeper....... ");
                 multiprizerOraclizeInstance = oraclize_instance;
                 return multiprizerInstance.transferTimekeeping(TIMEKEEPER, { from: accounts[0], gasPrice: 5e9 });
             })
