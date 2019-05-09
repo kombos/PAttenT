@@ -9,3 +9,4 @@ info.docx
 npm-debug.log
 .DS_Store
 /*.env
+secret.js
