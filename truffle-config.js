@@ -1,4 +1,4 @@
-import { ROPSTEN_MNEMONIC, ROPSTEN_INFURA_APIKEY } from './secret.js';
+
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -25,17 +25,13 @@ import { ROPSTEN_MNEMONIC, ROPSTEN_INFURA_APIKEY } from './secret.js';
 
 // const HDWallet = require('truffle-hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
-//
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+const fs = require('fs');
+const mnemonic = fs.readFileSync(".secret").toString().trim();
 //projectID: c1a795f858814218840034fe273cb040
-//project Secret: d9a6e78d273a4c30a18deac51337de11
 //ropsten endpoint: https://ropsten.infura.io/v3/c1a795f858814218840034fe273cb040
-
-var HDWalletProvider = require("truffle-hdwallet-provider");
-var infura_apikey = ROPSTEN_INFURA_APIKEY;
-var mnemonic = ROPSTEN_MNEMONIC;
+const HDWalletProvider = require("truffle-hdwallet-provider");
+const infura_apikey = "c1a795f858814218840034fe273cb040";
 
 
 module.exports = {
