@@ -1,12 +1,27 @@
-/info.txt
+# dependencies
 /build
-/client/src/contracts
 /node_modules
-data.txt
-info.docx
-~WRL1436.tmp
-~$info.docx
-npm-debug.log
-.DS_Store
-/*.env
+/app/node_modules
+/app/src/contracts
+
+# secret
 .secret
+
+# testing
+/coverage
+
+# production
+/build
+
+# env 
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+/*.env
+
+# package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

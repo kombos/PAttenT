@@ -23,15 +23,10 @@
  *
  */
 
-// const HDWallet = require('truffle-hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
-
-const fs = require('fs');
-const mnemonic = fs.readFileSync(".secret").toString().trim();
-//projectID: c1a795f858814218840034fe273cb040
-//ropsten endpoint: https://ropsten.infura.io/v3/c1a795f858814218840034fe273cb040
+require('dotenv').config();
+// const fs = require('fs');
+// const mnemonic = fs.readFileSync(".secret").toString().trim();
 const HDWalletProvider = require("truffle-hdwallet-provider");
-const infura_apikey = "c1a795f858814218840034fe273cb040";
 
 
 module.exports = {
@@ -51,30 +46,43 @@ module.exports = {
         // You should run a client (like ganache-cli, geth or parity) in a separate terminal
         // tab if you use this network and you must also set the `host`, `port` and `network_id`
         // options below to some value.
-        //
-        development: {
-            host: "127.0.0.1",     // Localhost (default: none)
-            port: 8545,            // Standard Ethereum port (default: none)
-            gas: 1000000,
-            gasPrice: 1,
-            network_id: "*",       // Any network (default: none)
-        },
+        
+        /* 
+        ## Block Gas Limits (approx values as they change in every block) ##
+        Ganache: 6721975
+        Ropsten: 8000000
+        Kovan: 8000000
+        Rinkeby: 7000000
+        Gorli: 8000000
+        Mainnet: 8000000
+        */
 
         ganache: {
             host: "127.0.0.1",     // Localhost (default: none)
             port: 7545,            // Standard Ethereum port (default: none)
-            gas: 1000000,
-            gasPrice: 5000000000,
+            gas: 6721975,
+            gasPrice: 3000000000,
             network_id: "*",       // Any network (default: none)
         },
 
         ropsten: {
-            //provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/v3/" + infura_apikey),
-            gasPrice: 5000000000,
+            gas: 7000000,
+            gasPrice: 3000000000,
             provider: function () {
-                return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/v3/" + infura_apikey)
+                return new HDWalletProvider(process.env.ROPSTEN_MNEMONIC, "https://ropsten.infura.io/v3/" + process.env.INFURA_MP_DEPLOY)
             },
+            //provider: new HDWalletProvider(process.env.ROPSTEN_MNEMONIC, "https://ropsten.infura.io/v3/" + process.env.INFURA_MP_DEPLOY),
             network_id: 3
+        },
+
+        mainnet: {
+            gas: 7000000,
+            gasPrice: 6000000000,
+            provider: function () {
+                return new HDWalletProvider(process.env.MAINNET_MNENOMIC, "https://mainnet.infura.io/v3/" + process.env.INFURA_MP_DEPLOY)
+            },
+            //provider: new HDWalletProvider(process.env.MAINNET_MNENOMIC, "https://mainnet.infura.io/v3/" + process.env.INFURA_MP_DEPLOY),
+            network_id: 1
         }
 
         // Another network with more advanced options...
@@ -121,7 +129,7 @@ module.exports = {
                     enabled: true,
                     runs: 500
                 },
-                evmVersion: "byzantium"
+                //evmVersion: "byzantium"
             }
         }
     }
