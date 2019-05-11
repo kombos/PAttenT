@@ -22,5 +22,7 @@ export const DRAWERICONS = [
 // Indicator Props
 export const BOUNTYSIZE_DIVISOR = 5e18;
 
-// Trust Wallet Deep Link
-export const TRUST_WALLET_DEEPLINK = "https://links.trustwalletapp.com/8aIPBz7XnW";
+// Trust Wallet Deep Link (mainnet)
+export const TRUST_WALLET_DEEPLINK = "https://links.trustwalletapp.com/dWVTMiVEAW";
+// Trust Wallet Deep Link (ropsten)
+// export const TRUST_WALLET_DEEPLINK = "https://links.trustwalletapp.com/VBK1M04EAW";
