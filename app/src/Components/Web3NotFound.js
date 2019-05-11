@@ -99,6 +99,7 @@ class Web3NotFound extends React.Component {
                             <b>Multiprizer</b> - Multiply your prize winnings by playing your tokens strategically!
                             <br />
                             This DApp requires <b>MetaMask</b> if you are in a Desktop / Laptop, or <b>Trust Wallet App</b> if you are in a Mobile device.<br />
+                            Also, please set your Metamask / Trust Wallet to <b>Ethereum Main Network</b>, if not already done by default.<br />
                             Please select an item below.
                         </DialogContentText>
                     </DialogContent>
