@@ -23,6 +23,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
+import HomeIcon from '@material-ui/icons/Home';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import NotesIcon from '@material-ui/icons/Notes';
 import StarsIcon from '@material-ui/icons/Stars';
@@ -211,6 +212,18 @@ class Header extends React.Component {
         const drawerItems = (
             <div className={classes.list}>
                 <List>
+                    <ListItem
+                        button
+                        key="homesite"
+                        component='a'
+                        href='https://multiprizer.io'
+                    >
+                        <ListItemIcon>
+                            <HomeIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Goto Homesite" />
+                    </ListItem>
+                    <Divider />
                     <ListItem
                         button
                         key="notifications"
