@@ -55,11 +55,10 @@ const styles = theme => ({
 
 
 class NotificationBar extends React.Component {
-    static contextType = DrizzleContext.Consumer;
+    static contextType = DrizzleContext.Context;
 
-    constructor(props, context) {
+    constructor(props) {
         super(props);
-        this.context = context;
         this.flag = true;
     }
 

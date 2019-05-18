@@ -78,11 +78,10 @@ const styles = theme => ({
 
 
 class GameLogs extends React.Component {
-    static contextType = DrizzleContext.Consumer;
+    static contextType = DrizzleContext.Context;
 
-    constructor(props, context) {
+    constructor(props) {
         super(props);
-        this.context = context;
         const sortBy = 'timeSecs';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };

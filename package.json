@@ -2,6 +2,7 @@
   "name": "multiprizer-app",
   "version": "1.0.0",
   "description": "Source of a Blockchain Ethereum dapp game which requires strategic investment to multiply your prize winnings",
+  "private": true,
   "main": "truffle-config.js",
   "directories": {
     "test": "test"

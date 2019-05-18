@@ -106,12 +106,11 @@ const styles = theme => ({
 });
 
 class Header extends React.Component {
-    static contextType = DrizzleContext.Consumer;
+    static contextType = DrizzleContext.Context;
 
-    constructor(props, context) {
+    constructor(props) {
         console.log('#___ inside constructor___');
         super(props);
-        this.context = context;
         this.state = {
             dataKey: null,
             isDrawerOpen: false,

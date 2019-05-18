@@ -76,7 +76,9 @@ module.exports = {
         },
 
         mainnet: {
-            gas: 7000000,
+            // First gas limit is for contract deployment, second for executing state-changing transactions
+            // gas: 7000000,
+            gas: 500000,
             gasPrice: 6000000000,
             provider: function () {
                 return new HDWalletProvider(process.env.MAINNET_MNENOMIC, "https://mainnet.infura.io/v3/" + process.env.INFURA_MP_DEPLOY)

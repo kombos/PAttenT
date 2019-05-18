@@ -75,16 +75,15 @@ const styles = theme => ({
 });
 
 class PurchasedTokens extends React.Component {
-    static contextType = DrizzleContext.Consumer;
+    static contextType = DrizzleContext.Context;
 
-    constructor(props, context) {
+    constructor(props) {
         super(props);
         console.log('inside PurchasedTokens');
         this.state = {
             stackID: null,
             isDialogOpen: false,
         };
-        this.context = context;
         this.revertTokens = this.revertTokens.bind();
         this.handleClose = this.handleClose.bind();
     }

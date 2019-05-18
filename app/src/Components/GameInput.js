@@ -67,9 +67,9 @@ const styles = theme => ({
 });
 
 class GameInput extends React.Component {
-    static contextType = DrizzleContext.Consumer;
+    static contextType = DrizzleContext.Context;
 
-    constructor(props, context) {
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -77,7 +77,6 @@ class GameInput extends React.Component {
             numTokens: '',
             isDialogOpen: false,
         };
-        this.context = context;
         this.txHash = null;
         this.MINTOKENS = 1;
         this.handleSubmit = this.handleSubmit.bind();

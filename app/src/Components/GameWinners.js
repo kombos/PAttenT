@@ -98,11 +98,10 @@ const styles = theme => ({
 });
 
 class GameWinners extends React.Component {
-    static contextType = DrizzleContext.Consumer;
+    static contextType = DrizzleContext.Context;
 
-    constructor(props, context) {
+    constructor(props) {
         super(props);
-        this.context = context;
         const sortBy = 'round';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };

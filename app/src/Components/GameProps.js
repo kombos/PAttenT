@@ -47,12 +47,7 @@ const styles = theme => ({
 });
 
 class GameProps extends React.PureComponent {
-    static contextType = DrizzleContext.Consumer;
-
-    constructor(props, context) {
-        super(props);
-        this.context = context;
-    }
+    static contextType = DrizzleContext.Context;
 
     render() {
         console.log('inside gameProps');
