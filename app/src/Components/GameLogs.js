@@ -85,6 +85,7 @@ class GameLogs extends React.Component {
         const sortBy = 'timeSecs';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
+        // flag is needed to categorize 'play' and 'revert' transaction logs
         this.flag = true;
         // this.getEvents();
         // this.sortList({ sortBy, sortDirection });

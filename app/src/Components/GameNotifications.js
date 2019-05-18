@@ -100,9 +100,9 @@ class GameNotifications extends React.Component {
         const sortBy = 'timeSecs';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
-        this.flag = true;
-        this.getEvents();
-        this.sortList({ sortBy, sortDirection });
+        // this.flag = true;
+        // this.getEvents();
+        // this.sortList({ sortBy, sortDirection });
     }
 
     getRowClassName = ({ index }) => {
@@ -227,15 +227,15 @@ class GameNotifications extends React.Component {
         if (this.props.events.length != nextProps.events.length ||
             this.state.sortBy != nextState.sortBy ||
             this.state.sortDirection != nextState.sortDirection) {
-            this.flag = true;
-            return true;
-        }
+            // this.flag = true;
+            re turn true;
+         }
         else {
-            if (this.flag) {
-                console.log("inside if");
-                this.flag = false;
-                this.getEvents();
-                return true;
+            // if (this.flag) {
+                 console.log("inside if");
+                 // this.flag = false;
+                th is.getEvents();
+                re turn true;
             }
             return false;
         }
@@ -261,7 +261,7 @@ class GameNotifications extends React.Component {
 
     render() {
         console.log('inside gamenotifications');
-        const {sortBy, sortDirection} = this.state;
+        const { sortBy, sortDirection } = this.state;
         const { classes } = this.props;
         this.getEvents();
         this.sortList({ sortBy, sortDirection });

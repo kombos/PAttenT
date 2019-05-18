@@ -106,7 +106,7 @@ class GameMegaPrizeWinners extends React.Component {
         const sortBy = 'megaPrizeNumber';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
-        this.flag = true;
+        // this.flag = true;
         // this.getEvents();
         // this.sortList({ sortBy, sortDirection });
     }

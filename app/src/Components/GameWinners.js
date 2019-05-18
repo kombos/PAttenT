@@ -105,7 +105,7 @@ class GameWinners extends React.Component {
         const sortBy = 'round';
         const sortDirection = SortDirection.DESC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
-        this.flag = true;
+        // this.flag = true;
         // this.getEvents();
         // this.sortList({ sortBy, sortDirection });
     }

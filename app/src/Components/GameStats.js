@@ -80,7 +80,7 @@ class GameStats extends React.Component {
         const sortBy = 'serial';
         const sortDirection = SortDirection.ASC;
         this.state = { sortDirection: sortDirection, sortBy: sortBy };
-        this.flag = true;
+        // this.flag = true;
         // this.getData();
         // this.sortList({ sortBy, sortDirection });
     }
