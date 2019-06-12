@@ -10,7 +10,6 @@ import './css/index.css';
 // import * as serviceWorker from './serviceWorker';
 
 console.log('inside index.js');
-
 const drizzleStore = generateStore(drizzleOptions);
 console.log('drizzlestore: ', drizzleStore);
 console.log('drizzleoptions: ', drizzleOptions);

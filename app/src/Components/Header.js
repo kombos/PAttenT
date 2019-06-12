@@ -117,80 +117,24 @@ class Header extends React.Component {
             stackID: null,
             isDialogOpen: false,
         };
-        this.withdrawTokens = this.withdrawTokens.bind();
-        this.handleClose = this.handleClose.bind();
     }
 
     componentDidMount() {
-        this.getWithdrawals(this.props.playerAddress);
     }
 
     componentDidUpdate(prevProps) {
-        const { playerAddress } = this.props;
-        if (playerAddress !== prevProps.playerAddress) {
-            this.getWithdrawals(playerAddress);
-        }
     }
 
-    getWithdrawals = (playerAddress) => {
-        console.log('# Header: $$$$$ INSIDE getWithdrawals $$$$$');
-        const { drizzle } = this.context;
-        const { Multiprizer } = drizzle.contracts;
-        // get and save the key for the variable we are interested in
-        console.log('player : ', playerAddress);
-        const dataKey = Multiprizer.methods.viewWithdrawalInfo.cacheCall(
-            playerAddress,
-        );
-        console.log('# Header datakey value is:', dataKey);
-        this.setState({
-            dataKey: dataKey,
-        });
-    };
-
-    withdrawTokens = () => {
-        console.log('inside withdrawTokens() ');
-        const { playerAddress } = this.props;
-        const { drizzle } = this.context;
-        console.log('playeraddr: ', playerAddress);
-        const { Multiprizer } = drizzle.contracts;
-        const stackID = Multiprizer.methods.withdraw.cacheSend({
-            from: playerAddress,
-        });
-        this.handleClickOpen();
-        console.log('stackID: ', stackID);
-        this.setState({ stackID: stackID });
-    };
-
-    handleClickOpen = () => {
-        this.setState({ isDialogOpen: true });
-    };
-
-    handleClose = () => {
-        this.setState({ isDialogOpen: false });
-    };
 
     render() {
         console.log('# inside render ');
-        console.log('notification icon: ', NotificationsIcon);
         const { classes, history, fullScreen } = this.props;
         const { dataKey } = this.state;
         const { drizzleState } = this.context;
         const toggleDrawer = isDrawerOpen => () => {
             this.setState({ isDrawerOpen: isDrawerOpen });
         };
-        const { Multiprizer } = drizzleState.contracts;
-        console.log('this.state.dataKey : ', dataKey);
-        console.log('player: ', this.props.playerAddress);
-        const withdrawAmount = Multiprizer.viewWithdrawalInfo[dataKey];
-        console.log(
-            'withdraw amt : ',
-            withdrawAmount && parseInt(withdrawAmount.value, 10),
-        );
-        // const isWithdrawDisabled = withdrawAmount && (parseInt(withdrawAmount.value, 10) > 0) ? false : true;
-        const isWithdrawDisabled = !(
-            withdrawAmount && withdrawAmount.value && withdrawAmount.value.toString() !== '0'
-        );
-        console.log('isWithdrawDisabled: ', isWithdrawDisabled);
+        
 
         const renderLink = () => {
             history.push('/');
@@ -215,89 +159,12 @@ class Header extends React.Component {
                         button
                         key="homesite"
                         component='a'
-                        href='https://multiprizer.io'
+                        href='http://localhost:3000/#/'
                     >
                         <ListItemIcon>
                             <HomeIcon />
                         </ListItemIcon>
                         <ListItemText primary="Goto Homesite" />
-                    </ListItem>
-                    <Divider />
-                    <ListItem
-                        button
-                        key="notifications"
-                        onClick={() => renderDrawerItems(0)}
-                    >
-                        <ListItemIcon>
-                            <NotificationsIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Notifications" />
-                    </ListItem>
-                    <ListItem
-                        button
-                        key="howtoplay"
-                        component='a'
-                        href='https://docs.multiprizer.io/how-to-play'
-                    >
-                        <ListItemIcon>
-                            <NotesIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="How to Play" />
-                    </ListItem>
-                    <ListItem
-                        button
-                        key="megaprize"
-                        component='a'
-                        href='https://docs.multiprizer.io/megaprize'
-                    >
-                        <ListItemIcon>
-                            <StarsIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="MegaPrize" />
-                    </ListItem>
-                    <ListItem
-                        button
-                        key="directplay"
-                        component='a'
-                        href='https://docs.multiprizer.io/directplay'
-                    >
-                        <ListItemIcon>
-                            <GamesIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="DirectPlay" />
-                    </ListItem>
-                    <ListItem
-                        button
-                        key="contact"
-                        component='a'
-                        href='https://multiprizer.io/#contact'
-                    >
-                        <ListItemIcon>
-                            <ContactSupportIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Contact Support" />
-                    </ListItem>
-                    <ListItem
-                        button
-                        key="documentation"
-                        component='a'
-                        href='https://docs.multiprizer.io'
-                    >
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Documentation" />
-                    </ListItem>
-                    <ListItem
-                        button
-                        key="whitepaper"
-                        component='a'
-                        href='https://docs.multiprizer.io/whitepaper'
-                    >
-                        <ListItemIcon>
-                            <DeveloperBoardIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="WhitePaper" />
                     </ListItem>
                 </List>
                 <Divider />
@@ -318,31 +185,9 @@ class Header extends React.Component {
                         </IconButton>
                         <div className={classes.grow}>
                             <ButtonBase onClick={renderLink} className={classes.buttonBase}>
-                                <img
-                                    src={MultiprizerLogo}
-                                    alt="Header Logo"
-                                    className={classes.headerLogo}
-                                />
+                                {"ContentTUBE"}
                             </ButtonBase>
                         </div>
-                        <Tooltip
-                            title={
-                                isWithdrawDisabled === true
-                                    ? 'Withdraw Winnings (disabled)'
-                                    : 'Withdraw Winnings'
-                            }
-                        >
-                            <div className={classes.withdrawButton}>
-                                <IconButton
-                                    color="inherit"
-                                    aria-label="Menu"
-                                    disabled={isWithdrawDisabled}
-                                    onClick={this.withdrawTokens}
-                                >
-                                    <SaveAltIcon />
-                                </IconButton>
-                            </div>
-                        </Tooltip>
                     </Toolbar>
                 </AppBar>
 
@@ -356,27 +201,6 @@ class Header extends React.Component {
                         {drawerItems}
                     </div>
                 </Drawer>
-                <Dialog
-                    fullScreen={fullScreen}
-                    open={this.state.isDialogOpen}
-                    onClose={this.handleClose}
-                    aria-labelledby="withraw-dialog-title"
-                >
-                    <DialogTitle id="withraw-dialog-title">
-                        Wait for Withdraw Confirmation
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            Once you have given request to withdraw tokens, please wait till
-                            your transaction is confirmed.
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleClose} color="primary" autoFocus>
-                            OK
-                        </Button>
-                    </DialogActions>
-                </Dialog>
             </div>
         );
     }

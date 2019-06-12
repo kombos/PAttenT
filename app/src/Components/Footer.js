@@ -46,11 +46,7 @@ function Footer(props) {
     return (
         <div className={classes.root}>
             <div className={classes.logo}>
-                <img
-                    src={MultiprizerLogoBlue}
-                    alt="Header Logo"
-                    className={classes.footerLogo}
-                />
+                {"ContentTUBE"}
                 <p className={classes.mediumText}>(Copyright 2019)</p>
             </div>
         </div>

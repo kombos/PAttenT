@@ -4,11 +4,7 @@ import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import { DrizzleContext } from 'drizzle-react';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
-import GameStrategies from './Containers/GameStrategies';
-import GameDetails from './Containers/GameDetails';
-import Notifications from './Containers/Notifications';
-import Web3NotFound from './Components/Web3NotFound';
-import PageNotFound from './Components/PageNotFound';
+import VideoSection from './Containers/VideoSection';
 
 import './css/App.css';
 
@@ -21,7 +17,8 @@ export default () => (
             console.log('drizzleState: ', drizzleState);
             console.log('drizzle: ', drizzle);
             if (!initialized) {
-                return <Web3NotFound />;
+                {/* return <Web3NotFound />; */}
+                return("loading...");
             }
             let header = null;
             if (drizzleState) {
@@ -32,7 +29,7 @@ export default () => (
             console.log('value of initialized: ', initialized);
             console.log('drizzleState: ', drizzleState);
             console.log('drizzle: ', drizzle);
-            const logEvents = drizzleState.contracts.Multiprizer.events;
+            const logEvents = drizzleState.contracts.Pattent.events;
 
             return (
                 <Router basename={process.env.PUBLIC_URL}>
@@ -44,35 +41,13 @@ export default () => (
                                 exact
                                 path="/"
                                 render={() => (
-                                    <GameStrategies
+                                    <VideoSection
                                         drizzleState={drizzleState}
                                         drizzle={drizzle}
                                     />
                                 )}
 
                             />
-                            <Route
-                                path="/gameDetails/:gameID"
-                                render={({ match }) => (
-                                    <GameDetails
-                                        gameID={parseInt(match.params.gameID,10)}
-                                        drizzleState={drizzleState}
-                                        drizzle={drizzle}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/notifications"
-                                render={
-                                    () => (
-                                        <Notifications
-                                            drizzleState={drizzleState}
-                                            drizzle={drizzle}
-                                            events={logEvents}
-                                        />
-                                    )}
-                            />
-                            <Route render={() => <PageNotFound />} />
                         </Switch>
 
                         <Footer />

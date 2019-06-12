@@ -1,4 +1,4 @@
-import Multiprizer from '../contracts/Multiprizer.json';
+import Pattent from '../contracts/Pattent.json';
 
 const drizzleOptions = {
     web3: {
@@ -8,60 +8,12 @@ const drizzleOptions = {
             url: 'ws://127.0.0.1:8545',
         },
     },
-    contracts: [Multiprizer],
+    contracts: [Pattent],
     events: {
-        Multiprizer:
+        Pattent:
             [
                 {
-                    eventName: 'LogPlayGame',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogRevertGame',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogCompleteRound',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogCompleteMPRound',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogGameLocked',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogGameUnlocked',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogWinner',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogMegaPrizeWinner',
-                    eventOptions: {
-                        fromBlock: 0,
-                    },
-                },
-                {
-                    eventName: 'LogMegaPrizeUpdate',
+                    eventName: 'adSkipEvent',
                     eventOptions: {
                         fromBlock: 0,
                     },
